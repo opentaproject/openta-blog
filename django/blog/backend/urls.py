@@ -14,9 +14,15 @@ urlpatterns = [
     #url(r'^$', views.home,name='home'),
     path('', include('users.urls')),
     path("", include("blog.urls")),
+    
 ]
 
 
 urlpatterns += [
-    path("ckeditor5/", include('django_ckeditor_5.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += [
+    path("ckeditor5/", include('django_ckeditor_5.urls')),
+]
+
+print(f"URLPATTERNS = {urlpatterns}")

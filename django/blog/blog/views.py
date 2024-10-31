@@ -59,6 +59,7 @@ def blog_leave_comment(request, pk):
                 user=user,
             )
             comment.save()
+            print(f"REDIRECTR TO {request.path_info}")
             return HttpResponseRedirect(request.path_info)
     
     comments = Comment.objects.filter(post=post)

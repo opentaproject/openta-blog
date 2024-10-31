@@ -96,13 +96,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 ATOMIC_REQUESTS = False
 PGHOST = os.environ.get("PGHOST", "localhost")
 PGPASSWORD = os.environ.get("PGPASSWORD")
-PGUSER = os.environ.get("PGUSER", 'postgres')
+PGUSER = os.environ.get("PGUSER")
+PGDATABASE = os.environ.get('PGDATABASE')
+PGDATABASE_NAME = os.environ.get('PGDATABASE_NAME','default')
 
 
 DATABASES = {
-    "default": {
+     PGDATABASE_NAME : {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "blog5d",
+        "NAME": PGDATABASE,
         "USER": PGUSER,
         "PASSWORD": PGPASSWORD,
         "HOST": PGHOST,
@@ -162,11 +164,11 @@ superuser_password = os.environ.get("SUPERUSER_PASSWORD",'')
 
 
 create_database_if_not_exists(db_name, host,user, password , superuser, superuser_password) 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/subdomain-data/openta-blog/media'
 MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 
-FILEBROWSER_DIRECTORY = ''
 FILEBROWSER_ROOT = MEDIA_ROOT  # os.path.join(MEDIA_ROOT, 'uploads')
 FILEBROWSER_DIRECTORY = ''
 
@@ -213,7 +215,7 @@ customColorPalette = [
   ]
 
 #CKEDITOR_5_CUSTOM_CSS = 'path_to.css' # optional
-#CKEDITOR_5_FILE_STORAGE = "path_to_storage.CustomStorage" # optional
+
 CKEDITOR_5_CONFIGS = {
   'default': {
       'toolbar': ['heading', '|', 'bold', 'italic', 'link',
@@ -277,5 +279,6 @@ CKEDITOR_5_CONFIGS = {
 
 
 # Define a constant in settings.py to specify file upload permissions
-CKEDITOR_5_FILE_UPLOAD_PATH = "uploads/"  # Possible values: "staff", "authenticated", "any"
-CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"  # Possible values: "staff", "authenticated", "any"
+#CKEDITOR_5_FILE_UPLOAD_PATH = "/subdomain_data/openta-blog/media/"  # Possible values: "staff", "authenticated", "any"
+CKEDITOR_5_FILE_UPLOAD_PERMISSION = "authenticated"
+CKEDITOR_5_FILE_STORAGE = "backend.util.CustomStorage" # optional

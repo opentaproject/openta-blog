@@ -3,6 +3,10 @@ from psycopg2 import sql
 from django.core.management import call_command
 import os
 import django
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+from urllib.parse import urljoin
+
 
 
 def create_database_if_not_exists(db_name, host,user , password , superuser, superuser_password ) :
@@ -33,3 +37,11 @@ def create_database_if_not_exists(db_name, host,user , password , superuser, sup
         call_command( 'migrate'  )
         call_command( 'createsuperuser','--noinput')
 
+
+class CustomStorage(FileSystemStorage):
+    location = os.path.join(settings.MEDIA_ROOT, "django_ckeditor_5")
+    print(f"LOCATION1 = {location}")
+    location = '/subdomain-data/openta-blog/media/django_ckeditor_5'
+    print(f"LOCATION2 = {location}")
+    base_url = urljoin(settings.MEDIA_URL, "django_ckeditor_5/")
+    base_url = "/media/django_ckeditor_5/"
