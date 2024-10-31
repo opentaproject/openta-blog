@@ -60,7 +60,7 @@ def blog_leave_comment(request, pk):
             )
             comment.save()
             print(f"REDIRECTR TO {request.path_info}")
-            return HttpResponseRedirect(request.path_info)
+            return HttpResponseRedirect(f'/blog/{post.pk}')
     
     comments = Comment.objects.filter(post=post)
     cat =  post.categories.pk
