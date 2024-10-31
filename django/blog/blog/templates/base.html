@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"  class="text-gray-900 antialiased leading-tight">
+<head>
+    <meta charset="utf-8">
+    <title>OpenTA Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+      <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navigation: '#ccccff',
+            footer: '#cccccc',
+            page_title:  '#ccffcc',
+	    bodycolor: "#eeeeee",
+	    post_body_color: "#dddddd",
+          }
+        }
+      }
+    }
+
+  </script>
+
+
+ {{ form.media }}
+
+
+
+</head>
+<body class="min-h-screen">
+<div class="bg-bodycolor p-4">
+<i class="text-green-600 fa-regular fa-circle"></i>
+<a  class="hover:bg-red-500" href="{% url "blog_index" %}"> OpenTA </a> 
+<div> 
+{% include "blog/header_snippet.html" %}
+</div> 
+
+
+
+<div class="bg-page_title">
+{% block page_title %}{% endblock page_title %}
+</div> 
+{% block page_content %}{% endblock page_content %}
+</body>
+</html>
+
+<script>
+ function toggle(post) {
+    const content = document.getElementById(post);
+    content.classList.toggle('hidden'); // Toggle the hidden class
+
+    var con2 = 'show' + post
+    const content2 = document.getElementById('show' + post);
+    content2.classList.toggle('hidden'); // Toggle the hidden class
+
+    var con3 = 'hide' + post
+    const content3 = document.getElementById('hide' + post);
+    content3.classList.toggle('hidden'); // Toggle the hidden class
+
+ }
+</script>
+

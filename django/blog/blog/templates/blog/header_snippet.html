@@ -1,0 +1,11 @@
+   {% block category %}
+   <div class="bg-navigation">
+    {% for category in categories %}
+     {% if category.pk == category_selected %}
+     <a class="bg-red-400" href="/blog/{{ category.pk }}/">{{ category }} </a>
+     {% else %}
+    <a class="hover:bg-green-400" href="/blog/{{ category.pk }}/">{{ category }}</a>
+     {% endif %}
+	{% endfor %}
+   </div>
+   {% endblock category %}
