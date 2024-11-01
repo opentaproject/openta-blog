@@ -1,5 +1,5 @@
    {% block category %}
-   <div class="OpenTA-navigation-bar OpenTA-bg-navigation">
+   <div class="OpenTA-navigation-bar bg-navigation">
     {% for category in categories %}
      {% if category.pk == category_selected %}
      <a class="OpenTA-category-selected bg-red-400" href="/blog/{{ category.pk }}/">{{ category }} </a>
