@@ -27,31 +27,37 @@
 	  {% else %}
  	<div class="p-2">
             <span class="sm:italic">
-		{{ post.title }}
+		{{ post.title }} {{ post.last_modified }} 
+ 
 
 	    </span>
 	    <div id="NOHIDE{{ post.pk}}" class="px-0"> 
-		    {{ post.body | safe |  slice:":400" }} 
+		    {{ post.body | safe  }} 
 	    </div>
 	    {% endif %}
+	    <div> 
+<a class="OpenTA-leave-comment-link bg-red-400" href="{% url 'blog_leave_comment' post.pk %}"> {{ post.comments | length }} Leave a comment </a>
+	    </div> 
 	<button   id="hide{{ post.pk }}c" onClick=toggle("{{ post.pk }}c") class="OpenTA-show-button bg-red-500"> <i class="fa-solid fa-chevron-down"></i>  {{ post.comments | length }} comments </button> 
 	<button  id="show{{ post.pk }}c" onClick=toggle("{{ post.pk }}c") class="OpenTA-hidden-button hidden bg-green-500"> <i class="fa-solid fa-chevron-up"></i> {{ post.comments | length }} comment </button> 
   <div id="{{ post.pk }}c"class="OpenTA-comment-list px-0 hidden ">
     {% for comment in post.comments %}
       <div class="OpenTA-comment-entry p-2">
+
      {% if comment.author != "" %}
         <p> On {{ comment.created_on.date }} <b>{{ comment.author }}</b> wrote: </p>
      {% else %}
 	<p> On {{ comment.created_on.date }} <b>Anon </b> wrote: </p>
      {% endif %}
-     	<div class="OpenTA-comment-body p-1">
+
+
+     	<div class="OpenTA-comment-body">
             {{ comment.body | safe | linebreaks }}
 	</div> 
     </div>
     {% endfor %}
   </div>
 	</div>
-<a class="OpenTA-leave-comment-link bg-red-400" href="{% url 'blog_leave_comment' post.pk %}"> {{ post.comments | length }} Leave a comment </a>
 </div>
 
 
