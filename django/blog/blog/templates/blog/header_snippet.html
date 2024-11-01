@@ -1,10 +1,10 @@
    {% block category %}
-   <div class="bg-navigation">
+   <div class="OpenTA-navigation-bar OpenTA-bg-navigation">
     {% for category in categories %}
      {% if category.pk == category_selected %}
-     <a class="bg-red-400" href="/blog/{{ category.pk }}/">{{ category }} </a>
+     <a class="OpenTA-category-selected bg-red-400" href="/blog/{{ category.pk }}/">{{ category }} </a>
      {% else %}
-    <a class="hover:bg-green-400" href="/blog/{{ category.pk }}/">{{ category }}</a>
+    <a class="OpenTA-category-not-selected hover:bg-green-400" href="/blog/{{ category.pk }}/">{{ category }}</a>
      {% endif %}
 	{% endfor %}
    </div>

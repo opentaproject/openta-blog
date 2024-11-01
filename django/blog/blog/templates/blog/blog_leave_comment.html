@@ -17,22 +17,22 @@
 {% block page_content %}
 
 	
-  <div class="bg-post_body_color">
+  <div class="OpenTA-comment-body p-1 ">
     <p>{{ post.body | safe | linebreaks }}</p>
   </div> 
 
 
-    <div class="p-4 bg-red-100">
+    <div class="OpenTA-toggle sm:italic">
      <span> 
-      <button   id="hide{{ post.pk }}" onClick=toggle({{ post.pk }}) class="bg-green-500"> <i class="fa-solid fa-chevron-up"></i>  Less </button> 
-      <button  id="show{{ post.pk }}" onClick=toggle({{ post.pk }}) class="hidden bg-red-500"> <i class="fa-solid fa-chevron-down"></i> More </button> 
+      <button   id="hide{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-hide-button bg-green-500"> <i class="fa-solid fa-chevron-up"></i>  Less </button> 
+      <button  id="show{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-show-button hidden bg-red-500"> <i class="fa-solid fa-chevron-down"></i> More </button> 
      </span> 
-     <div id={{ post.pk }} class="px-4">
+     <div id={{ post.pk }} class="OpenTA-leave-comment-form px-4">
     <form method="post">
         {% csrf_token %}
         <div> AUTHOR={{ author }} USER={{ user }}  PK={{ user.pk }} </div>
         <div> {{ form.body | safe }} </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="OpenTA-submit-button btn btn-primary">Submit</button>
     </form>
     </div> 
     </div> 
