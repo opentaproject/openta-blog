@@ -1,11 +1,16 @@
    {% block category %}
-   <div class="OpenTA-navigation-bar bg-OpenTA_navigation">
+   <ul class="OpenTA-navigation-bar">
+	  
     {% for category in categories %}
+    <li class="-mb-px mr-1">
      {% if category.pk == category_selected %}
-     <a class="OpenTA-category-selected bg-red-400" href="/blog/{{ category.pk }}/">{{ category }} </a>
+     <a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} </a>
+    </li>
      {% else %}
-    <a class="OpenTA-category-not-selected hover:bg-green-400" href="/blog/{{ category.pk }}/">{{ category }}</a>
+     <li class="mr-1">
+    <a class="OpenTA-category-not-selected" href="/blog/{{ category.pk }}/">{{ category }}</a>
+     </li>
      {% endif %}
 	{% endfor %}
-   </div>
+   </ul>
    {% endblock category %}

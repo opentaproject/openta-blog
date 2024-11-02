@@ -17,8 +17,7 @@
       theme: {
         extend: {
           colors: {
-            OpenTA_navigation: '#ccccff',
-	    OpenTA_bodycolor:  '#ffcccc',
+	    OpenTA_bodycolor_color:  '#ffcccc',
           }
         }
       }
@@ -31,10 +30,8 @@
 <body class="min-h-screen">
 <div class="OpenTA-body">
 <i class="text-green-600 fa-regular fa-circle"></i>
-<a  class="hover:bg-red-500" href="{% url "blog_index" %}"> OpenTA </a> 
-<div> 
+<a  class="hover:font-bold p-4" href="{% url "blog_index" %}"> OpenTA </a> 
 {% include "blog/header_snippet.html" %}
-</div> 
 
 
 

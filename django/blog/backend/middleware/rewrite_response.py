@@ -3,18 +3,19 @@ from django.utils.deprecation import MiddlewareMixin
 class ResponseRewriteMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         # Check if the response is an HTML response
-        r = { 'OpenTA-category-not-selected' : 'bg-green-200 hover:bg-green-400',\
-            'OpenTA-category-selected' : 'bg-red-400',\
-            'OpenTA-body' : 'bg-indigo-100 p-8 font-sans text-sm antialiased',\
+        r = { 'OpenTA-category-not-selected' : 'inline-block border border-white rounded hover:border-gray-200 text-blue-500 hover:bg-gray-200 py-1 px-3',\
+            'OpenTA-category-selected' : 'inline-block border border-blue-500 rounded py-1 px-3 bg-blue-500 text-white"',\
+            'OpenTA-body' : 'bg-[#dddddd] p-8 font-sans text-sm antialiased',\
             'OpenTA-comment-body' : 'py-2',\
             'OpenTA-comment-entry' : 'p-0',\
             'OpenTA-comment-list' : 'p-0' ,\
-            'OpenTA-hide-button' :  'hover:bg-green-400 bg-green-200',\
+            'OpenTA-hide-button' :  'hover:bg-blue-400 bg-blue-200',\
             'OpenTA-leave-comment-form' : 'px-0',\
-            'OpenTA-leave-comment-link' : 'bg-red-400',\
-            'OpenTA-navigation-bar' : 'bg-blue-100', \
-            'OpenTA-post-entry' : 'p-0',\
-            'OpenTA-show-button' : 'hover:bg-red-400 bg-red-200',\
+            'OpenTA-leave-comment-link' : 'bg-blue-200',\
+            'OpenTA-navigation-bar' : 'flex border-b bg-transparent bg-[#cccccc]', \
+            'OpenTA-post-entry' : 'py-2',\
+            'OpenTA-post-title' : 'italic font-bold',\
+            'OpenTA-show-button' : 'hover:bg-blue-400 bg-blue-200',\
             'OpenTA-submit-button' : 'hover:bg-blue-400 btn btn-primary',\
             'OpenTA-toggle' : 'sm:italic',}
         if 'text/html' in response['Content-Type']:
