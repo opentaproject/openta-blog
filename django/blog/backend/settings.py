@@ -155,7 +155,7 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-db = DATABASES['default'];
+db = DATABASES[PGDATABASE_NAME];
 db_name = db['NAME'];
 host = db['HOST'];
 user = db['USER'];
