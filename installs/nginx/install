@@ -1,0 +1,5 @@
+export VERSION=latest
+echo creating docker openta-blog-nginx:${VERSION}
+#eval $(minikube docker-env)
+docker build . -t localhost:32000/openta-blog-nginx:${VERSION}
+docker push localhost:32000/openta-blog-nginx:${VERSION}

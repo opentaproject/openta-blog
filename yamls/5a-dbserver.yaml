@@ -1,0 +1,29 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: db-server
+  labels:
+    app: db-server
+spec:
+    volumes:
+    - name: minikube-vol
+      persistentVolumeClaim:
+        claimName: minikube-pvc
+
+    restartPolicy: Always
+    containers:
+      - name: postgres
+        volumeMounts:
+          - mountPath: "/var/lib/postgresql/data"
+            name: minikube-vol
+        ports:
+          - containerPort: 5432
+            name: "port-5432"
+        image: postgres:14-alpine
+        env:
+        - name: TZ
+          value: "Europe/Stockholm" # Set your desired timezone
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/db14"
+        - name: POSTGRES_PASSWORD
+          value: 'postgres'

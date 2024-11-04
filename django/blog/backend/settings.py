@@ -29,7 +29,12 @@ SECRET_KEY = "django-insecure-$a%sbcorrazhwe7j63jjxynztgbz9xh6$9x8x!b$suwawrx+o=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://blog.openta.se',
+    'http://localhost:8000',
+]
+
 
 
 # Application definition
@@ -155,7 +160,7 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-db = DATABASES['default'];
+db = DATABASES[PGDATABASE_NAME];
 db_name = db['NAME'];
 host = db['HOST'];
 user = db['USER'];

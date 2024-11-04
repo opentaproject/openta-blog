@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openta-blog # prefix for  pod names
+  labels:
+    app: openta-blog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app:  openta-blog
+  template:
+    metadata:
+      labels:
+        app: openta-blog
+    spec:  
+
+      volumes:
+      - name: subdomain-blog-vol
+        persistentVolumeClaim:
+          claimName: subdomain-blog-pvc
+      - name: deploystatic-vol
+        persistentVolumeClaim:
+          claimName: deploystatic-pvc
+
+      containers:
+        - name: openta-blog
+          image: 'localhost:32000/openta-blog:latest'
+          volumeMounts:
+              - mountPath: "/subdomain-blog-data"
+                name: subdomain-blog-vol
+              - mountPath: "/deploystatic"
+                name: deploystatic-vol
+    
+          env: 
+            - name: TZ
+              value: "Europe/Stockholm" # Set your desired timezone
+            - name: NOT_PGHOST
+              value: 'db-server'
+            - name: PGHOST
+              value: 'pgbouncer-service'
+            - name: DBHOST
+              value: 'db-server' # EDIT 
+            - name: DEBUG
+              value: 'True'
+
+            - name: SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: SUPERUSER_PASSWORD
+
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: PGPASSWORD
+
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: PGUSER
+
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: SECRET_KEY
+
+
+            - name: SUPERUSER
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: SUPERUSER
+
+            - name: PGDATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: PGDATABASE_NAME
+
+
+
+            - name: PGDATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: PGDATABASE
+
+
+
+
+
+            - name: HTTP_PROTOCOL
+              value: "https"
+            - name: HTTP_SERVER_PORT
+              value: "443"
+          imagePullPolicy: Always
+          command: ["/bin/bash","-c"]
+          args: 
+            - cd django/blog;
+              /usr/local/bin/supervisord -c /srv/openta/supervisord.conf ;
+              #python manage.py runserver
+
+        - name: nginx
+          image: 'localhost:32000/openta-blog-nginx:latest'
+          ports: 
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /subdomain-blog-data
+              name: subdomain-blog-vol
+
+
+
+
+    
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: openta-blog-service
+spec:
+  selector:
+    app: openta-blog
+  type: NodePort 
+  ports:
+    - port: 8000
+      targetPort: 8080
+      name: http
+

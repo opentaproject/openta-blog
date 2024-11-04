@@ -1,0 +1,85 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: minikube-vol
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 10Gi
+  storageClassName: local-hostpath
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/pv/minikube-vol"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: minikube-pvc
+spec:
+  storageClassName: local-hostpath
+  accessModes:
+    - ReadWriteOnce
+  volumeName: minikube-vol
+  resources:
+    requests:
+      storage: 10Gi
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: deploystatic-vol
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  storageClassName: local-hostpath
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/pv/deploystatic-vol"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: deploystatic-pvc
+spec:
+  storageClassName: local-hostpath
+  accessModes:
+    - ReadWriteOnce
+  volumeName: deploystatic-vol
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: subdomain-blog-vol
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 20Gi
+  storageClassName: local-hostpath
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/pv/subdomain-blog-vol"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: subdomain-blog-pvc
+spec:
+  storageClassName: local-hostpath
+  accessModes:
+    - ReadWriteOnce
+  volumeName: subdomain-blog-vol
+  resources:
+    requests:
+      storage: 10Gi
