@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openta-blog # prefix for  pod names
+  labels:
+    app: openta-blog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app:  openta-blog
+  template:
+    metadata:
+      labels:
+        app: openta-blog
+    spec:  
+
+      volumes:
+      - name: subdomain-blog-vol
+        persistentVolumeClaim:
+          claimName: subdomain-blog-pvc
+      - name: deploystatic-vol
+        persistentVolumeClaim:
+          claimName: deploystatic-pvc
+  
+      containers:
+        - name: nginx
+          image: 'localhost:32000/openta-blog-nginx:latest'
+          ports: 
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /subdomain-blog-data
+              name: subdomain-blog-vol
+    
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: openta-blog-service
+spec:
+  selector:
+    app: openta-blog
+  type: NodePort 
+  ports:
+    - port: 8000
+      targetPort: 8080
+      name: http
+
