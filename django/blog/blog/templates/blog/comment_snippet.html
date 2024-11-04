@@ -1,0 +1,17 @@
+  <div class="OpenTA-comment-body">
+    <p>{{ post.body | safe | linebreaks }}</p>
+  </div> 
+    <div class="OpenTA-toggle">
+     <span> 
+      <button   id="hide{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-hide-button"> <i class="fa-solid fa-chevron-up"></i>  Less </button> 
+      <button  id="show{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-show-button hidden"> <i class="fa-solid fa-chevron-down"></i> More </button> 
+     </span> 
+     <div id={{ post.pk }} class="OpenTA-leave-comment-form">
+    <form method="post">
+        {% csrf_token %}
+        <div> AUTHOR={{ author }} USER={{ user }}  PK={{ user.pk }} </div>
+        <div> {{ form.body | safe }} </div>
+        <button type="submit" class="OpenTA-submit-button">Submit</button>
+    </form>
+    </div> 
+    </div> 
