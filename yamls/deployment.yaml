@@ -22,8 +22,86 @@ spec:
       - name: deploystatic-vol
         persistentVolumeClaim:
           claimName: deploystatic-pvc
-  
+
       containers:
+        - name: openta-blog-app
+          image: 'localhost:32000/openta-blog:latest'
+          volumeMounts:
+              - mountPath: "/subdomain-blog-data"
+                name: subdomain-blog-vol
+              - mountPath: "/deploystatic"
+                name: deploystatic-vol
+    
+          env: 
+            - name: TZ
+              value: "Europe/Stockholm" # Set your desired timezone
+            - name: PGHOST
+              value: 'db-server'
+            - name: NOT_PGHOST
+              value: 'pgbouncer-service'
+            - name: DBHOST
+              value: 'db-server' # EDIT 
+            - name: DEBUG
+              value: 'True'
+
+            - name: SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: SUPERUSER_PASSWORD
+
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: PGPASSWORD
+
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: PGUSER
+
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: SECRET_KEY
+
+
+            - name: SUPERUSER
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: SUPERUSER
+
+            - name: PGDATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: PGDATABASE_NAME
+
+
+
+            - name: PGDATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: openta-secret  # Name of the secret
+                  key: PGDATABASE
+
+
+
+
+
+            - name: HTTP_PROTOCOL
+              value: "https"
+            - name: HTTP_SERVER_PORT
+              value: "443"
+          imagePullPolicy: Always
+          command: ["/bin/bash","-c"]
+          args: 
+            - sleep 3600
+
         - name: nginx
           image: 'localhost:32000/openta-blog-nginx:latest'
           ports: 
@@ -31,6 +109,10 @@ spec:
           volumeMounts:
             - mountPath: /subdomain-blog-data
               name: subdomain-blog-vol
+
+
+
+
     
 ---
 
