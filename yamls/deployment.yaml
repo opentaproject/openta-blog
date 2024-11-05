@@ -24,7 +24,7 @@ spec:
           claimName: deploystatic-pvc
 
       containers:
-        - name: openta-blog-app
+        - name: openta-blog
           image: 'localhost:32000/openta-blog:latest'
           volumeMounts:
               - mountPath: "/subdomain-blog-data"
