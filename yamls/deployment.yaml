@@ -29,7 +29,7 @@ spec:
           volumeMounts:
               - mountPath: "/subdomain-data"
                 name: subdomain-vol
-              - mountPath: "/deploystatic"
+              - mountPath: "/srv/openta-blog/django/blog/static"
                 name: deploystatic-vol
     
           env: 
@@ -111,6 +111,9 @@ spec:
           volumeMounts:
             - mountPath: /subdomain-data
               name: subdomain-vol
+          volumeMounts:
+            - mountPath: /deploystatic
+              name: deploystatic-vol
 
 
 
