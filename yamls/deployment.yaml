@@ -101,7 +101,7 @@ spec:
           command: ["/bin/bash","-c"]
           args: 
             - cd django/blog;
-              /usr/local/bin/supervisord -c /srv/openta/supervisord.conf ;
+              /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
               #python manage.py runserver
 
         - name: nginx
