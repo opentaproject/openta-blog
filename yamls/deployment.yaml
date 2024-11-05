@@ -16,9 +16,9 @@ spec:
     spec:  
 
       volumes:
-      - name: subdomain-blog-vol
+      - name: subdomain-vol
         persistentVolumeClaim:
-          claimName: subdomain-blog-pvc
+          claimName: subdomain-pvc
       - name: deploystatic-vol
         persistentVolumeClaim:
           claimName: deploystatic-pvc
@@ -27,9 +27,9 @@ spec:
         - name: openta-blog
           image: 'localhost:32000/openta-blog:latest'
           volumeMounts:
-              - mountPath: "/subdomain-blog-data"
-                name: subdomain-blog-vol
-              - mountPath: "/deploystatic"
+              - mountPath: "/subdomain-data"
+                name: subdomain-vol
+              - mountPath: "/srv/openta-blog/django/blog/static"
                 name: deploystatic-vol
     
           env: 
@@ -101,7 +101,7 @@ spec:
           command: ["/bin/bash","-c"]
           args: 
             - cd django/blog;
-              /usr/local/bin/supervisord -c /srv/openta/supervisord.conf ;
+              /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
               #python manage.py runserver
 
         - name: nginx
@@ -109,8 +109,11 @@ spec:
           ports: 
             - containerPort: 8080
           volumeMounts:
-            - mountPath: /subdomain-blog-data
-              name: subdomain-blog-vol
+            - mountPath: "/subdomain-data"
+              name: subdomain-vol
+            - mountPath: "/deploystatic"
+              name: deploystatic-vol
+
 
 
 

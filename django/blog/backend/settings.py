@@ -169,7 +169,7 @@ superuser = os.environ.get("SUPERUSER", 'super')
 superuser_password = os.environ.get("SUPERUSER_PASSWORD",'')
 
 
-create_database_if_not_exists(db_name, host,user, password , superuser, superuser_password) 
+#create_database_if_not_exists(db_name, host,user, password , superuser, superuser_password) 
 #MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_ROOT = '/subdomain-data/openta-blog/media'
 MEDIA_URL = '/media/'

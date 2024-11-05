@@ -59,7 +59,7 @@ spec:
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: subdomain-blog-vol
+  name: subdomain-vol
   labels:
     type: local
 spec:
@@ -69,17 +69,17 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/mnt/pv/subdomain-blog-vol"
+    path: "/mnt/pv/subdomain-vol"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: subdomain-blog-pvc
+  name: subdomain-pvc
 spec:
   storageClassName: local-hostpath
   accessModes:
     - ReadWriteOnce
-  volumeName: subdomain-blog-vol
+  volumeName: subdomain-vol
   resources:
     requests:
       storage: 10Gi

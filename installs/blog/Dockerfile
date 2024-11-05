@@ -17,4 +17,5 @@ WORKDIR /srv/openta-blog
 RUN pip install --upgrade pip
 COPY . /srv
 RUN pip install -r django/requirements.txt
+RUN pip install gunicorn
 EXPOSE 8000
