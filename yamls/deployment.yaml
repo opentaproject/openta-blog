@@ -101,8 +101,7 @@ spec:
           command: ["/bin/bash","-c"]
           args: 
             - cd django/blog;
-              python manage.py runserver
-              #/usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
+              /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
               #python manage.py runserver
 
         - name: nginx
@@ -110,11 +109,11 @@ spec:
           ports: 
             - containerPort: 8080
           volumeMounts:
-            - mountPath: /subdomain-data
+            - mountPath: "/subdomain-data"
               name: subdomain-vol
-          volumeMounts:
-            - mountPath: /deploystatic
+            - mountPath: "/deploystatic"
               name: deploystatic-vol
+
 
 
 
