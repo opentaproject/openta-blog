@@ -101,6 +101,7 @@ spec:
           command: ["/bin/bash","-c"]
           args: 
             - cd django/blog;
+              python manage.py collectstatic --no-input;
               /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
               #python manage.py runserver
 
