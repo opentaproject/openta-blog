@@ -9,7 +9,9 @@ RUN apt update -y \
     vim \
     postgresql-14\
     apt-utils \
-    redis  
+    redis   \
+    supervisor
+RUN apt update
 RUN mkdir -p /srv/openta-blog
 WORKDIR /srv/openta-blog
 RUN pip install --upgrade pip
