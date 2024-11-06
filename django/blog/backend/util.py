@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2 import sql
+import io
 from django.core.management import call_command
 import os
 import django
@@ -28,20 +29,24 @@ def create_database_if_not_exists(db_name, host,user , password , superuser, sup
         cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db_name)))
         print(f"Database '{db_name}' created successfully.")
         # Close the connection
+        print(f"TRYE TO SET UP THE DATABASE")
+        settings.DEBUG=True
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', '.settings')
         django.setup()
         cursor.close()
         conn.close()
-        call_command( 'makemigrations' , 'users' )
-        call_command( 'makemigrations' , 'blog' );
-        call_command( 'migrate'  )
-        call_command( 'createsuperuser','--noinput')
+        call_command( 'makemigrations'  )
+        #call_command( 'migrate'  )
+        #fake_stdin = io.StringIO(superuser_password)
+        #call_command( 'createsuperuser', '--username' , superuser, '--email' , 'super@mail.com', '--noinput',stdin=fake_stdin)
+
 
 
 class CustomStorage(FileSystemStorage):
     location = os.path.join(settings.MEDIA_ROOT, "django_ckeditor_5")
     print(f"LOCATION1 = {location}")
-    location = '/subdomain-data/openta-blog/media/django_ckeditor_5'
+    SUBDOMAIN = os.environ.get('SUBDOMAIN','blog')
+    location = f'/subdomain-data/{SUBDOMAIN}/media/django_ckeditor_5'
     print(f"LOCATION2 = {location}")
     base_url = urljoin(settings.MEDIA_URL, "django_ckeditor_5/")
     base_url = "/media/django_ckeditor_5/"

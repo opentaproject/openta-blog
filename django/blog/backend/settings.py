@@ -1,4 +1,6 @@
 import os
+from django.core.management import call_command
+
 """
 Django settings for blog project.
 
@@ -160,6 +162,7 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+SUBDOMAIN = os.environ.get('SUBDOMAIN','blog')
 db = DATABASES[PGDATABASE_NAME];
 db_name = db['NAME'];
 host = db['HOST'];
@@ -170,15 +173,18 @@ superuser_password = os.environ.get("SUPERUSER_PASSWORD",'')
 SUPERUSER=superuser
 SUPERUSER_PASSWORD=superuser_password
 
+create_database_if_not_exists(db_name, host,user, password , superuser, superuser_password) 
 
-#create_database_if_not_exists(db_name, host,user, password , superuser, superuser_password) 
+
+
 #MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_ROOT = '/subdomain-data/openta-blog/media'
+MEDIA_ROOT = f'/subdomain-data/{SUBDOMAIN}/media'
 MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 
 FILEBROWSER_ROOT = MEDIA_ROOT  # os.path.join(MEDIA_ROOT, 'uploads')
 FILEBROWSER_DIRECTORY = ''
+os.makedirs(os.path.join( FILEBROWSER_ROOT, '_versions') ,exist_ok=True)
 
 #CKEDITOR_UPLOAD_PATH = 'uploads/'
 #CKEDITOR_IMAGE_BACKEND = "pillow"
@@ -287,6 +293,7 @@ CKEDITOR_5_CONFIGS = {
 
 
 # Define a constant in settings.py to specify file upload permissions
-#CKEDITOR_5_FILE_UPLOAD_PATH = "/subdomain_data/openta-blog/media/"  # Possible values: "staff", "authenticated", "any"
+#CKEDITOR_5_FILE_UPLOAD_PATH = f"/subdomain_data/{SUBDOMAIN}/media/"  # Possible values: "staff", "authenticated", "any"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "authenticated"
 CKEDITOR_5_FILE_STORAGE = "backend.util.CustomStorage" # optional
+

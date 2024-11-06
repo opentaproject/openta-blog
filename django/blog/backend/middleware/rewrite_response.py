@@ -18,12 +18,18 @@ class ResponseRewriteMiddleware(MiddlewareMixin):
             'OpenTA-show-button' : 'hover:bg-blue-400 bg-blue-200',\
             'OpenTA-submit-button' : 'hover:bg-blue-400 btn btn-primary',\
             'OpenTA-toggle' : 'sm:italic',}
-        if 'text/html' in response['Content-Type']:
-            for pat in r.keys() :
-                response.content = response.content.replace(
-                    pat.encode()  , r[pat].encode()  
-                )
-            # Ensure the content length header is updated
-            response['Content-Length'] = len(response.content)
+    
+        p = request.path
+        try :
+            q = response['Content-Type']
+            if 'text/html' in response['Content-Type'] and not 'admin' in p :
+                for pat in r.keys() :
+                    response.content = response.content.replace(
+                        pat.encode()  , r[pat].encode()  
+                    )
+                # Ensure the content length header is updated
+                response['Content-Length'] = len(response.content)
+        except :
+            pass
         
         return response
