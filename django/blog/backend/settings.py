@@ -167,6 +167,8 @@ user = db['USER'];
 password = db['PASSWORD']
 superuser = os.environ.get("SUPERUSER", 'super')
 superuser_password = os.environ.get("SUPERUSER_PASSWORD",'')
+SUPERUSER=superuser
+SUPERUSER_PASSWORD=superuser_password
 
 
 #create_database_if_not_exists(db_name, host,user, password , superuser, superuser_password) 
