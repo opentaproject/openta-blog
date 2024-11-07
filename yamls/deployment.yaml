@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: openta-blog # prefix for  pod names
+  name: blog5 # prefix for  pod names
   labels:
-    app: openta-blog
+    app: blog5
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app:  openta-blog
+      app:  blog5
   template:
     metadata:
       labels:
-        app: openta-blog
+        app: blog5
     spec:  
 
       volumes:
@@ -24,7 +24,7 @@ spec:
           claimName: deploystatic-pvc
 
       containers:
-        - name: openta-blog
+        - name: blog
           image: 'localhost:32000/openta-blog:latest'
           volumeMounts:
               - mountPath: "/subdomain-data"
@@ -43,6 +43,8 @@ spec:
               value: 'db-server' # EDIT 
             - name: DEBUG
               value: 'True'
+            - name:  SUBDOMAIN
+              value: 'blog5'
 
             - name: SUPERUSER_PASSWORD
               valueFrom:
@@ -76,20 +78,11 @@ spec:
                   key: SUPERUSER
 
             - name: PGDATABASE_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: openta-secret  # Name of the secret
-                  key: PGDATABASE_NAME
-
+              value: 'default'
 
 
             - name: PGDATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: openta-secret  # Name of the secret
-                  key: PGDATABASE
-
-
+              value: 'blog5db'
 
 
 
@@ -101,6 +94,7 @@ spec:
           command: ["/bin/bash","-c"]
           args: 
             - cd django/blog;
+              ./db_setup ;
               python manage.py collectstatic --no-input;
               /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
               #python manage.py runserver
@@ -125,10 +119,10 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: openta-blog-service
+  name: blog5-service
 spec:
   selector:
-    app: openta-blog
+    app: blog5
   type: NodePort 
   ports:
     - port: 8000

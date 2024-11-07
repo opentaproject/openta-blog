@@ -1,24 +1,24 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: openta-se-ingress4
+  name: openta-se-blog5
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "700m"
 spec:
   tls:
     - hosts:
-      - 'blog.openta.se'   #EDIR
+      - 'blog5.openta.se'   #EDIR
       secretName: openta-se-secret
   ingressClassName: nginx
   rules:
-    - host: "blog.openta.se" #EDIT THIS
+    - host: "blog5.openta.se" #EDIT THIS
       http:
         paths:
           - pathType: "ImplementationSpecific"
             path: /
             backend:
               service:
-                name: openta-blog-service
+                name: blog5-service
                 port:
                   number: 8000
 
