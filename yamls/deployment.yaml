@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: blog5 # prefix for  pod names
+  name: www # prefix for  pod names
   labels:
-    app: blog5
+    app: www
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app:  blog5
+      app:  www
   template:
     metadata:
       labels:
-        app: blog5
+        app: www
     spec:  
 
       volumes:
@@ -44,7 +44,7 @@ spec:
             - name: DEBUG
               value: 'True'
             - name:  SUBDOMAIN
-              value: 'blog5'
+              value: 'www'
 
             - name: SUPERUSER_PASSWORD
               valueFrom:
@@ -82,7 +82,7 @@ spec:
 
 
             - name: PGDATABASE
-              value: 'blog5db'
+              value: 'wwwdb'
 
 
 
@@ -95,6 +95,7 @@ spec:
           args: 
             - cd django/blog;
               ./db_setup ;
+              python manage.py migrate;
               python manage.py collectstatic --no-input;
               /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
               #python manage.py runserver
@@ -119,10 +120,10 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: blog5-service
+  name: www-service
 spec:
   selector:
-    app: blog5
+    app: www
   type: NodePort 
   ports:
     - port: 8000
