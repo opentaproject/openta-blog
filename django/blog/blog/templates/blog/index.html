@@ -14,7 +14,7 @@
               <button   id="hide{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-show-button"> <i class="fa-solid fa-chevron-down"></i> </button>
               <button  id="show{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-hide-button hidden"> <i class="fa-solid fa-chevron-up"></i> </button>
             </span>
-            <span class="OpenTA-post-title"> {{ post.title }} {{ post.last_modified }} </span>
+	    <span class="OpenTA-post-title"> {{ post.title }} <span class="OpenTA-post-last-modified"> {{ post.last_modified }} </span> </span>
             {% if posts|length  > 1 %}
               <div id="{{ post.pk}}" class="px-0 hidden "> {{ post.body | safe  }} </div>
             {% else %}
