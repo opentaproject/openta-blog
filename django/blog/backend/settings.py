@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'grappelli',
     "django.contrib.admin",
     'filebrowser',
+    'lti_provider',
     "django_ckeditor_5",
     "users",
     "blog.apps.BlogConfig",
@@ -296,4 +297,39 @@ CKEDITOR_5_CONFIGS = {
 #CKEDITOR_5_FILE_UPLOAD_PATH = f"/subdomain_data/{SUBDOMAIN}/media/"  # Possible values: "staff", "authenticated", "any"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "authenticated"
 CKEDITOR_5_FILE_STORAGE = "backend.util.CustomStorage" # optional
+AUTHENTICATION_BACKENDS = [
+  'django.contrib.auth.backends.ModelBackend',
+  'lti_provider.auth.LTIBackend',
+]
+
+LTI_TOOL_CONFIGURATION = {
+    'title': 'OpenTA-blog',
+    'description': 'Blog to support OpenTA',
+    'launch_url': 'lti/',
+    'embed_url': '',
+    'embed_icon_url': '',
+    'embed_tool_id': 'openta-blog-0',
+    'landing_url': 'https://www.openta.se',
+    'course_aware': False,
+    'course_navigation': False,
+    'new_tab': True,
+    'frame_width': 1024,
+    'frame_height': 960,
+    'custom_fields': None,
+    'allow_ta_access': False,
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
+
+PYLTI_CONFIG = {
+    'consumers': {
+        '123456789': {
+            'secret': '123456789'
+        }
+    }
+}
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
