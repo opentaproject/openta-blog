@@ -14,7 +14,7 @@ class ResponseRewriteMiddleware(MiddlewareMixin):
             'OpenTA-leave-comment-link' : 'bg-blue-200',\
             'OpenTA-navigation-bar' : 'flex border-b bg-transparent bg-[#cccccc]', \
             'OpenTA-post-entry' : 'py-2',\
-            'OpenTA-post-last-modified' : 'text-sm',\
+            'OpenTA-post-last-modified' : 'font-light text-xs',\
             'OpenTA-post-title' : 'italic font-bold',\
             'OpenTA-show-button' : 'hover:bg-blue-400 bg-blue-200',\
             'OpenTA-submit-button' : 'hover:bg-blue-400 btn btn-primary',\
