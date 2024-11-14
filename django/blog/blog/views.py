@@ -4,8 +4,12 @@ from django.http import HttpResponseRedirect
 from blog.models import Post, Comment, Category
 from django.db import ProgrammingError
 from blog.forms import CommentForm
+from rest_framework.decorators import api_view
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 
+@api_view(["GET", "POST"])
+@xframe_options_exempt  
 def blog_index(request, category_selected=1):
     print(f"CATEGORY_SELECTED = {category_selected}")
     try :
