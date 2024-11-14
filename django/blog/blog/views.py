@@ -13,6 +13,7 @@ def blog_index(request, category_selected=1):
         print(f"POSTS = {posts}")
         categories = Category.objects.all()
         cat = int( category_selected )
+        is_authenticated = request.user.is_authenticated
         for post in posts :
             comments = Comment.objects.filter(post=post)
             post.comments = comments
@@ -20,6 +21,7 @@ def blog_index(request, category_selected=1):
             "posts": posts,
             "categories":  categories,
             "category_selected" : cat,
+            "is_authenticated" : is_authenticated,
         }
     except ProgrammingError as e:
         context = {

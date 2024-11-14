@@ -24,8 +24,10 @@
 
 
 
-            <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }} </span> 
-		    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  Leave a comment </a> </div>
+	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
+		    {% if is_authenticated %} 
+	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  Leave a comment </a> </div>
+	    		{% endif %}
 
             {% if post.comments|length > 0 %}
               <button  id=hide"{{ post.pk }}c" onClick=toggle("{{ post.pk }}c") class="OpenTA-show-button"> <i class="fa-solid fa-chevron-down"></i>  {{ post.comments | length }} comments </button>
