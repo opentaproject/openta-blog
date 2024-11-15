@@ -58,7 +58,7 @@ def blog_index(request, category_selected=1):
             "category_selected" : None
             }
         logger.error(f"ERROR = {type(e).__name__} {str(e)}")
-    return render(request, "blog/index.html", context)
+    return render(request, "blog/sidebyside.html", context)
 
 def blog_category(request, category):
     posts = Post.objects.filter(
