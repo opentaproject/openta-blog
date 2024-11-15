@@ -6,21 +6,45 @@ from django.db import ProgrammingError
 from blog.forms import CommentForm
 from rest_framework.decorators import api_view
 from django.views.decorators.clickjacking import xframe_options_exempt
+import logging
+import json
+logger = logging.getLogger(__name__)
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  
+@xframe_options_exempt  # N
 def blog_index(request, category_selected=1):
-    print(f"CATEGORY_SELECTED = {category_selected}")
+    logger.error(f"CATEGORY_SELECTED = {category_selected} METHOD={request.method} ")
+    logger.error(f"SESSION = {request.session}")
+    if request.method == 'POST' :
+        data = dict( request.POST )
+        username = data.get('custom_canvas_login_id', '')
+        request.session['username'] = username
+    else :
+        data = {};
+        username = request.user.username
+        logger.error(f"GET = {request.body}")
+    logger.error(f"DATA = {data}")
+    username = request.session.get('username', request.user.username )
+    logger.error(f"SESSION USERNAME = {request.session.get('username',None)}")
+
+
+    logger.error(f"USER = {username}")
     try :
         posts = Post.objects.all().order_by("-created_on").filter(categories__pk=category_selected)
-        print(f"POSTS = {posts}")
+        logger.error(f"POSTS = {posts}")
         categories = Category.objects.all()
         cat = int( category_selected )
-        is_authenticated = request.user.is_authenticated
+
+
+
+        is_authenticated = not( username == ''  )
+        logger.error(f" USER = {username} IS_AUTHENTICATED = {is_authenticated}")
         for post in posts :
             comments = Comment.objects.filter(post=post)
             post.comments = comments
+
+
         context = {
             "posts": posts,
             "categories":  categories,
@@ -33,7 +57,7 @@ def blog_index(request, category_selected=1):
             "categoies" : [],
             "category_selected" : None
             }
-        print(f"ERROR = {type(e).__name__} {str(e)}")
+        logger.error(f"ERROR = {type(e).__name__} {str(e)}")
     return render(request, "blog/index.html", context)
 
 def blog_category(request, category):
@@ -47,16 +71,22 @@ def blog_category(request, category):
     return render(request, "blog/category.html", context)
 
 
+
+
+@api_view(["GET", "POST"])
+@xframe_options_exempt  # N
 def blog_leave_comment(request, pk):
     post = Post.objects.get(pk=pk)
     form = CommentForm()
     categories = Category.objects.all()
     if request.method == "POST":
         form = CommentForm(request.POST)
-        if request.user.is_authenticated :
-            user = request.user
-        else :
-            user = None
+        user = request.session.get('username',None)
+        #if request.user.is_authenticated :
+        #    user = request.user
+        #else :
+        #    user = None
+        user = request.session.get('username',None)
         if form.is_valid():
             comment = Comment(
                 author=form.cleaned_data["author"],
@@ -71,12 +101,13 @@ def blog_leave_comment(request, pk):
     comments = Comment.objects.filter(post=post)
     cat =  post.categories.pk
     print(f"CAT = {cat}")
+    user = request.session.get('username',None)
     context = {
         "post": post,
         "comments": comments,
         "form": CommentForm(),
-        "user" : request.user,
-        "author" : request.user.username,
+        "user" : user,
+        "author" : user,
         "categories" : categories,
         "category_selected" : cat,
 
