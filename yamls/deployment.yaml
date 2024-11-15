@@ -95,6 +95,7 @@ spec:
           args: 
             - cd django/blog;
               ./db_setup ;
+              python manage.py makemigrations;
               python manage.py migrate;
               python manage.py collectstatic --no-input;
               /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 

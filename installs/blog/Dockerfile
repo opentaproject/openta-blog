@@ -17,8 +17,9 @@ WORKDIR /srv/openta-blog
 RUN pip install --upgrade pip
 COPY . /srv
 WORKDIR /srv
-RUN git clone -b development https://github.com/opentaproject/openta-blog.git
+RUN git clone https://github.com/opentaproject/openta-blog.git
 WORKDIR /srv/openta-blog
 RUN pip install -r django/requirements.txt
+WORKDIR /srv/openta-blog/django/blog
 RUN pip install gunicorn
 EXPOSE 8000
