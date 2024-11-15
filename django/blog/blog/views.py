@@ -81,7 +81,6 @@ def blog_leave_comment(request, pk):
     categories = Category.objects.all()
     if request.method == "POST":
         form = CommentForm(request.POST)
-        user = request.session.get('username',None)
         #if request.user.is_authenticated :
         #    user = request.user
         #else :
@@ -92,7 +91,6 @@ def blog_leave_comment(request, pk):
                 author=form.cleaned_data["author"],
                 body=form.cleaned_data["body"],
                 post=post,
-                user=user,
             )
             comment.save()
             print(f"REDIRECTR TO {request.path_info}")
@@ -106,7 +104,6 @@ def blog_leave_comment(request, pk):
         "post": post,
         "comments": comments,
         "form": CommentForm(),
-        "user" : user,
         "author" : user,
         "categories" : categories,
         "category_selected" : cat,
