@@ -1,0 +1,24 @@
+  {% block posts %}
+    <div class="OpenTA-post-list">
+      {% for post in posts %}
+        <div>
+
+          <div class="OpenTA-post-entry">
+            <span class="OpenTA-toggle">
+	      <button   id="hide{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-show-button"> <i class="far fa-square"></i> A {{ selected.pk }} </button>
+	      <button  id="show{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-hide-button hidden"> <i class="far fa-square"></i> B {{ selected.pk }}  </button>
+            </span>
+	    <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title }} </span> </span>
+
+
+	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
+
+
+
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+
+  {% endblock posts %}

@@ -1,0 +1,57 @@
+  {% block posts %}
+    <div class="OpenTA-post-list">
+      {% for post in posts %}
+        <div>
+
+
+          <div class="OpenTA-post-entry">
+            <span class="OpenTA-toggle">
+              <button   id="hide{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-show-button"> <i class="fa-solid fa-chevron-down"></i> </button>
+              <button  id="show{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-hide-button hidden"> <i class="fa-solid fa-chevron-up"></i> </button>
+            </span>
+	    <span class="OpenTA-post-title"> {{ post.title }} 
+	    </span>
+            {% if posts|length  > 1 %}
+              <div id="{{ post.pk}}" class="px-0 hidden "> {{ post.body | safe  }} </div>
+            {% else %}
+              <div id="{{ post.pk}}" class="px-0 "> {{ post.body | safe  }} </div>
+            {% endif %}
+
+
+
+	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
+		    {% if is_authenticated %} 
+	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  Leave a comment </a> </div>
+	    		{% endif %}
+
+            {% if post.comments|length > 0 %}
+              <button  id=hide"{{ post.pk }}c" onClick=toggle("{{ post.pk }}c") class="OpenTA-show-button"> <i class="fa-solid fa-chevron-down"></i>  {{ post.comments | length }} comments </button>
+              <button  id=show"{{ post.pk }}c" onClick=toggle("{{ post.pk }}c") class="OpenTA-hidden-button hidden"> <i class="fa-solid fa-chevron-up"></i> {{ post.comments | length }} comment </button>
+
+
+
+              <div id="{{ post.pk }}c" class="OpenTA-comment-list hidden ">
+                {% for comment in post.comments %}
+                  <div class="OpenTA-comment-entry">
+                    {% if comment.author != "" %}
+                      <p> On {{ comment.created_on.date }} <b>{{ comment.author }}</b> wrote: </p>
+                    {% else %}
+                      <p> On {{ comment.created_on.date }} <b>Anon </b> wrote: </p>
+                    {% endif %}
+                  </div>
+
+                  <div class="OpenTA-comment-body"> {{ comment.body | safe | linebreaks }} </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+
+
+
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+
+  {% endblock posts %}

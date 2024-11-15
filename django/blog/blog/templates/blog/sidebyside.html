@@ -1,0 +1,26 @@
+<!-- blog/templates/blog/index.html -->
+{% extends "base.html" %}
+
+
+{% block page_content %}
+
+  <div class="bg-red-200 ">
+    <table class="min-w-full border-collapse border border-gray-300"> <tr>
+      <td class="w-1/4 align-top">
+
+      {% block posts %}
+      {% include "blog/posts_lhs.html" %}
+      {% endblock posts %}
+
+    </td>  <td class="OpenTA-rhs-sidebyside w-3/4 align-top px-4"> 
+
+      {% include "blog/posts_rhs.html" %}
+		      
+
+    </td> </tr> </table>
+  </table>
+  </div>
+
+
+{% endblock page_content %}
+

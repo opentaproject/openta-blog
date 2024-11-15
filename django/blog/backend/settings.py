@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
 
 
 ]
@@ -297,6 +298,7 @@ CKEDITOR_5_CONFIGS = {
 #CKEDITOR_5_FILE_UPLOAD_PATH = f"/subdomain_data/{SUBDOMAIN}/media/"  # Possible values: "staff", "authenticated", "any"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "authenticated"
 CKEDITOR_5_FILE_STORAGE = "backend.util.CustomStorage" # optional
+#CKEDITOR_5_CONFIGS  = 'extended'
 AUTHENTICATION_BACKENDS = [
   'django.contrib.auth.backends.ModelBackend',
   'lti_provider.auth.LTIBackend',
@@ -309,7 +311,7 @@ LTI_TOOL_CONFIGURATION = {
     'embed_url': '',
     'embed_icon_url': '',
     'embed_tool_id': 'openta-blog-0',
-    'landing_url': 'https://www.openta.se',
+    #'landing_url': 'http://localhost:8000/lti_landing',
     'course_aware': False,
     'course_navigation': False,
     'new_tab': True,
@@ -332,4 +334,4 @@ PYLTI_CONFIG = {
 }
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
+LTI_EXTRA_PARAMETERS = ["custom_canvas_login_id"]
