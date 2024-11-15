@@ -23,9 +23,9 @@ def blog_index(request, category_selected=1):
     else :
         data = {};
         username = request.user.username
+        request.session['username'] = username
         logger.error(f"GET = {request.body}")
     logger.error(f"DATA = {data}")
-    username = request.session.get('username', request.user.username )
     logger.error(f"SESSION USERNAME = {request.session.get('username',None)}")
 
 
@@ -110,5 +110,6 @@ def blog_leave_comment(request, pk):
 
         
     }
+    print(f"CONTEXT = {context}")
 
     return render(request, "blog/blog_leave_comment.html", context)
