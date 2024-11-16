@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Simple LTI Launch Test</title>
+    <script src="bundle.js"></script>
+</head>
+
+<body>
+
+    <pre><code class="language-json"></code></pre>
+    <form id="ltiForm"></form>
+    <button type="submit" form="ltiForm">POST to LTI Tool Provider!</button>
+
+    <script>
+        var oauth = require('oauth-sign');
+        var action = 'http://localhost:8000/lti_landing/';
+        var method = 'POST';
+        var timestamp = Math.round(Date.now() / 1000);
+
+        var params = {
+            // LTI Required Parameters
+            lti_message_type: 'basic-lti-launch-request',
+            lti_version: 'LTI-1p0',
+            resource_link_id: 'resourceLinkId',
+            // OAuth 1.0a Required Parameters
+	    custom_canvas_login_id: 'ostlund',
+	    lis_person_name_contact_email_primary: 'ostlund@chalmers.se',
+            oauth_consumer_key: '123456789',
+            oauth_nonce: btoa(timestamp),
+            oauth_signature_method: 'HMAC-SHA1',
+            oauth_timestamp: timestamp,
+            oauth_version: '1.0'
+        };
+
+	secret = '123456789'
+        var signature = oauth.hmacsign(method, action, params, secret);
+        params.oauth_signature = signature;
+
+        var form = document.querySelector("#ltiForm");
+        form.action = action;
+        form.method = method;
+        for (var name in params) {
+            var node = document.createElement("input");
+            node.name = name;
+            node.type = 'hidden';
+            node.value = params[name];
+            form.appendChild(node);
+        }
+
+        var output = document.querySelector("code");
+        output.textContent = JSON.stringify(params, null, 2);
+        console.log(form);
+
+        var meta = document.querySelector("body > script");
+        console.log(meta);
+    </script>
+
+</body>
+
+</html>
