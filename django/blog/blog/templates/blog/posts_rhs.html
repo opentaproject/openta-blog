@@ -4,7 +4,7 @@
       <div id="{{post.pk}}" class="hideshow hidden" >
 	    <div  class="OpenTA-post-entry">
 	    <span class="OpenTA-post-title"> {{ post.title }} </span>
-              <div id="{{ post.pk}}"> {{ post.body | safe  }} </div>
+              <div class="OpenTA-post-entry" id="{{ post.pk}}"> {{ post.body | safe  }} </div>
 	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
 		    {% if is_authenticated %} 
 	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  Leave a comment </a> </div>
