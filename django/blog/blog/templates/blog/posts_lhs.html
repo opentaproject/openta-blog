@@ -3,7 +3,7 @@
       {% for post in posts %}
         <div>
 
-          <div class="OpenTA-post-entry border border-gray-300 p-6 rounded-lg bg-white shadow-md ">
+          <div class="OpenTA-post-entry">
             <span class="OpenTA-toggle">
               <button   id="hide{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-show-button"> <i class="far fa-square"></i> </button>
               <button  id="show{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-hide-button hidden"> <i class="far fa-square"></i> </button>

@@ -310,7 +310,7 @@ LTI_TOOL_CONFIGURATION = {
     'embed_url': '',
     'embed_icon_url': '',
     'embed_tool_id': 'openta-blog-0',
-    'landing_url': 'http://localhost:8000/lti_landing',
+    #'landing_url': 'http://localhost:8000/lti_landing',
     'course_aware': False,
     'course_navigation': False,
     'new_tab': True,

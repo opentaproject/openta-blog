@@ -1,10 +1,10 @@
   {% block posts %}
-    <div class="OpenTA-post-list h-full border border-gray-300 px-4 rounded-lg bg-white shadow-md">
+    <div class="OpenTA-post-list">
       {% for post in posts %}
       <div id="{{post.pk}}" class="hideshow hidden" >
 	    <div  class="OpenTA-post-entry">
 	    <span class="OpenTA-post-title"> {{ post.title }} </span>
-              <div id="{{ post.pk}}" class="px-0 "> {{ post.body | safe  }} </div>
+              <div id="{{ post.pk}}"> {{ post.body | safe  }} </div>
 	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
 		    {% if is_authenticated %} 
 	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  Leave a comment </a> </div>
@@ -16,7 +16,7 @@
               <button  id=show"{{ post.pk }}c" onClick=toggle("{{ post.pk }}c") class="OpenTA-hidden-button hideshow hidden"> 
 		      <i class="fa-solid fa-chevron-up"></i> {{ post.comments | length }} comment </button>
 
-              <div class="OpenTA-comment-list">
+              <div class="OpenTA-post-entry">
                 {% for comment in post.comments %}
                   <div class="OpenTA-comment-entry">
                     {% if comment.author != "" %}
@@ -24,9 +24,9 @@
                     {% else %}
                       <p> On {{ comment.created_on.date }} <b>Anon </b> wrote: </p>
                     {% endif %}
-                  </div>
 
                   <div class="OpenTA-comment-body"> {{ comment.body | safe | linebreaks }} </div>
+		  </div> 
                 {% endfor %}
               </div>
             {% endif %}
