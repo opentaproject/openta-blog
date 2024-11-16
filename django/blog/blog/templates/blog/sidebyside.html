@@ -4,14 +4,15 @@
 
 {% block page_content %}
 
-  <div class="min-w-full bg-red-100 ">
-    <table class="min-w-full  "> <tr><td class="bg-blue-100 w-1/4 align-top">
+  <div class="min-w-full bg-red-200 ">
+    <table class="min-w-full border-collapse border border-gray-300"> <tr>
+      <td class="w-1/4 align-top">
 
       {% block posts %}
       {% include "blog/posts_lhs.html" %}
       {% endblock posts %}
 
-    </td>  <td class="bg-blue-400 w-3/4 align-top"> 
+    </td>  <td class="OpenTA-rhs-sidebyside w-3/4 align-top px-4"> 
 
       {% include "blog/posts_rhs.html" %}
 		      
