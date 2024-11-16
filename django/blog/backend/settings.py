@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
 
 
 ]
@@ -309,7 +310,7 @@ LTI_TOOL_CONFIGURATION = {
     'embed_url': '',
     'embed_icon_url': '',
     'embed_tool_id': 'openta-blog-0',
-    'landing_url': 'https://www.openta.se',
+    'landing_url': 'http://localhost:8000/lti_landing',
     'course_aware': False,
     'course_navigation': False,
     'new_tab': True,
@@ -332,4 +333,4 @@ PYLTI_CONFIG = {
 }
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
+LTI_EXTRA_PARAMETERS = ["custom_canvas_login_id"]

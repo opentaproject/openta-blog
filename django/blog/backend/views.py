@@ -1,9 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def home(request):
     print(f"GET HOME.HTML")
     return render(request, 'home.html') 
+
+@csrf_exempt
+def lti_landing(request) :
+    return redirect("/")
 
 def config_lti(request):
     with open("backend/config.xml", "rb") as f:

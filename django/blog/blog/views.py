@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 from django.views.decorators.clickjacking import xframe_options_exempt
 import logging
 import json
+from django.http import JsonResponse
 logger = logging.getLogger(__name__)
 
 
@@ -21,11 +22,10 @@ def blog_index(request, category_selected=1):
         username = data.get('custom_canvas_login_id', '')
         request.session['username'] = username
     else :
-        data = {};
+        print(f"GET = {request.GET}")
         username = request.user.username
         request.session['username'] = username
         logger.error(f"GET = {request.body}")
-    logger.error(f"DATA = {data}")
     logger.error(f"SESSION USERNAME = {request.session.get('username',None)}")
 
 
