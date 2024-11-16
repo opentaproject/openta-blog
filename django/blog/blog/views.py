@@ -23,7 +23,7 @@ def blog_index(request, category_selected=1):
         request.session['username'] = username
     else :
         print(f"GET = {request.GET}")
-        username = request.user.username
+        username = request.GET.get('user',request.user.username)
         request.session['username'] = username
         logger.error(f"GET = {request.body}")
     logger.error(f"SESSION USERNAME = {request.session.get('username',None)}")

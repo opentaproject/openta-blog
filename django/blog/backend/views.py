@@ -8,7 +8,9 @@ def home(request):
 
 @csrf_exempt
 def lti_landing(request) :
-    return redirect("/")
+    print(f"LANDING {request.POST}")
+    username = request.POST.get('custom_canvas_login_id',None)
+    return redirect(f"/?user={username}")
 
 def config_lti(request):
     with open("backend/config.xml", "rb") as f:
