@@ -10,6 +10,7 @@ def home(request):
 def lti_landing(request) :
     print(f"LANDING {request.POST}")
     username = request.POST.get('custom_canvas_login_id',None)
+    request.session['username'] = username
     return redirect(f"/?user={username}")
 
 def config_lti(request):

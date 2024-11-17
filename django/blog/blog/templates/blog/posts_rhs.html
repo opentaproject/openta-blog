@@ -4,7 +4,7 @@
       <div id="{{post.pk}}" class="hideshow hidden" >
 	    <div  class="OpenTA-post-entry">
 	    <span class="OpenTA-post-title"> {{ post.title }} </span>
-              <div class="OpenTA-post-entry" id="{{ post.pk}}"> {{ post.body | safe  }} </div>
+              <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body | safe  }} </div>
 	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
 		    {% if is_authenticated %} 
 	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  Leave a comment </a> </div>
@@ -16,7 +16,7 @@
               <button  id=show"{{ post.pk }}c" onClick=toggle("{{ post.pk }}c") class="OpenTA-hidden-button hideshow hidden"> 
 		      <i class="fa-solid fa-chevron-up"></i> {{ post.comments | length }} comment </button>
 
-              <div class="OpenTA-post-entry">
+              <div class="OpenTA-comment-list">
                 {% for comment in post.comments %}
                   <div class="OpenTA-comment-entry">
                     {% if comment.author != "" %}

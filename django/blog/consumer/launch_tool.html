@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Simple LTI Launch Test</title>
-    <script src="bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/oauth-signature@1.5.0/dist/oauth-signature.min.js"></script>
 </head>
 
 <body>
@@ -15,8 +15,7 @@
     <form id="ltiForm"></form>
     <button type="submit" form="ltiForm">POST to LTI Tool Provider!</button>
 
-    <script>
-        var oauth = require('oauth-sign');
+    <script type="module">
         var action = 'http://localhost:8000/lti_landing/';
         var method = 'POST';
         var timestamp = Math.round(Date.now() / 1000);
@@ -36,8 +35,8 @@
             oauth_version: '1.0'
         };
 
-	secret = '123456789'
-        var signature = oauth.hmacsign(method, action, params, secret);
+	var secret = '123456789'
+        var signature = oauthSignature.generate(method, action, params, secret);
         params.oauth_signature = signature;
 
         var form = document.querySelector("#ltiForm");
