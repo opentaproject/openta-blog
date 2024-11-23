@@ -36,7 +36,7 @@
         };
 
 	var secret = '123456789'
-        var signature = oauthSignature.generate(method, action, params, secret);
+        var signature = oauthSignature.generate(method, action, params, secret); // THIS IS FROM THE oauth-signature cdn package
         params.oauth_signature = signature;
 
         var form = document.querySelector("#ltiForm");
