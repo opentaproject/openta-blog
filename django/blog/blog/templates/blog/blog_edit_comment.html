@@ -12,11 +12,6 @@
 <div> {{ post.title }} {{ post.last_modified }} </div>
     {{ post.body | safe | linebreaks }}
     <div class="OpenTA-toggle sm:italic bg-red-100  ">
-     <span> 
-      <button   id="hide{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-hide-button"> <i class="fa-solid fa-chevron-up"></i>  Less </button> 
-      <button  id="show{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-show-button hidden"> <i class="fa-solid fa-chevron-down"></i> More </button> 
-     </span> 
-     <div id={{ post.pk }} class="OpenTA-comment-form bg-blue-100">
     USERNAME = {{ username }} 
     <form method="post">
         {% csrf_token %}
@@ -28,7 +23,6 @@
     {% endfor %}
         <button type="submit" class="OpenTA-submit-button">Submit Edit </button>
     </form>
-    </div> 
     </div> 
   </div> 
 

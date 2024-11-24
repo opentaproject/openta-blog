@@ -10,13 +10,15 @@
 		    {% if is_authenticated %} 
 	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  Leave a comment </a> 
 	    </div>
-	    		{% endif %}
+	    {% endif %}
 
             {% if post.comments|length > 0 %}
-              <button  id=hide"{{ post.pk }}c" onClick=toggle("{{ post.pk }}c") class="OpenTA-show-button"> 
-		      <i class="fa-solid fa-chevron-down"></i>  {{ post.comments | length }} comments </button>
-              <button  id=show"{{ post.pk }}c" onClick=toggle("{{ post.pk }}c") class="OpenTA-hidden-button hideshow hidden"> 
+
+              <!-- <button  id=hide"{{ post.pk }}s" onClick=toggle("{{ post.pk }}m") class="OpenTA-show-button"> 
+		      <i class="fa-solid fa-chevron-down"></i>  {{ post.comments | length }} list of comments </button>
+              <button  id=show"{{ post.pk }}s" onClick=toggle("{{ post.pk }}m") class="OpenTA-hidden-button hideshow hidden"> 
 		      <i class="fa-solid fa-chevron-up"></i> {{ post.comments | length }} comment </button>
+	      -->
 
               <div class="OpenTA-comment-list">
                 {% for comment in post.comments %}

@@ -76,21 +76,20 @@ def blog_category(request, category):
 def blog_add_post(request ):
     username = request.user.username
     author = username
-    body = '<p> Initial content </p> '
-    title = 'Title'
     categories = Category.objects.all()[0]
-    post, _  = Post.objects.get_or_create(categories=categories,title=title,body=body)
+    post, _  = Post.objects.get_or_create(title='',body='',categories=categories)
     print(f"ADD_POST {post.pk}")
     if request.method == "POST":
         form = PostForm( request.POST, instance=post)
         print(f"SAVING POST {post.pk}")
-        if form.is_valid():
+        if form.is_valid() and form.instance.body != '' and form.instance.title != '':
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/edit_post/{post.pk}')
         else :
             print(f"POST FORM IS NOT VALID ")
     else :
+        print(f"POST = {post}")
         form = PostForm( instance=post)
     return render(request, "blog/blog_edit_post.html", {'form' : form, 'username' : username  } )
 
@@ -129,12 +128,12 @@ def blog_leave_comment (request, pk):
     print(f"LEAVE_COMMENT")
     username = request.user.username
     author = username
-    body = 'Initial content'
-    comment = Comment.objects.create(author=author,post=post )
+    body = ''
+    comment , _ = Comment.objects.get_or_create(author=author,post=post,body=body)
     print(f"USER = {username} AUTHOR = {comment.author}")
     if request.method == "POST":
         form = CommentForm( request.POST, instance=comment)
-        if form.is_valid():
+        if form.is_valid() and form.instance.body != '' and form.instance.author != '':
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/comment/{comment.pk}')

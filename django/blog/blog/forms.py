@@ -26,7 +26,19 @@ class PostForm(forms.ModelForm):
 
       def __init__(self, *args, **kwargs):
           super().__init__(*args, **kwargs)
-          self.fields["body"].required = False
+          self.fields["body"].required = True
+          self.fields["title"].required = True
+
+      def clean(self):
+          cleaned_data = super().clean()
+          body = cleaned_data.get('body')
+          title = cleaned_data.get('title')
+  
+          if body and title:
+              return cleaned_data
+          else :
+              raise forms.ValidationError("Title and body must be set.")
+          
 
       class Meta:
           model = Post
