@@ -17,6 +17,6 @@ class CommentForm(forms.ModelForm):
           fields = '__all__' 
           widgets = {
               "body": CKEditor5Widget(
-                  attrs={"class": "django_ckeditor_5"}, config_name="default"
+                  attrs={"class": "django_ckeditor_5"}, config_name="extends"
               )
           }
