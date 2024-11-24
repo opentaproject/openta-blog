@@ -298,6 +298,7 @@ CKEDITOR_5_CONFIGS = {
 #CKEDITOR_5_FILE_UPLOAD_PATH = f"/subdomain_data/{SUBDOMAIN}/media/"  # Possible values: "staff", "authenticated", "any"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "authenticated"
 CKEDITOR_5_FILE_STORAGE = "backend.util.CustomStorage" # optional
+#CKEDITOR_5_CONFIGS  = 'extended'
 AUTHENTICATION_BACKENDS = [
   'django.contrib.auth.backends.ModelBackend',
   'lti_provider.auth.LTIBackend',

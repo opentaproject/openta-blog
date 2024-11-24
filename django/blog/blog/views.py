@@ -1,10 +1,10 @@
 # blogs/views.py
-from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from blog.models import Post, Comment, Category
 from django.db import ProgrammingError
 from blog.forms import CommentForm
 from rest_framework.decorators import api_view
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.clickjacking import xframe_options_exempt
 import logging
 import json
@@ -50,6 +50,7 @@ def blog_index(request, category_selected=1):
             "categories":  categories,
             "category_selected" : cat,
             "is_authenticated" : is_authenticated,
+            "username" : request.user.username,
         }
     except ProgrammingError as e:
         context = {
@@ -91,6 +92,7 @@ def blog_leave_comment(request, pk):
                 author=form.cleaned_data["author"],
                 body=form.cleaned_data["body"],
                 post=post,
+                username=request.user.username,
             )
             comment.save()
             print(f"REDIRECTR TO {request.path_info}")
@@ -100,6 +102,7 @@ def blog_leave_comment(request, pk):
     cat =  post.categories.pk
     print(f"CAT = {cat}")
     user = request.session.get('username',None)
+    print(f"FORM2 = {form}")
     context = {
         "post": post,
         "comments": comments,
@@ -107,9 +110,33 @@ def blog_leave_comment(request, pk):
         "author" : user,
         "categories" : categories,
         "category_selected" : cat,
+        "username" : request.user.username,
 
         
     }
-    print(f"CONTEXT = {context}")
-
     return render(request, "blog/blog_leave_comment.html", context)
+
+@api_view(["GET", "POST"])
+@xframe_options_exempt  # N
+def blog_edit_comment(request, pk):
+    print(f"EDIT_COMMENT")
+    comment = get_object_or_404(Comment, pk=pk)
+    username = request.user.username
+    print(f"AUTHOR = {comment.author}")
+    print(f"BODY = {comment.body}")
+    print(f"CREATED_ON = {comment.created_on}")
+    print(f"post = {comment.post}")
+    post = comment.post
+    print(f"USER = {username} AUTHOR = {comment.author}")
+
+    if request.method == "POST":
+        form = CommentForm( request.POST, instance=comment)
+        if form.is_valid():
+            form.save()  # S
+            form.save()
+            return HttpResponseRedirect(f'/comment/{comment.pk}')
+        else :
+            print(f"FORM IS NOT VALID ")
+    else :
+        form = CommentForm( instance=comment)
+    return render(request, "blog/blog_edit_comment.html", {'form' : form, 'username' : request.user.username   } )
