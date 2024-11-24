@@ -1,4 +1,5 @@
   {% block posts %}
+   <a class="OpenTA-add_post-link" href="{% url 'blog_add_post'  %}">  Add post</a> 
     <div class="OpenTA-post-list">
       {% for post in posts %}
       <div id="{{post.pk}}" class="hideshow hidden" >
