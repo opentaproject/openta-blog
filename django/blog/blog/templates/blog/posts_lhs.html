@@ -5,8 +5,8 @@
 
           <div class="OpenTA-post-entry">
             <span class="OpenTA-toggle">
-	      <button   id="hide{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-show-button"> <i class="far fa-square lhs"></i> A {{ selected.pk }} </button>
-	      <button  id="show{{ post.pk }}" onClick=toggle({{ post.pk }}) class="OpenTA-hide-button hidden"> <i class="far fa-square-check lhs"></i> B {{ selected.pk }}  </button>
+	      <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}"> View </a>
+	      
             </span>
 	    <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title }} </span> </span>
 

@@ -19,8 +19,8 @@ def get_username( request ):
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
-def blog_index(request, category_selected=1,post_selected=None):
-    logger.error(f"CATEGORY_SELECTED = {category_selected} METHOD={request.method} ")
+def blog_index(request, category_selected=1,pk=None):
+    logger.error(f"CATEGORY_SELECTED = {category_selected} METHOD={request.method} POST_SELECTED={pk}")
     logger.error(f"SESSION = {request.session}")
     if request.method == 'POST' :
         data = dict( request.POST )
@@ -50,15 +50,17 @@ def blog_index(request, category_selected=1,post_selected=None):
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
             post.comments = comments
 
-        if post_selected == None :
-            post_selected = posts[0]
+        if pk == None :
+            pk = posts[0]
+        selected_posts = posts.filter(pk=pk)
         context = {
             "posts": posts,
             "categories":  categories,
             "category_selected" : cat,
             "is_authenticated" : is_authenticated,
             "username" : username,
-            "selected" : post_selected,
+            "selected" : pk,
+            "selected_posts" : selected_posts,
         }
     except ProgrammingError as e:
         context = {
@@ -142,7 +144,7 @@ def blog_edit_post(request, pk ):
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
-def blog_view_post(request, pk):
+def blog_leave_comment (request, pk):
 
     post = Post.objects.get(pk=pk)
     post_pk = pk
