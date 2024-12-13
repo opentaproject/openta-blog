@@ -142,7 +142,7 @@ def blog_edit_post(request, pk ):
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
-def blog_leave_comment (request, pk):
+def blog_view_post(request, pk):
 
     post = Post.objects.get(pk=pk)
     post_pk = pk

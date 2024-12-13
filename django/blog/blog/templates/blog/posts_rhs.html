@@ -20,7 +20,7 @@
 	    </span>
               <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body | safe  }} </div>
 	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
-	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  
+	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_view_post' post.pk %}">  
 
 	    {% if is_authenticated %}
 		    Leave a comment 

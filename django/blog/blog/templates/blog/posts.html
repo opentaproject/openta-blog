@@ -21,7 +21,7 @@
 
 	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
 		    {% if is_authenticated %} 
-	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  Leave a comment </a> </div>
+	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_view_post' post.pk %}">  Leave a comment </a> </div>
 	    		{% endif %}
 
             {% if post.comments|length > 0 %}
