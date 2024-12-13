@@ -38,6 +38,7 @@ def blog_index(request, category_selected=1,pk=None):
 
     logger.error(f"USER = {username}")
     try :
+        comments  = []
         posts = Post.objects.all().order_by("-created_on").filter(categories__pk=category_selected)
         categories = Category.objects.all()
         cat = int( category_selected )
@@ -47,7 +48,7 @@ def blog_index(request, category_selected=1,pk=None):
         is_authenticated = request.session.get('is_authenticated',False)
         logger.error(f" USER = {username} IS_AUTHENTICATED = {is_authenticated}")
         if pk == None :
-            pk = posts[0]
+            pk = posts[0].pk
         selected_posts = posts.filter(pk=pk)
 
         for post in selected_posts :
