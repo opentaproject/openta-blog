@@ -33,8 +33,6 @@
 
             {% if post.comments|length > 0 %}
 
-              <button  id=hide"{{ post.pk }}s" onClick=toggle("{{ post.pk }}m") class="OpenTA-show-button"> 
-		      <i class="fa-solid fa-chevron-down"></i>  {{ post.comments | length }} list of comments </button>
               <button  id=show"{{ post.pk }}s" onClick=toggle("{{ post.pk }}m") class="OpenTA-hidden-button hideshow hidden"> 
 		      <i class="fa-solid fa-chevron-up"></i> {{ post.comments | length }} comment </button>
 
