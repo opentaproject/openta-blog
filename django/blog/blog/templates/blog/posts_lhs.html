@@ -5,10 +5,16 @@
 
           <div class="OpenTA-post-entry">
             <span class="OpenTA-toggle">
-	      <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}"> View </a>
+	  {% if post.pk == selected %}
+	      <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class="far fa-square-check lhs"></i>    </button>
+	   {% else %}
+<button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class="far fa-square "></i>   </button>
+		{% endif %}
+	      <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}"> 
+<span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title }} </span> </span>
+	      </a>
 	      
             </span>
-	    <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title }} </span> </span>
 
 
 	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 

@@ -31,13 +31,9 @@
 	    </div>
 
 
-            {% if post.comments|length > 0 %}
-
-              <button  id=show"{{ post.pk }}s" onClick=toggle("{{ post.pk }}m") class="OpenTA-hidden-button hideshow hidden"> 
-		      <i class="fa-solid fa-chevron-up"></i> {{ post.comments | length }} comment </button>
 
               <div class="OpenTA-comment-list">
-                {% for comment in post.comments %}
+                {% for comment in comments %}
                   <div class="OpenTA-comment-entry">
                     {% if comment.author != "" %}
 		    <p> On {{ comment.created_on.date }} <b> {{ comment.author }}  {{ username }}  </b> wrote: </p>
@@ -52,7 +48,6 @@
 		  </div> 
                 {% endfor %}
               </div>
-            {% endif %}
 
 
 

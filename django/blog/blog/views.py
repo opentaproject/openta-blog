@@ -46,13 +46,12 @@ def blog_index(request, category_selected=1,pk=None):
 
         is_authenticated = request.session.get('is_authenticated',False)
         logger.error(f" USER = {username} IS_AUTHENTICATED = {is_authenticated}")
-        for post in posts :
-            comments = Comment.objects.filter(post=post ).order_by('-created_on')
-            post.comments = comments
-
         if pk == None :
             pk = posts[0]
         selected_posts = posts.filter(pk=pk)
+
+        for post in selected_posts :
+            comments = Comment.objects.filter(post=post ).order_by('-created_on')
         context = {
             "posts": posts,
             "categories":  categories,
@@ -61,6 +60,7 @@ def blog_index(request, category_selected=1,pk=None):
             "username" : username,
             "selected" : pk,
             "selected_posts" : selected_posts,
+            "comments" : comments,
         }
     except ProgrammingError as e:
         context = {
