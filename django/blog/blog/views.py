@@ -19,8 +19,10 @@ def get_username( request ):
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
-def blog_index(request, category_selected=1,post_selected=None):
-    logger.error(f"CATEGORY_SELECTED = {category_selected} METHOD={request.method} ")
+def blog_index(request, category_selected=1,pk=None):
+    if not pk == None :
+        category_selected = Post.objects.get(pk=pk).category.pk;
+    logger.error(f"CATEGORY_SELECTED = {category_selected} METHOD={request.method} POST_SELECTED={pk}")
     logger.error(f"SESSION = {request.session}")
     if request.method == 'POST' :
         data = dict( request.POST )
@@ -38,27 +40,36 @@ def blog_index(request, category_selected=1,post_selected=None):
 
     logger.error(f"USER = {username}")
     try :
-        posts = Post.objects.all().order_by("-created_on").filter(categories__pk=category_selected)
-        categories = Category.objects.all()
+        comments  = []
+        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected)
+        for post in posts :
+            print(f"BODY = {type(post.body)} {post.body} ")
+        categories= Category.objects.all()
         cat = int( category_selected )
 
 
 
         is_authenticated = request.session.get('is_authenticated',False)
         logger.error(f" USER = {username} IS_AUTHENTICATED = {is_authenticated}")
-        for post in posts :
-            comments = Comment.objects.filter(post=post ).order_by('-created_on')
-            post.comments = comments
+        if posts :
+            if pk == None :
+                pk = posts[0].pk
+            selected_posts = posts.filter(pk=pk)
+        else :
+            pk = None;
+            selected_posts = []
 
-        if post_selected == None :
-            post_selected = posts[0]
+        for post in selected_posts :
+            comments = Comment.objects.filter(post=post ).order_by('-created_on')
         context = {
             "posts": posts,
             "categories":  categories,
             "category_selected" : cat,
             "is_authenticated" : is_authenticated,
             "username" : username,
-            "selected" : post_selected,
+            "selected" : pk,
+            "selected_posts" : selected_posts,
+            "comments" : comments,
         }
     except ProgrammingError as e:
         context = {
@@ -71,7 +82,7 @@ def blog_index(request, category_selected=1,post_selected=None):
 
 def blog_category(request, category):
     posts = Post.objects.filter(
-        categories__name__contains=category
+        category__name__contains=category
     ).order_by("-created_on")
     context = {
         "category": category,
@@ -89,14 +100,15 @@ def blog_add_post(request ):
         raise PermissionDenied("You must be authenticated in to add a post")
         
     author = username
-    categories = Category.objects.all()[0]
-    post, _  = Post.objects.get_or_create(title='',body='',categories=categories)
+    category = Category.objects.all()[0]
+    post, _  = Post.objects.get_or_create(title='',body='',category=category)
     print(f"SESSION = {vars(request.session)}")
     print(f"ADD_POST post.pk={post.pk} author={author}")
+    print(f"METHOD = {request.method}")
     if request.method == "POST":
         form = PostForm( request.POST, instance=post)
         print(f"SAVING POST {post.pk}")
-        if form.is_valid() and form.instance.body != '' and form.instance.title != '':
+        if form.is_valid() :
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/edit_post/{post.pk}')
@@ -106,6 +118,19 @@ def blog_add_post(request ):
         print(f"POST = {post}")
         form = PostForm( instance=post)
     return render(request, "blog/blog_edit_post.html", {'form' : form, 'username' : username  } )
+
+@api_view(["GET", "POST"])
+@xframe_options_exempt  # N
+def blog_delete_post(request, pk ):
+    if not request.session.get('is_authenticated',False ):
+        raise PermissionDenied("You must be authenticated in to edit a post")
+    post = get_object_or_404(Post, pk=pk)
+    username = request.session.get('username',None)
+    category_selected = post.category.pk
+    post.delete();
+    return HttpResponseRedirect(f'/blog/{category_selected}')
+
+
 
 
 @api_view(["GET", "POST"])
@@ -130,7 +155,7 @@ def blog_edit_post(request, pk ):
             form.save()  # S
             form.save()
             print(f"SAVING POST {post.pk}")
-            return HttpResponseRedirect(f'/edit_post/{post.pk}')
+            return HttpResponseRedirect(f'/post/{post.pk}')
         else :
             print(f"FORM IS NOT VALID ")
     else :
@@ -157,7 +182,7 @@ def blog_leave_comment (request, pk):
         if form.is_valid() and form.instance.body != '' and form.instance.author != '':
             form.save()  # S
             form.save()
-            return HttpResponseRedirect(f'/comment/{comment.pk}')
+            return HttpResponseRedirect(f'/post/{comment.post.pk}')
         else :
             print(f"FORM IS NOT VALID ")
     else :
@@ -181,20 +206,36 @@ def blog_edit_comment(request, pk ):
     print(f"post = {comment.post}")
     post = comment.post
     print(f"USER = {username} AUTHOR = {comment.author}")
+    if comment.body in [ '<p>&nbsp;</p>' ,'']  :
+        comment.delete();
+        print(f"DELETE AND REDDIRECT TO post/{comment.post.pk}")
+        return HttpResponseRedirect(f'/post/{comment.post.pk}')
 
     if request.method == "POST":
-        if action == 'delete' :
+        if  action == 'delete' :
             comment.delete();
-            return HttpResponseRedirect(f'/')
+            return HttpResponseRedirect(f'/post/{comment.post.pk}')
 
         form = CommentForm( request.POST, instance=comment)
         if form.is_valid():
             form.save()  # S
             form.save()
-            return HttpResponseRedirect(f'/comment/{comment.pk}')
+            return HttpResponseRedirect(f'/post/{comment.post.pk}')
         else :
             print(f"FORM IS NOT VALID ")
     else :
         print(f"GET = {request.get_full_path() }")
         form = CommentForm( instance=comment)
     return render(request, "blog/blog_edit_comment.html", {'form' : form, 'username' : request.user.username   } )
+
+
+@api_view(["GET", "POST"])
+@xframe_options_exempt  # N
+def blog_delete_comment(request, pk ):
+    comment = get_object_or_404(Comment, pk=pk)
+    username = request.user.username
+    action = request.POST.get('action','edit');
+    post = comment.post
+    comment.delete();
+    return HttpResponseRedirect(f'/post/{post.pk}')
+

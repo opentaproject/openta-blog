@@ -1,58 +1,69 @@
   {% block posts %}
-	    {% if is_authenticated %} 
-   <a class="OpenTA-add_post-link" href="{% url 'blog_add_post'  %}">  Add post</a> 
-{% endif %}
-    <div class="OpenTA-post-list">
-      {% for post in posts %}
-      {% if selected.pk == post.pk %}
+    <div class="OpenTA-post-list bg-blue-800">
+      {% for post in selected_posts %}
+
+
       <div id="{{post.pk}}" class="hideshow " >
-      {% else %}
-<div id="{{post.pk}}" class="hideshow hidden" >
-	{% endif %}
+
+
 	    <div  class="OpenTA-post-entry">
-	    <span class="OpenTA-post-title"> {{ post.title }} 	<a class="OpenTA-edit-post-link" href="{% url 'blog_edit_post' post.pk %}">  
-	    {% if is_authenticated %} 
-			    Edit post
-{% endif %}
 
-		    </a> 
- 
-	    </span>
-              <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body | safe  }} </div>
-	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
-	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  
+		<div class=" OpenTA-post-body mt-2 flex justify-between w-full">
 
-	    {% if is_authenticated %}
-		    Leave a comment 
-{% endif %}
+		    <span class="OpenTA-post-title"> {{ post.title }} 	 </span>
+		    <span>  <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  {% if is_authenticated %} Leave a comment {% endif %} </a> </span> 
+
+		</div> 
+
+              <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body  | safe }} 
+
+	      <div>
+<div class="mt-2 flex justify-between w-full">
+<span>
+<span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_edit_post' post.pk %}">  {% if is_authenticated %} Edit {% endif %} </a> </span>
+<span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if is_authenticated %} Delete {% endif %} </a> </span>
+</span>
+
+<span>   Admin {{ post.last_modified }} 
+
+	</span>
+</div>
 
 
-	    </a> 
-	    </div>
+
+	     </div> 
 
 
-            {% if post.comments|length > 0 %}
 
-              <button  id=show"{{ post.pk }}s" onClick=toggle("{{ post.pk }}m") class="OpenTA-hidden-button hideshow hidden"> 
-		      <i class="fa-solid fa-chevron-up"></i> {{ post.comments | length }} comment </button>
+
+	      </div> 
 
               <div class="OpenTA-comment-list">
-                {% for comment in post.comments %}
+                {% for comment in comments %}
                   <div class="OpenTA-comment-entry">
                     {% if comment.author != "" %}
-		    <p> On {{ comment.created_on.date }} <b> {{ comment.author }}  {{ username }}  </b> wrote: </p>
-		    	{% if comment.author == username %}
-			<a class="OpenTA-leave-comment-link" href="{% url 'blog_edit_comment' comment.pk %}">  Edit comment </a> 
-			{% endif %}
                     {% else %}
 		    <p> On {{ comment.created_on.date }} <b>Anon  {{ username }} </b> wrote: </p>
                     {% endif %}
 
-                  <div class="OpenTA-comment-body"> {{ comment.body | safe | linebreaks }} </div>
+		    <div class="OpenTA-comment-body"> {{ comment.body | safe }}   </div>
+		    <div>
+			     <div class="mt-2 flex justify-between w-full">
+				     	{% if comment.author == username %}
+					<span> <a class="OpenTA-leave-comment-link" href="{% url 'blog_edit_comment' comment.pk %}">  Edit </a> 
+			<a class="OpenTA-leave-comment-link" href="{% url 'blog_delete_comment' comment.pk %}">  Delete </a> 
+					</span>
+			{% else %}
+			&nbsp;
+			{% endif %}
+
+			    <span class=""> {{ comment.author }}      {{ comment.created_on.date }}    </span>
+			     </div>
+		  </div>
 		  </div> 
+
                 {% endfor %}
               </div>
-            {% endif %}
 
 
 
