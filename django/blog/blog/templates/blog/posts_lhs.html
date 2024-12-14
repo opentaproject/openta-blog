@@ -1,30 +1,43 @@
-  {% block posts %}
-    <div class="OpenTA-post-list">
-      {% for post in posts %}
-        <div>
-
-          <div class="OpenTA-post-entry">
-            <span class="OpenTA-toggle">
-	  {% if post.pk == selected %}
-	      <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class="far fa-square-check lhs"></i>    </button>
-	   {% else %}
-<button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class="far fa-square "></i>   </button>
-		{% endif %}
-	      <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}"> 
-<span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title }} </span> </span>
-	      </a>
-	      
-            </span>
+{% block posts %}
+  <div class="OpenTA-post-list">
+    {% for post in posts %}
+      <div>
 
 
-	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
-
-
-
+        {% if post.pk == selected %}
+          <div class="OpenTA-post-selected-entry">
+            <div class="flex justify-between w-full">
+	    <span> 
+              <a class="" href="{% url 'blog_index'  post.pk %}">
+                <button  id="check{{ post.pk }}"  class=""> <i class="far fa-square-check lhs"></i>    </button>
+                <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
+		</span> 
+                <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span>
+              </a>
+	    </div>
+              <div> {{ post.body | truncatechars:200   | safe }} </div>
           </div>
-        </div>
-      {% endfor %}
-    </div>
+
+        {% else %}
+          <div class="OpenTA-post-entry">
+            <div class="flex justify-between w-full">
+	      <span> 
+              <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}">
+                <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class="far fa-square "></i>   </button>
+                <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
+	    </span> 
+                <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span>
+              </a>
+	    </div> 
+              <div> {{ post.body | truncatechars:200 | safe }} </div>
+          </div>
+        {% endif %}
+
+      </div>
+      </div>
+      </div>
+    {% endfor %}
+  </div>
 
 
-  {% endblock posts %}
+{% endblock posts %}

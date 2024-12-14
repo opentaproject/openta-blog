@@ -18,7 +18,7 @@
 		    </a> 
  
 	    </span>
-              <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body | safe  }} </div>
+              <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body  | safe }} </div>
 	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
 	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  
 
@@ -44,7 +44,7 @@
 		    <p> On {{ comment.created_on.date }} <b>Anon  {{ username }} </b> wrote: </p>
                     {% endif %}
 
-                  <div class="OpenTA-comment-body"> {{ comment.body | safe | linebreaks }} </div>
+                  <div class="OpenTA-comment-body"> {{ comment.body | safe }} </div>
 		  </div> 
                 {% endfor %}
               </div>
