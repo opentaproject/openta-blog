@@ -1,8 +1,5 @@
   {% block posts %}
-	    {% if is_authenticated %} 
-   <a class="OpenTA-add_post-link" href="{% url 'blog_add_post'  %}">  Add post</a> 
-{% endif %}
-    <div class="OpenTA-post-list">
+    <div class="OpenTA-post-list bg-blue-800">
       {% for post in selected_posts %}
 
 
