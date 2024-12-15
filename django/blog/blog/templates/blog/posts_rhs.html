@@ -33,16 +33,24 @@
                 {% for comment in comments %}
                   <div class="OpenTA-comment-entry">
                     {% if comment.author != "" %}
-		    <p> On {{ comment.created_on.date }} <b> {{ comment.author }}  {{ username }}  </b> wrote: </p>
-		    	{% if comment.author == username %}
-			<a class="OpenTA-leave-comment-link" href="{% url 'blog_edit_comment' comment.pk %}">  Edit comment </a> 
-			{% endif %}
                     {% else %}
 		    <p> On {{ comment.created_on.date }} <b>Anon  {{ username }} </b> wrote: </p>
                     {% endif %}
 
-                  <div class="OpenTA-comment-body"> {{ comment.body | safe }} </div>
+		    <div class="OpenTA-comment-body"> {{ comment.body | safe }}   </div>
+		    <div>
+			     <div class="mt-2 flex justify-between w-full">
+				     	{% if comment.author == username %}
+			<a class="OpenTA-leave-comment-link" href="{% url 'blog_edit_comment' comment.pk %}">  Edit comment </a> 
+			{% else %}
+			&nbsp;
+			{% endif %}
+
+			    <span class=""> {{ comment.author }}      {{ comment.created_on.date }}    </span>
+			     </div>
+		  </div>
 		  </div> 
+
                 {% endfor %}
               </div>
 
