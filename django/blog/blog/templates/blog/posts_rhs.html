@@ -16,6 +16,21 @@
  
 	    </span>
               <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body  | safe }} </div>
+
+	      <div>
+<div class="mt-2 flex justify-between w-full">
+	<span>  Edit post </span>
+
+	<span>  author time </span>
+</div>
+
+
+
+	     </div> 
+
+
+
+
 	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
 	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  
 
