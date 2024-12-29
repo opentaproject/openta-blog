@@ -39,10 +39,10 @@ def blog_index(request, category_selected=1,pk=None):
     logger.error(f"USER = {username}")
     try :
         comments  = []
-        posts = Post.objects.all().order_by("-created_on").filter(categories__pk=category_selected)
+        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected)
         for post in posts :
             print(f"BODY = {type(post.body)} {post.body} ")
-        categories = Category.objects.all()
+        categories= Category.objects.all()
         cat = int( category_selected )
 
 
@@ -76,7 +76,7 @@ def blog_index(request, category_selected=1,pk=None):
 
 def blog_category(request, category):
     posts = Post.objects.filter(
-        categories__name__contains=category
+        category__name__contains=category
     ).order_by("-created_on")
     context = {
         "category": category,
@@ -94,8 +94,8 @@ def blog_add_post(request ):
         raise PermissionDenied("You must be authenticated in to add a post")
         
     author = username
-    categories = Category.objects.all()[0]
-    post, _  = Post.objects.get_or_create(title='',body='',categories=categories)
+    category = Category.objects.all()[0]
+    post, _  = Post.objects.get_or_create(title='',body='',category=category)
     print(f"SESSION = {vars(request.session)}")
     print(f"ADD_POST post.pk={post.pk} author={author}")
     print(f"METHOD = {request.method}")

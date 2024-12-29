@@ -9,7 +9,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 class Category(models.Model):
     name = models.CharField(max_length=30)
     class Meta:
-        verbose_name_plural = "categories"
+        verbose_name_plural = "category"
 
     def __str__(self):
         return self.name
@@ -22,7 +22,7 @@ class Post(models.Model):
     body = CKEditor5Field('Text', config_name='extends')
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
-    categories = models.ForeignKey("Category", on_delete=models.CASCADE,null=True, blank=True,  related_name="posts")
+    category = models.ForeignKey("Category", on_delete=models.CASCADE,null=True, blank=True,  related_name="posts")
 
     def __str__(self):
         return self.title
@@ -39,7 +39,7 @@ class Comment(models.Model):
 
 class CommentUpdateView(UpdateView):
     model = Comment
-    fields = ['body', 'categories','title']
+    fields = ['body', 'category','title']
 
     def get_success_url(self)  :
         url = f'/post/{self.post.pk}'
@@ -48,7 +48,7 @@ class CommentUpdateView(UpdateView):
 
 class CommentCreateView(CreateView):
     model = Comment
-    fields = ['body', 'categories','title']
+    fields = ['body', 'category','title']
 
     def get_success_url(self)  :
         print(f"CREATE_VIEW_SUCCESS_URL")
