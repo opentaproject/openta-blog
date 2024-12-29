@@ -9,7 +9,7 @@ def home(request):
 @csrf_exempt
 def lti_landing(request) :
     print(f"LANDING {request.POST}")
-    username = request.POST.get('custom_canvas_login_id',None)
+    username = request.POST.get('custom_canvas_login_id',request.user.username)
     subdomain = request.POST.get('subdomain',None)
     request.session['username'] = username
     request.session['subdomain'] = subdomain

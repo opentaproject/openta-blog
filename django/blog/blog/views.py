@@ -20,10 +20,18 @@ def get_username( request ):
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
 def blog_index(request, category_selected=1,pk=None):
+    request.session['is_staff'] = False
+    if request.user and request.user.username  :
+        username = request.user.username
+        request.session['username'] = username
+        request.session['is_staff'] = request.user.is_staff
+        request.session['is_authenticated'] = True
     if not pk == None :
         category_selected = Post.objects.get(pk=pk).category.pk;
     logger.error(f"CATEGORY_SELECTED = {category_selected} METHOD={request.method} POST_SELECTED={pk}")
     logger.error(f"SESSION = {request.session}")
+    for key in request.session.keys() :
+        print(f" {key} {request.session[key]}")
     if request.method == 'POST' :
         data = dict( request.POST )
         print(f"DATA = {data}")
@@ -42,7 +50,7 @@ def blog_index(request, category_selected=1,pk=None):
         request.session['is_authenticated'] = not username == ''
         logger.error(f"GET = {request.body}")
     subdomain = request.session.get('subdomain',None )
-    if not Category.objects.filter(name=subdomain) :
+    if subdomain and not Category.objects.filter(name=subdomain) :
         new_category = Category.objects.create(name=subdomain,restricted=True)
         new_category.save() 
     print(f"SUBDOMAIN = {subdomain}")
@@ -54,14 +62,19 @@ def blog_index(request, category_selected=1,pk=None):
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected)
         for post in posts :
             print(f"BODY = {type(post.body)} {post.body} ")
-        copen = Category.objects.all().filter(restricted=False)
-        closed = Category.objects.all().filter(restricted=True,name=subdomain)
-        categories = ( closed | copen ).order_by ('restricted')
+        if request.session['is_staff'] :
+            categories = Category.objects.all()
+        else :
+            copen = Category.objects.all().filter(restricted=False)
+            closed = Category.objects.all().filter(restricted=True,name=subdomain)
+            categories = ( closed | copen )
+        categories = categories.order_by ('restricted')
         cat = int( category_selected )
 
 
 
         is_authenticated = request.session.get('is_authenticated',False)
+        is_staff = request.session.get('is_staff',False)
         logger.error(f" USER = {username} IS_AUTHENTICATED = {is_authenticated}")
         if posts :
             if pk == None :
@@ -79,6 +92,7 @@ def blog_index(request, category_selected=1,pk=None):
             "subdomain" : subdomain, 
             "category_selected" : cat,
             "is_authenticated" : is_authenticated,
+            "is_staff" : is_staff,
             "username" : username,
             "selected" : pk,
             "selected_posts" : selected_posts,
