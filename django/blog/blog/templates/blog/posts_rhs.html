@@ -7,21 +7,26 @@
 
 
 	    <div  class="OpenTA-post-entry">
-	    <span class="OpenTA-post-title"> {{ post.title }} 	<a class="OpenTA-edit-post-link" href="{% url 'blog_edit_post' post.pk %}">  
-	    {% if is_authenticated %} 
-			    Edit post
-{% endif %}
 
-		    </a> 
- 
-	    </span>
-              <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body  | safe }} </div>
+		<div class=" OpenTA-post-body mt-2 flex justify-between w-full">
+
+		    <span class="OpenTA-post-title"> {{ post.title }} 	 </span>
+		    <span>  <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  {% if is_authenticated %} Leave a comment {% endif %} </a> </span> 
+
+		</div> 
+
+              <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body  | safe }} 
 
 	      <div>
 <div class="mt-2 flex justify-between w-full">
-	<span>  Edit post </span>
+<span>
+<span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_edit_post' post.pk %}">  {% if is_authenticated %} Edit {% endif %} </a> </span>
+<span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if is_authenticated %} Delete {% endif %} </a> </span>
+</span>
 
-	<span>  author time </span>
+<span>   Admin {{ post.last_modified }} 
+
+	</span>
 </div>
 
 
@@ -31,18 +36,7 @@
 
 
 
-	    <div>  <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span> 
-	    <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  
-
-	    {% if is_authenticated %}
-		    Leave a comment 
-{% endif %}
-
-
-	    </a> 
-	    </div>
-
-
+	      </div> 
 
               <div class="OpenTA-comment-list">
                 {% for comment in comments %}
@@ -56,7 +50,9 @@
 		    <div>
 			     <div class="mt-2 flex justify-between w-full">
 				     	{% if comment.author == username %}
-			<a class="OpenTA-leave-comment-link" href="{% url 'blog_edit_comment' comment.pk %}">  Edit comment </a> 
+					<span> <a class="OpenTA-leave-comment-link" href="{% url 'blog_edit_comment' comment.pk %}">  Edit </a> 
+			<a class="OpenTA-leave-comment-link" href="{% url 'blog_delete_comment' comment.pk %}">  Delete </a> 
+					</span>
 			{% else %}
 			&nbsp;
 			{% endif %}

@@ -17,6 +17,7 @@ class Category(models.Model):
 from django.urls import reverse_lazy
 
 class Post(models.Model):
+    author = models.CharField(max_length=60)
     title = models.CharField(max_length=255)
     body = CKEditor5Field('Text', config_name='extends')
     created_on = models.DateTimeField(auto_now_add=True)
@@ -27,8 +28,7 @@ class Post(models.Model):
         return self.title
 
 class Comment(models.Model):
-    author = models.CharField(max_length=60)
-    #user =  models.ForeignKey(User , null=True, blank=True, on_delete=models.CASCADE)
+    author = models.CharField(max_length=60,default='',blank=True)
     body =   CKEditor5Field('Text', config_name='extends')
     created_on = models.DateTimeField(auto_now_add=True)
     post = models.ForeignKey("Post", on_delete=models.CASCADE)
