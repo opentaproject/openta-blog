@@ -11,7 +11,6 @@
   <div class="OpenTA-post-entry p-0">
 <div> {{ post.title }} {{ post.last_modified }} </div>
      <div id={{ post.pk }} class="OpenTA-post-form bg-blue-100">
-    THIS POST USERNAME = {{ username }} 
     <form method="post">
         {% csrf_token %}
 	  {% for field in form %}

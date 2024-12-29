@@ -98,10 +98,11 @@ def blog_add_post(request ):
     post, _  = Post.objects.get_or_create(title='',body='',categories=categories)
     print(f"SESSION = {vars(request.session)}")
     print(f"ADD_POST post.pk={post.pk} author={author}")
+    print(f"METHOD = {request.method}")
     if request.method == "POST":
         form = PostForm( request.POST, instance=post)
         print(f"SAVING POST {post.pk}")
-        if form.is_valid() and form.instance.body != '' and form.instance.title != '':
+        if form.is_valid() :
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/edit_post/{post.pk}')
