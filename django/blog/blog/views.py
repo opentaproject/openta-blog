@@ -51,9 +51,13 @@ def blog_index(request, category_selected=1,pk=None):
 
         is_authenticated = request.session.get('is_authenticated',False)
         logger.error(f" USER = {username} IS_AUTHENTICATED = {is_authenticated}")
-        if pk == None :
-            pk = posts[0].pk
-        selected_posts = posts.filter(pk=pk)
+        if posts :
+            if pk == None :
+                pk = posts[0].pk
+            selected_posts = posts.filter(pk=pk)
+        else :
+            pk = None;
+            selected_posts = []
 
         for post in selected_posts :
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
@@ -122,8 +126,9 @@ def blog_delete_post(request, pk ):
         raise PermissionDenied("You must be authenticated in to edit a post")
     post = get_object_or_404(Post, pk=pk)
     username = request.session.get('username',None)
+    category_selected = post.category.pk
     post.delete();
-    return HttpResponseRedirect(f'/')
+    return HttpResponseRedirect(f'/blog/{category_selected}')
 
 
 
