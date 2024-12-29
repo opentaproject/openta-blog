@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Simple LTI Launch Test</title>
-    <script src="https://cdn.jsdelivr.net/npm/oauth-signature@1.5.0/dist/oauth-signature.min.js"></script>
+    <script src="bundle.js"></script>
 </head>
 
 <body>
@@ -15,8 +15,9 @@
     <form id="ltiForm"></form>
     <button type="submit" form="ltiForm">POST to LTI Tool Provider!</button>
 
-    <script type="module">
-        var action = 'http://localhost:8000/lti_landing/';
+    <script>
+        var oauth = require('oauth-sign');
+        var action = 'https://lti.tools/saltire/tp';
         var method = 'POST';
         var timestamp = Math.round(Date.now() / 1000);
 
@@ -24,22 +25,16 @@
             // LTI Required Parameters
             lti_message_type: 'basic-lti-launch-request',
             lti_version: 'LTI-1p0',
-	    subdomain :  'ffm516-2024',
             resource_link_id: 'resourceLinkId',
             // OAuth 1.0a Required Parameters
-	    custom_canvas_login_id: 'pete',
-	    lis_person_name_contact_email_primary: 'pete@chalmers.se',
-	    // lti_roles: 'Instructor,ContentDeveloper,TeachingAssistant',
-	    lti_roles: 'Teacher',
-            oauth_consumer_key: '123456789',
+            oauth_consumer_key: 'jisc.ac.uk',
             oauth_nonce: btoa(timestamp),
             oauth_signature_method: 'HMAC-SHA1',
             oauth_timestamp: timestamp,
             oauth_version: '1.0'
         };
 
-	var secret = '123456789'
-        var signature = oauthSignature.generate(method, action, params, secret); // THIS IS FROM THE oauth-signature cdn package
+        var signature = oauth.hmacsign(method, action, params, 'secret');
         params.oauth_signature = signature;
 
         var form = document.querySelector("#ltiForm");

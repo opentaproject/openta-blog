@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 class Category(models.Model):
     name = models.CharField(max_length=30)
+    restricted = models.BooleanField(default=False)
     class Meta:
         verbose_name_plural = "category"
 
@@ -16,7 +17,22 @@ class Category(models.Model):
     
 from django.urls import reverse_lazy
 
+class Visit(models.Model) :
+    visitor = models.CharField(max_length=60)
+    post = models.ForeignKey("Post", on_delete=models.CASCADE)
+
+
 class Post(models.Model):
+    class Visibility( models.IntegerChoices ):
+        PRIVATE = 1
+        PUBLIC = 2 
+    class AuthorType( models.IntegerChoices ):
+        ANONYMOUS = 0
+        STUDENT = 1
+        TEACHER = 2
+        STAFF = 3
+    visibility = models.IntegerField(choices=Visibility , default=2 )
+    author_type = models.IntegerField(choices=AuthorType, default=0 )
     author = models.CharField(max_length=60)
     title = models.CharField(max_length=255)
     body = CKEditor5Field('Text', config_name='extends')
@@ -26,6 +42,24 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+
+    def tot_visits(self ):
+        v = Visit.objects.filter(post=self).count()
+        return v
+
+    def visits(self,username) :
+        v = Visit.objects.filter(visitor=username,post=self).count()
+        return v
+
+    def bgclass(self ):
+        colors = ['','bg-gray-400','bg-blue-400','bg-red-400']
+        return colors[ self.author_type ]
+
+    def textclass(self ):
+        colors = ['text-green-800','text-gray-600','text-blue-600','text-red-600']
+        return colors[ self.author_type ]
+
 
 class Comment(models.Model):
     author = models.CharField(max_length=60,default='',blank=True)

@@ -1,7 +1,9 @@
 # blogs/views.py
+from django.db.models import Count, Subquery, Sum, OuterRef
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
-from blog.models import Post, Comment, Category
+from blog.models import Post, Comment, Category,Visit
 from django.db import ProgrammingError
 from blog.forms import CommentForm, PostForm
 from rest_framework.decorators import api_view
@@ -20,36 +22,65 @@ def get_username( request ):
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
 def blog_index(request, category_selected=1,pk=None):
+    request.session['is_staff'] = False
+    if request.user and request.user.username  :
+        username = request.user.username
+        request.session['username'] = username
+        request.session['is_staff'] = request.user.is_staff
+        request.session['is_authenticated'] = True
     if not pk == None :
         category_selected = Post.objects.get(pk=pk).category.pk;
     logger.error(f"CATEGORY_SELECTED = {category_selected} METHOD={request.method} POST_SELECTED={pk}")
     logger.error(f"SESSION = {request.session}")
+    for key in request.session.keys() :
+        print(f" {key} {request.session[key]}")
     if request.method == 'POST' :
         data = dict( request.POST )
         print(f"DATA = {data}")
         username = data.get('custom_canvas_login_id', '')
+        subdomain = data.get('subdomain', '')
         request.session['username'] = username
         request.session['is_authenticated'] = not username ==  ''
+        request.session['subdomain'] = subdomain
     else :
-        print(f"GET = {request.GET}")
-        username = request.GET.get('user',request.user.username)
+        if 'username' in request.session :
+            print(f"GET = {request.GET}")
+            username = request.session['username']
+        else :
+            username = request.GET.get('user',request.user.username)
         request.session['username'] = username
         request.session['is_authenticated'] = not username == ''
         logger.error(f"GET = {request.body}")
+    subdomain = request.session.get('subdomain',None )
+    if subdomain and not Category.objects.filter(name=subdomain) :
+        new_category = Category.objects.create(name=subdomain,restricted=True)
+        new_category.save() 
+    print(f"SUBDOMAIN = {subdomain}")
     logger.error(f"SESSION USERNAME = {request.session.get('username',None)}")
 
     logger.error(f"USER = {username}")
     try :
         comments  = []
-        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected)
+        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
         for post in posts :
-            print(f"BODY = {type(post.body)} {post.body} ")
-        categories= Category.objects.all()
+            if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
+                post.delete()
+        post_subquery = Post.objects.filter(id=OuterRef('id'),author=username).annotate(viewed=Count('author')).values('viewed')
+        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=username).annotate(viewed=Count('visitor')).values('viewed')
+        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
+        if request.session['is_staff'] :
+            categories = Category.objects.all()
+        else :
+            copen = Category.objects.all().filter(restricted=False)
+            closed = Category.objects.all().filter(restricted=True,name=subdomain)
+            categories = ( closed | copen )
+        categories = categories.order_by ('restricted')
         cat = int( category_selected )
 
 
 
         is_authenticated = request.session.get('is_authenticated',False)
+        is_staff = request.session.get('is_staff',False)
         logger.error(f" USER = {username} IS_AUTHENTICATED = {is_authenticated}")
         if posts :
             if pk == None :
@@ -60,12 +91,23 @@ def blog_index(request, category_selected=1,pk=None):
             selected_posts = []
 
         for post in selected_posts :
+            visit = Visit.objects.get_or_create(visitor=username,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
+        author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
+        author_type_display = request.session.get('author_type_display','Anonymous')
+        if request.user.is_staff :
+            author_type = Post.AuthorType.STAFF
+            author_type_display = 'Admin'
         context = {
             "posts": posts,
             "categories":  categories,
+            "subdomain" : subdomain, 
             "category_selected" : cat,
             "is_authenticated" : is_authenticated,
+            "visibility" : Post.Visibility.PUBLIC , 
+            "author_type" : author_type,
+            "author_type_display" : author_type_display,
+            "is_staff" : is_staff,
             "username" : username,
             "selected" : pk,
             "selected_posts" : selected_posts,
@@ -100,13 +142,20 @@ def blog_add_post(request ):
         raise PermissionDenied("You must be authenticated in to add a post")
         
     author = username
-    category = Category.objects.all()[0]
+    try :
+        category_ = request.POST.get('category')[0]
+        print(f"CATEGORY_ = {category_}")
+        category = Category.objects.get(pk=category_)
+    except ObjectDoesNotExist as e :
+        category = Category.objects.all()[0].pk
     post, _  = Post.objects.get_or_create(title='',body='',category=category)
     print(f"SESSION = {vars(request.session)}")
     print(f"ADD_POST post.pk={post.pk} author={author}")
     print(f"METHOD = {request.method}")
     if request.method == "POST":
-        form = PostForm( request.POST, instance=post)
+        is_staff = request.session.get('is_staff',False)
+        form = PostForm( request.POST, is_staff=is_staff, instance=post)
+        print(f"FOMR BODY = {post.body}")
         print(f"SAVING POST {post.pk}")
         if form.is_valid() :
             form.save()  # S
@@ -116,8 +165,8 @@ def blog_add_post(request ):
             print(f"POST FORM IS NOT VALID ")
     else :
         print(f"POST = {post}")
-        form = PostForm( instance=post)
-    return render(request, "blog/blog_edit_post.html", {'form' : form, 'username' : username  } )
+        form = PostForm( is_staff=is_staff, instance=post)
+    return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  } )
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
@@ -142,6 +191,7 @@ def blog_edit_post(request, pk ):
     print(f"ACTION POST = {action}")
     post = get_object_or_404(Post, pk=pk)
     username = request.session.get('username',None)
+    is_staff = request.session.get('is_staff',False)
     print(f"BODY = {post.body}")
     print(f"post = {post.pk}")
 
@@ -150,8 +200,8 @@ def blog_edit_post(request, pk ):
             post.delete();
             return HttpResponseRedirect(f'/')
 
-        form = PostForm( request.POST, instance=post)
-        if form.is_valid():
+        form = PostForm( request.POST, is_staff=is_staff,instance=post)
+        if form.is_valid() and not post.body == '' :
             form.save()  # S
             form.save()
             print(f"SAVING POST {post.pk}")
@@ -159,8 +209,8 @@ def blog_edit_post(request, pk ):
         else :
             print(f"FORM IS NOT VALID ")
     else :
-        form = PostForm( instance=post)
-    return render(request, "blog/blog_edit_post.html", {'form' : form, 'username' : request.user.username   } )
+        form = PostForm( is_staff=is_staff, instance=post)
+        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff   } )
 
 
 
