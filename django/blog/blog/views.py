@@ -165,7 +165,7 @@ def blog_edit_post(request, pk ):
             print(f"FORM IS NOT VALID ")
     else :
         form = PostForm( instance=post)
-    return render(request, "blog/blog_edit_post.html", {'form' : form, 'username' : request.user.username   } )
+        return render(request, "blog/blog_edit_post.html", {'form' : form, 'username' : request.user.username   } )
 
 
 
