@@ -31,8 +31,11 @@ def blog_index(request, category_selected=1,pk=None):
         request.session['username'] = username
         request.session['is_authenticated'] = not username ==  ''
     else :
-        print(f"GET = {request.GET}")
-        username = request.GET.get('user',request.user.username)
+        if 'username' in request.session :
+            print(f"GET = {request.GET}")
+            username = request.session['username']
+        else :
+            username = request.GET.get('user',request.user.username)
         request.session['username'] = username
         request.session['is_authenticated'] = not username == ''
         logger.error(f"GET = {request.body}")
