@@ -20,6 +20,8 @@ def get_username( request ):
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
 def blog_index(request, category_selected=1,pk=None):
+    if not pk == None :
+        category_selected = Post.objects.get(pk=pk).category.pk;
     logger.error(f"CATEGORY_SELECTED = {category_selected} METHOD={request.method} POST_SELECTED={pk}")
     logger.error(f"SESSION = {request.session}")
     if request.method == 'POST' :
