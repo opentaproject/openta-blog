@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 class Category(models.Model):
     name = models.CharField(max_length=30)
+    restricted = models.BooleanField(default=False)
     class Meta:
         verbose_name_plural = "category"
 

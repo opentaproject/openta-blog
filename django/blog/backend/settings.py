@@ -102,7 +102,7 @@ WSGI_APPLICATION = "backend.wsgi.application"
 #    }
 #}
 
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "deploystatic")
 ATOMIC_REQUESTS = False
 PGHOST = os.environ.get("PGHOST", "localhost")
 PGPASSWORD = os.environ.get("PGPASSWORD")
@@ -158,7 +158,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -335,3 +335,4 @@ PYLTI_CONFIG = {
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 LTI_EXTRA_PARAMETERS = ["custom_canvas_login_id"]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]

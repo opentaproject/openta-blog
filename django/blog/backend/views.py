@@ -10,8 +10,10 @@ def home(request):
 def lti_landing(request) :
     print(f"LANDING {request.POST}")
     username = request.POST.get('custom_canvas_login_id',None)
+    subdomain = request.POST.get('subdomain',None)
     request.session['username'] = username
-    return redirect(f"/?user={username}")
+    request.session['subdomain'] = subdomain
+    return redirect(f"/")
 
 def config_lti(request):
     with open("backend/config.xml", "rb") as f:

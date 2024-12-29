@@ -37,11 +37,12 @@ MathJax = {
 
 
 </head>
+{% load static %}
 <body class="min-h-screen">
 <div class="OpenTA-body">
-<i class="text-green-600 fa-regular fa-circle"></i>
-<a  class="hover:font-bold p-4" href="{% url "blog_index" %}"> OpenTA </a> 
-{% if is_authenticated %}  LOGGED IN AS {{ username }} 
+<img class="inline w-16 h-8 " src="{% static '/images/s.ico' %}" alt="My Image">
+<a  class="hover:font-bold p-4" href="{% url "blog_index" %}"> OpenTA-sidecar </a> 
+{% if is_authenticated %}  {{ username }} @ {{ subdomain }} 
 			   
 {% endif %}
 

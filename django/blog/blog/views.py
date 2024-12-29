@@ -28,8 +28,10 @@ def blog_index(request, category_selected=1,pk=None):
         data = dict( request.POST )
         print(f"DATA = {data}")
         username = data.get('custom_canvas_login_id', '')
+        subdomain = data.get('subdomain', '')
         request.session['username'] = username
         request.session['is_authenticated'] = not username ==  ''
+        request.session['subdomain'] = subdomain
     else :
         if 'username' in request.session :
             print(f"GET = {request.GET}")
@@ -39,6 +41,11 @@ def blog_index(request, category_selected=1,pk=None):
         request.session['username'] = username
         request.session['is_authenticated'] = not username == ''
         logger.error(f"GET = {request.body}")
+    subdomain = request.session.get('subdomain',None )
+    if not Category.objects.filter(name=subdomain) :
+        new_category = Category.objects.create(name=subdomain,restricted=True)
+        new_category.save() 
+    print(f"SUBDOMAIN = {subdomain}")
     logger.error(f"SESSION USERNAME = {request.session.get('username',None)}")
 
     logger.error(f"USER = {username}")
@@ -47,7 +54,9 @@ def blog_index(request, category_selected=1,pk=None):
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected)
         for post in posts :
             print(f"BODY = {type(post.body)} {post.body} ")
-        categories= Category.objects.all()
+        copen = Category.objects.all().filter(restricted=False)
+        closed = Category.objects.all().filter(restricted=True,name=subdomain)
+        categories = ( closed | copen ).order_by ('restricted')
         cat = int( category_selected )
 
 
@@ -67,6 +76,7 @@ def blog_index(request, category_selected=1,pk=None):
         context = {
             "posts": posts,
             "categories":  categories,
+            "subdomain" : subdomain, 
             "category_selected" : cat,
             "is_authenticated" : is_authenticated,
             "username" : username,
