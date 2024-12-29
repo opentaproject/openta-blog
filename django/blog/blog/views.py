@@ -100,7 +100,12 @@ def blog_add_post(request ):
         raise PermissionDenied("You must be authenticated in to add a post")
         
     author = username
-    category = Category.objects.all()[0]
+    try :
+        category_ = request.POST.get('category')[0]
+        print(f"CATEGORY_ = {category_}")
+        category = Category.objects.get(pk=category_)
+    except ObjectDoesNotExist as e :
+        category = Category.objects.all()[0].pk
     post, _  = Post.objects.get_or_create(title='',body='',category=category)
     print(f"SESSION = {vars(request.session)}")
     print(f"ADD_POST post.pk={post.pk} author={author}")
