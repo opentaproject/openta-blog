@@ -24,7 +24,7 @@
 <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if post.author == username or  is_staff %} Delete {% endif %} </a> </span>
 </span>
 
-<span class="{{ post.textclass }}">   {{ username }} {{ post.last_modified }} 
+<span class="{{ post.textclass }}">   {{ post.author }} {{ post.last_modified }} 
 
 	</span>
 </div>
@@ -43,7 +43,7 @@
                   <div class="OpenTA-comment-entry">
                     {% if comment.author != "" %}
                     {% else %}
-		    <p> On {{ comment.created_on.date }} <b>Anon  {{ username }} </b> wrote: </p>
+		    <p> On {{ comment.created_on.date }} <b>{{ comment.author }} </b> wrote: </p>
                     {% endif %}
 
 		    <div class="OpenTA-comment-body"> {{ comment.body | safe }}   </div>

@@ -20,7 +20,7 @@
 
         {% if post.pk == selected %}
           <div class="OpenTA-post-selected-entry">
-            <div class="flex justify-between w-full">
+		  <div class=" {{ post.textclass }} flex justify-between w-full">
 	    <span> 
               <a class="" href="{% url 'blog_index'  post.pk %}">
 		      <button  id="check{{ post.pk }}"  class=""> <i class="{{ post.bgclass }} far fa-square-check lhs"></i></button>
@@ -34,7 +34,7 @@
 
         {% else %}
           <div class="OpenTA-post-entry">
-            <div class="flex justify-between w-full">
+		  <div class=" {{ post.textclass }} flex justify-between w-full">
 	      <span> 
               <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}">
 		      <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class=" {{ post.bgclass }} far fa-square "></i>   </button>
