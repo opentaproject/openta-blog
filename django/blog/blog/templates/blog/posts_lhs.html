@@ -23,7 +23,7 @@
             <div class="flex justify-between w-full">
 	    <span> 
               <a class="" href="{% url 'blog_index'  post.pk %}">
-                <button  id="check{{ post.pk }}"  class=""> <i class="far fa-square-check lhs"></i>    </button>
+		      <button  id="check{{ post.pk }}"  class=""> <i class="{{ post.bgclass }} far fa-square-check lhs"></i></button>
                 <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
 		</span> 
                 <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span>
@@ -37,7 +37,7 @@
             <div class="flex justify-between w-full">
 	      <span> 
               <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}">
-                <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class="far fa-square "></i>   </button>
+		      <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class=" {{ post.bgclass }} far fa-square "></i>   </button>
                 <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
 	    </span> 
                 <span class="OpenTA-post-last-modified"> {{ post.last_modified }}  </span>

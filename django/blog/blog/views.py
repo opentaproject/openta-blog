@@ -91,6 +91,8 @@ def blog_index(request, category_selected=1,pk=None):
             "categories":  categories,
             "subdomain" : subdomain, 
             "category_selected" : cat,
+            #"visibility" : Post.Visibility.PUBLIC,
+            #"author_type" : Post.AuthorType.STUDENT,
             "is_authenticated" : is_authenticated,
             "is_staff" : is_staff,
             "username" : username,

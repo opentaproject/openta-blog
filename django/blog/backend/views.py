@@ -13,6 +13,7 @@ def lti_landing(request) :
     subdomain = request.POST.get('subdomain',None)
     request.session['username'] = username
     request.session['subdomain'] = subdomain
+    request.session['roles'] = request.POST.get('lti_roles','Anonymous')
     return redirect(f"/")
 
 def config_lti(request):

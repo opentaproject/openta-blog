@@ -38,6 +38,15 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+    def bgclass(self ):
+        colors = ['','bg-gray-400','bg-blue-400','bg-red-400']
+        return colors[ self.author_type ]
+
+    def textclass(self ):
+        colors = ['text-green-800','text-gray-600','text-blue-600','text-red-600']
+        return colors[ self.author_type ]
+
+
 class Comment(models.Model):
     author = models.CharField(max_length=60,default='',blank=True)
     body =   CKEditor5Field('Text', config_name='extends')
