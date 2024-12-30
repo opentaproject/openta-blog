@@ -18,6 +18,16 @@ class Category(models.Model):
 from django.urls import reverse_lazy
 
 class Post(models.Model):
+    class Visibility( models.IntegerChoices ):
+        PRIVATE = 1
+        PUBLIC = 2 
+    class AuthorType( models.IntegerChoices ):
+        ANONYMOUS = 0
+        STUDENT = 1
+        TEACHER = 2
+        STAFF = 3
+    visibility = models.IntegerField(choices=Visibility , default=2 )
+    author_type = models.IntegerField(choices=AuthorType, default=0 )
     author = models.CharField(max_length=60)
     title = models.CharField(max_length=255)
     body = CKEditor5Field('Text', config_name='extends')
