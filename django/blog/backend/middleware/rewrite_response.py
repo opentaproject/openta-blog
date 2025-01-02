@@ -16,7 +16,8 @@ class ResponseRewriteMiddleware(MiddlewareMixin):
             'OpenTA-navigation-bar' : 'flex p-2 border-b bg-transparent bg-[#cccccc]', \
             'OpenTA-post-selected-entry' : 'border border-gray-300 p-2 rounded-lg bg-yellow-100  shadow-md',\
             'OpenTA-post-entry' :          'border bg-white    border-gray-300 p-2 rounded-lg shadow-md',\
-            'OpenTA-post-body' : 'border  border-gray-300 p-2 rounded-lg  bg-yellow-100 shadow-md',\
+            #'OpenTA-post-body' : 'border  border-gray-300 p-2 rounded-lg  bg-yellow-100 shadow-md',\
+            'OpenTA-post-body' : 'bg-white' , \
             'OpenTA-post-last-modified' : 'font-light text-xs ',\
             'OpenTA-post-title' : 'font-semibold',\
             'OpenTA-show-button' : 'hover:bg-blue-400 bg-blue-200',\
