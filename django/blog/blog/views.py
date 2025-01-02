@@ -1,4 +1,5 @@
 # blogs/views.py
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from blog.models import Post, Comment, Category
@@ -148,7 +149,8 @@ def blog_add_post(request ):
     print(f"ADD_POST post.pk={post.pk} author={author}")
     print(f"METHOD = {request.method}")
     if request.method == "POST":
-        form = PostForm( request.POST, instance=post)
+        is_staff = request.session.get('is_staff',False)
+        form = PostForm( request.POST, is_staff=is_staff, instance=post)
         print(f"FOMR BODY = {post.body}")
         print(f"SAVING POST {post.pk}")
         if form.is_valid() :
@@ -159,8 +161,8 @@ def blog_add_post(request ):
             print(f"POST FORM IS NOT VALID ")
     else :
         print(f"POST = {post}")
-        form = PostForm( instance=post)
-    return render(request, "blog/blog_edit_post.html", {'form' : form, 'username' : username  } )
+        form = PostForm( is_staff=is_staff, instance=post)
+    return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  } )
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
@@ -185,6 +187,7 @@ def blog_edit_post(request, pk ):
     print(f"ACTION POST = {action}")
     post = get_object_or_404(Post, pk=pk)
     username = request.session.get('username',None)
+    is_staff = request.session.get('is_staff',False)
     print(f"BODY = {post.body}")
     print(f"post = {post.pk}")
 
@@ -193,7 +196,7 @@ def blog_edit_post(request, pk ):
             post.delete();
             return HttpResponseRedirect(f'/')
 
-        form = PostForm( request.POST, instance=post)
+        form = PostForm( request.POST, is_staff=is_staff,instance=post)
         if form.is_valid() and not post.body == '' :
             form.save()  # S
             form.save()
@@ -202,8 +205,8 @@ def blog_edit_post(request, pk ):
         else :
             print(f"FORM IS NOT VALID ")
     else :
-        form = PostForm( instance=post)
-        return render(request, "blog/blog_edit_post.html", {'form' : form, 'username' : request.user.username   } )
+        form = PostForm( is_staff=is_staff, instance=post)
+        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff   } )
 
 
 
