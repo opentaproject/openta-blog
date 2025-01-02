@@ -7,6 +7,8 @@
     <span class="flex">
     <button class="p-1 text-white bg-blue-400 font-medium rounded me-2 " type="submit">New post: </button>
     <input class="px-2 grow border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400" type="text" id="title" name="title" placeholder="title ..." required> 
+    <input type="hidden" id="visibility" name="visibility" value="{{ visibility }}">
+    <input type="hidden" id="author_type" name="author_type" value="{{ author_type}}">
     <input type="hidden" id="author" name="author" value="{{ username }}">
     <input type="hidden" id="category" name="category" value="{{ category_selected }}">
     </span>

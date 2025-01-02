@@ -22,7 +22,7 @@ class CommentForm(forms.ModelForm):
           }
 
 class PostForm(forms.ModelForm):
-      """Form for comments to the article."""
+      """Form for posts."""
 
       def __init__(self, *args, **kwargs):
           super().__init__(*args, **kwargs)

@@ -61,7 +61,9 @@ def blog_index(request, category_selected=1,pk=None):
         comments  = []
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected)
         for post in posts :
-            print(f"BODY = {type(post.body)} {post.body} ")
+            if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
+                post.delete()
+        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected)
         if request.session['is_staff'] :
             categories = Category.objects.all()
         else :
@@ -86,14 +88,20 @@ def blog_index(request, category_selected=1,pk=None):
 
         for post in selected_posts :
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
+
+        author_type = Post.AuthorType.ANONYMOUS
+        if is_authenticated :
+            author_type = Post.AuthorType.STUDENT
+        if is_staff :
+            author_type = Post.AuthorType.STAFF 
         context = {
             "posts": posts,
             "categories":  categories,
             "subdomain" : subdomain, 
             "category_selected" : cat,
-            #"visibility" : Post.Visibility.PUBLIC,
-            #"author_type" : Post.AuthorType.STUDENT,
             "is_authenticated" : is_authenticated,
+            "visibility" : Post.Visibility.PUBLIC , 
+            "author_type" : author_type,
             "is_staff" : is_staff,
             "username" : username,
             "selected" : pk,
@@ -141,6 +149,7 @@ def blog_add_post(request ):
     print(f"METHOD = {request.method}")
     if request.method == "POST":
         form = PostForm( request.POST, instance=post)
+        print(f"FOMR BODY = {post.body}")
         print(f"SAVING POST {post.pk}")
         if form.is_valid() :
             form.save()  # S
@@ -185,7 +194,7 @@ def blog_edit_post(request, pk ):
             return HttpResponseRedirect(f'/')
 
         form = PostForm( request.POST, instance=post)
-        if form.is_valid():
+        if form.is_valid() and not post.body == '' :
             form.save()  # S
             form.save()
             print(f"SAVING POST {post.pk}")
