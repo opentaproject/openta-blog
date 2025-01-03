@@ -18,12 +18,12 @@
 
     {% for post in posts %}
       <div>
-	      <span> {% if post.viewed %}  Viewed  {% else %}  Not Viewed {% endif %} </span> 
 
         {% if post.pk == selected %}
           <div class="OpenTA-post-selected-entry">
 		  <div class=" {{ post.textclass }} flex justify-between w-full">
 	    <span> 
+{% if not post.viewed %}     <i class="fa-solid fa-circle "></i> {% endif %} 
 		    <a class="" href="{% url 'blog_index'  post.pk %}"> 
 		      <button  id="check{{ post.pk }}"  class=""> <i class="{{ post.bgclass }} far fa-square-check lhs"></i></button>
                 <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
@@ -38,7 +38,9 @@
           <div class="OpenTA-post-entry">
 		  <div class=" {{ post.textclass }} flex justify-between w-full">
 	      <span> 
+{% if not post.viewed %}     <i class="fa-solid fa-circle "></i> {% endif %} 
               <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}">
+
 		      <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class=" {{ post.bgclass }} far fa-square "></i>   </button>
                 <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
 	    </span> 
