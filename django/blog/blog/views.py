@@ -201,7 +201,7 @@ def blog_leave_comment (request, pk):
 
     post = Post.objects.get(pk=pk)
     post_pk = pk
-    username = request.user.username
+    username = get_username(request) 
     author = username
     body = ''
     comment , _ = Comment.objects.get_or_create(author=author,post=post,body=body)
@@ -215,7 +215,7 @@ def blog_leave_comment (request, pk):
             pass
     else :
         form = CommentForm( instance=comment)
-    return render(request, "blog/blog_edit_comment.html", {'form' : form, 'username' : request.user.username   } )
+    return render(request, "blog/blog_edit_comment.html", {'form' : form, 'username' : username   } )
 
 
 
@@ -224,7 +224,7 @@ def blog_leave_comment (request, pk):
 @xframe_options_exempt  # N
 def blog_edit_comment(request, pk ):
     comment = get_object_or_404(Comment, pk=pk)
-    username = request.user.username
+    username = get_username(request)
     action = request.POST.get('action','edit');
     post = comment.post
     if comment.body in [ '<p>&nbsp;</p>' ,'']  :
@@ -245,7 +245,7 @@ def blog_edit_comment(request, pk ):
             pass
     else :
         form = CommentForm( instance=comment)
-    return render(request, "blog/blog_edit_comment.html", {'form' : form, 'username' : request.user.username   } )
+    return render(request, "blog/blog_edit_comment.html", {'form' : form, 'username' : username   } )
 
 
 @api_view(["GET", "POST"])

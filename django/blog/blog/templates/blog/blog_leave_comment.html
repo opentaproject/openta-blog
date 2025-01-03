@@ -19,7 +19,7 @@
      <div id={{ post.pk }} class="OpenTA-comment-form bg-blue-100">
     <form method="post">
         {% csrf_token %}
-        <div> AUTHOR={{ author }}    </div>
+        <div> AUTHOR={{ username }}    </div>
         <div> {{ form.body | safe }} </div>
         <button type="submit" class="OpenTA-submit-button">Submit</button>
     </form>
