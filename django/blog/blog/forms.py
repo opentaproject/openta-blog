@@ -11,6 +11,9 @@ class CommentForm(forms.ModelForm):
           super().__init__(*args, **kwargs)
           self.fields["body"].required = False
           self.fields["author"].required = False
+          self.fields['post'].widget = forms.HiddenInput();
+          self.fields['author'].widget = forms.HiddenInput();
+
 
       class Meta:
           model = Comment
