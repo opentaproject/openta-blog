@@ -53,11 +53,11 @@ class Post(models.Model):
         return v
 
     def bgclass(self ):
-        colors = ['','bg-gray-400','bg-blue-400','bg-red-400']
+        colors = ['bg-green-200','bg-gray-400','bg-blue-400','bg-bule-400']
         return colors[ self.author_type ]
 
     def textclass(self ):
-        colors = ['text-green-800','text-gray-600','text-blue-600','text-red-600']
+        colors = ['text-green-800','text-gray-600','text-blue-600','text-blue-600']
         return colors[ self.author_type ]
 
 

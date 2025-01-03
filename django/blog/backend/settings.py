@@ -73,7 +73,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "backend.urls"
 
-print(f"BASE_DIR={BASE_DIR}/blog/templates/")
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -325,11 +324,13 @@ LTI_TOOL_CONFIGURATION = {
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
+LTI_KEY =  os.environ.get('LTI_KEY', 'lti-key')
+LTI_SECRET = os.environ.get('LTI_SECRET', 'lti-secret')
 
 PYLTI_CONFIG = {
     'consumers': {
-        '123456789': {
-            'secret': '123456789'
+        LTI_KEY : {
+            'secret': LTI_SECRET
         }
     }
 }

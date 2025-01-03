@@ -28,4 +28,3 @@ urlpatterns += [
     path("ckeditor5/", include('django_ckeditor_5.urls')),
 ]
 
-print(f"URLPATTERNS = {urlpatterns}")

@@ -44,9 +44,7 @@ def create_database_if_not_exists(db_name, host,user , password , superuser, sup
 
 class CustomStorage(FileSystemStorage):
     location = os.path.join(settings.MEDIA_ROOT, "django_ckeditor_5")
-    print(f"LOCATION1 = {location}")
     SUBDOMAIN = os.environ.get('SUBDOMAIN','blog')
     location = f'/subdomain-data/{SUBDOMAIN}/media/django_ckeditor_5'
-    print(f"LOCATION2 = {location}")
     base_url = urljoin(settings.MEDIA_URL, "django_ckeditor_5/")
     base_url = "/media/django_ckeditor_5/"

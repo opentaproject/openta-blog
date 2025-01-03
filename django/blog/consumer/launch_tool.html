@@ -27,18 +27,18 @@
 	    subdomain :  'ffm516-2024',
             resource_link_id: 'resourceLinkId',
             // OAuth 1.0a Required Parameters
-	    custom_canvas_login_id: 'pete',
-	    lis_person_name_contact_email_primary: 'pete@chalmers.se',
+	    custom_canvas_login_id: 'ulf',
+	    lis_person_name_contact_email_primary: 'ulf@chalmers.se',
 	    // lti_roles: 'Instructor,ContentDeveloper,TeachingAssistant',
 	    lti_roles: 'Teacher',
-            oauth_consumer_key: '123456789',
+            oauth_consumer_key: '889d570f472',
             oauth_nonce: btoa(timestamp),
             oauth_signature_method: 'HMAC-SHA1',
             oauth_timestamp: timestamp,
             oauth_version: '1.0'
         };
 
-	var secret = '123456789'
+	var secret = 'b317476faed2e879'
         var signature = oauthSignature.generate(method, action, params, secret); // THIS IS FROM THE oauth-signature cdn package
         params.oauth_signature = signature;
 

@@ -29,7 +29,7 @@
 		      <button  id="check{{ post.pk }}"  class=""> <i class="{{ post.bgclass }} far fa-square-check lhs"></i></button>
                 <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
 		</span> 
-                <span class="OpenTA-post-last-modified"> {{ post.last_modified | naturaltime }} </span>
+		<span class="OpenTA-post-last-modified"> {{ post.author }} {{ post.last_modified | naturaltime }} </span>
               </a>
 	    </div>
               <div class="text-xs" > {{ post.body | striptags | truncatechars:200   | safe }} </div>
@@ -45,7 +45,7 @@
 		      <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class=" {{ post.bgclass }} far fa-square "></i>   </button>
                 <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
 	    </span> 
-                <span class="OpenTA-post-last-modified"> {{ post.last_modified | naturaltime }} </span>
+	    <span class="OpenTA-post-last-modified"> {{ post.author }} {{ post.last_modified | naturaltime }} </span>
               </a>
 	    </div> 
               <div class="text-xs"> {{ post.body | truncatechars:200 | safe }} </div>
