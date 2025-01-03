@@ -21,13 +21,15 @@ def get_username( request ):
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
-def blog_index(request, category_selected=1,pk=None):
+def blog_index(request, category_selected=None,pk=None):
     request.session['is_staff'] = False
     if request.user and request.user.username  :
         username = request.user.username
         request.session['username'] = username
         request.session['is_staff'] = request.user.is_staff
         request.session['is_authenticated'] = True
+    if category_selected == None :
+        category_selected = Category.objects.all()[0].pk
     if not pk == None :
         category_selected = Post.objects.get(pk=pk).category.pk;
     #for key in request.session.keys() :
