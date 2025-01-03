@@ -19,12 +19,13 @@
     {% for post in posts %}
       <div>
 
+	      {{ post.pk }}  {{ post.viewed }} 
 
         {% if post.pk == selected %}
           <div class="OpenTA-post-selected-entry">
 		  <div class=" {{ post.textclass }} flex justify-between w-full">
 	    <span> 
-              <a class="" href="{% url 'blog_index'  post.pk %}">
+		    <a class="" href="{% url 'blog_index'  post.pk %}"> 
 		      <button  id="check{{ post.pk }}"  class=""> <i class="{{ post.bgclass }} far fa-square-check lhs"></i></button>
                 <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
 		</span> 
@@ -36,6 +37,7 @@
 
         {% else %}
           <div class="OpenTA-post-entry">
+ 	{{ post.viewed }} 
 		  <div class=" {{ post.textclass }} flex justify-between w-full">
 	      <span> 
               <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}">

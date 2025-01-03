@@ -1,4 +1,5 @@
 # blogs/views.py
+from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
@@ -60,11 +61,11 @@ def blog_index(request, category_selected=1,pk=None):
     logger.error(f"USER = {username}")
     try :
         comments  = []
-        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected)
+        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
         for post in posts :
             if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
                 post.delete()
-        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected)
+        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
         if request.session['is_staff'] :
             categories = Category.objects.all()
         else :
