@@ -44,6 +44,7 @@ CSRF_TRUSTED_ORIGINS = [
 INSTALLED_APPS = [
     'grappelli',
     "django.contrib.admin",
+    "django.contrib.humanize",
     'filebrowser',
     'lti_provider',
     "django_ckeditor_5",

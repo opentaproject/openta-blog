@@ -1,4 +1,5 @@
-  {% block posts %}
+{% load humanize %} 
+{% block posts %}
     <div class="OpenTA-post-list bg-blue-800">
       {% for post in selected_posts %}
 
@@ -25,7 +26,7 @@
 <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if post.author == username or  is_staff %} Delete {% endif %} </a> </span>
 </span>
 
-<span class="{{ post.textclass }}">   {{ post.author }} {{ post.last_modified }} 
+<span class="{{ post.textclass }}">   {{ post.author }} {{ post.last_modified  | naturaltime }} 
 
 	</span>
 </div>

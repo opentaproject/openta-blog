@@ -93,12 +93,11 @@ def blog_index(request, category_selected=1,pk=None):
         for post in selected_posts :
             visit = Visit.objects.get_or_create(visitor=username,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
-
-        author_type = Post.AuthorType.ANONYMOUS
-        if is_authenticated :
-            author_type = Post.AuthorType.STUDENT
-        if is_staff :
-            author_type = Post.AuthorType.STAFF 
+        author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
+        author_type_display = request.session.get('author_type_display','Anonymous')
+        if request.user.is_staff :
+            author_type = Post.AuthorType.STAFF
+            author_type_display = 'Admin'
         context = {
             "posts": posts,
             "categories":  categories,
@@ -107,6 +106,7 @@ def blog_index(request, category_selected=1,pk=None):
             "is_authenticated" : is_authenticated,
             "visibility" : Post.Visibility.PUBLIC , 
             "author_type" : author_type,
+            "author_type_display" : author_type_display,
             "is_staff" : is_staff,
             "username" : username,
             "selected" : pk,
