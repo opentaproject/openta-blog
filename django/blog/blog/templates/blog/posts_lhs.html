@@ -18,8 +18,7 @@
 
     {% for post in posts %}
       <div>
-
-	      {{ post.pk }}  {{ post.viewed }} 
+	      <span> {% if post.viewed %}  Viewed  {% else %}  Not Viewed {% endif %} </span> 
 
         {% if post.pk == selected %}
           <div class="OpenTA-post-selected-entry">
@@ -37,7 +36,6 @@
 
         {% else %}
           <div class="OpenTA-post-entry">
- 	{{ post.viewed }} 
 		  <div class=" {{ post.textclass }} flex justify-between w-full">
 	      <span> 
               <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}">

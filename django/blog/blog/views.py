@@ -1,9 +1,9 @@
 # blogs/views.py
-from django.db.models import Count
+from django.db.models import Count, Subquery, Sum, OuterRef
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
-from blog.models import Post, Comment, Category
+from blog.models import Post, Comment, Category,Visit
 from django.db import ProgrammingError
 from blog.forms import CommentForm, PostForm
 from rest_framework.decorators import api_view
@@ -65,7 +65,9 @@ def blog_index(request, category_selected=1,pk=None):
         for post in posts :
             if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
                 post.delete()
-        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
+        post_subquery = Post.objects.filter(id=OuterRef('id'),author=username).annotate(viewed=Count('author')).values('viewed')
+        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=username).annotate(viewed=Count('visitor')).values('viewed')
+        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
         if request.session['is_staff'] :
             categories = Category.objects.all()
         else :
@@ -89,6 +91,7 @@ def blog_index(request, category_selected=1,pk=None):
             selected_posts = []
 
         for post in selected_posts :
+            visit = Visit.objects.get_or_create(visitor=username,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
 
         author_type = Post.AuthorType.ANONYMOUS
