@@ -22,6 +22,7 @@ def get_username( request ):
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
 def blog_index(request, category_selected=None,pk=None):
+    pksave = pk
     print(f"BLOG_INDEX pk= {pk}")
     request.session['is_staff'] = False
     if request.user and request.user.username  :
@@ -118,7 +119,12 @@ def blog_index(request, category_selected=None,pk=None):
             }
         logger.error(f"ERROR = {type(e).__name__} {str(e)}")
     request.session['last_post_pk'] = pk
-    return render(request, "blog/sidebyside.html", context)
+    if pksave == None :
+        return render(request, "blog/leftside.html", context)
+    else :
+        return render(request, "blog/rightside.html", context)
+
+    #return render(request, "blog/sidebyside.html", context)
 
 def blog_category(request, category):
     posts = Post.objects.filter(
