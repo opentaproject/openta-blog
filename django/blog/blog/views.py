@@ -21,7 +21,11 @@ def get_username( request ):
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
-def blog_index(request, category_selected=None,pk=None):
+def blog_index(request, *args, **kwargs ) :
+    print(f"ARGS = {args}")
+    print(f"KWARGS = {kwargs}")
+    pk = kwargs.get('pk',None)
+    category_selected = kwargs.get('category_selected',None)
     pksave = pk
     print(f"BLOG_INDEX pk= {pk}")
     request.session['is_staff'] = False
