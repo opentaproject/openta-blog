@@ -8,8 +8,8 @@
     http://www.imsglobal.org/xsd/imsbasiclti_v1p0 http://www.imsglobal.org/xsd/lti/ltiv1p0/imsbasiclti_v1p0.xsd
     http://www.imsglobal.org/xsd/imslticm_v1p0 http://www.imsglobal.org/xsd/lti/ltiv1p0/imslticm_v1p0.xsd
     http://www.imsglobal.org/xsd/imslticp_v1p0 http://www.imsglobal.org/xsd/lti/ltiv1p0/imslticp_v1p0.xsd">
-    <blti:title>OpenTA-blog</blti:title>
-    <blti:description>OpenTA-blog</blti:description>
+    <blti:title>OpenTA-sidecar</blti:title>
+    <blti:description>OpenTA-sidecar</blti:description>
     <blti:icon></blti:icon>
     <blti:launch_url>https://www.openta.se</blti:launch_url>
     <blti:custom>
@@ -28,19 +28,19 @@
       <lticm:property name="domain">www.openta.se</lticm:property>
       <lticm:options name="course_navigation">
         <lticm:property name="url">https://www.openta.se</lticm:property>
-        <lticm:property name="text">OpenTA-blog</lticm:property>
+        <lticm:property name="text">OpenTA-sidecar</lticm:property>
         <lticm:property name="visibility">public</lticm:property>
         <lticm:property name="default">enabled</lticm:property>
         <lticm:property name="enabled">true</lticm:property>
       </lticm:options>
       <lticm:options name="account_navigation">
         <lticm:property name="url">https://www.openta.se</lticm:property>
-        <lticm:property name="text">OpenTA-blog</lticm:property>
+        <lticm:property name="text">OpenTA-sidecar</lticm:property>
         <lticm:property name="enabled">true</lticm:property>
       </lticm:options>
       <lticm:options name="user_navigation">
         <lticm:property name="url">https://www.openta.se</lticm:property>
-        <lticm:property name="text">OpenTA-blog</lticm:property>
+        <lticm:property name="text">OpenTA-sidecar</lticm:property>
         <lticm:property name="enabled">true</lticm:property>
       </lticm:options>
     </blti:extensions>
