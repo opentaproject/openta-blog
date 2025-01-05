@@ -14,17 +14,17 @@ def lti_landing(request) :
     subdomain = request.POST.get('subdomain',None)
     request.session['username'] = username
     request.session['subdomain'] = subdomain
-    request.session['roles'] = request.POST.get('lti_roles','Anonymous')
+    request.session['roles'] = request.POST.get('roles',['Anonymous'])
     roles  =  request.POST.get('lti_roles','Anonymous')
     t = Post.AuthorType.ANONYMOUS
     td = 'Anonymous'
     if 'Student' in roles  or 'Learner' in roles :
         t = Post.AuthorType.STUDENT
         td = 'Student'
-    elif 'Teacher' in roles or 'Examiner' in roles or 'ContentDeveloper' in roles or 'TeachingAssistant' in roles  or 'Instructor' in roles:
+    if 'Teacher' in roles or 'Examiner' in roles or 'ContentDeveloper' in roles or 'TeachingAssistant' in roles  or 'Instructor' in roles:
         t = Post.AuthorType.TEACHER
         td = 'Teacher'
-    elif request.user.is_staff :
+    if request.user.is_staff :
         t = Post.AuthorType.STAFF
         td = 'Admin'
     request.session['author_type'] = t

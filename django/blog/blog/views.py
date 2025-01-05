@@ -18,6 +18,23 @@ logger = logging.getLogger(__name__)
 def get_username( request ):
     return request.session.get('username',request.user.username)
 
+def get_author_type( request ):
+    roles  =  request.POST.get('roles',['Anonymous'])
+    t = Post.AuthorType.ANONYMOUS
+    td = 'Anonymous'
+    if 'Student' in roles  or 'Learner' in roles :
+        t = Post.AuthorType.STUDENT
+        td = 'Student'
+    if 'Teacher' in roles or 'Examiner' in roles or 'ContentDeveloper' in roles or 'TeachingAssistant' in roles  or 'Instructor' in roles:
+        t = Post.AuthorType.TEACHER
+        td = 'Teacher'
+    if request.user.is_staff :
+        t = Post.AuthorType.STAFF
+        td = 'Admin'
+    request.session['author_type'] = td;
+    request.session['author_type_display'] = td
+    return td
+
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
@@ -38,6 +55,7 @@ def blog_index(request, *args, **kwargs ) :
     #for key in request.session.keys() :
     #    print(f" {key} {request.session[key]}")
     if request.method == 'POST' :
+
         data = dict( request.POST )
         logger.error(f"DATA = {data}")
         print(f"DATA = {data}")
