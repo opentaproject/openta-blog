@@ -1,0 +1,20 @@
+<!-- blog/templates/blog/index.html -->
+{% extends "base.html" %}
+
+
+{% block page_content %}
+
+  <div class="bg-gray-300">
+    <table class="min-w-full border-collapse border border-blue-800"> <tr>
+      <td class="w-1/1 align-top">
+
+      {% block posts %}
+      {% include "blog/posts_lhs.html" %}
+      {% endblock posts %}
+
+      </td>   </tr> </table> 
+  </div>
+
+
+{% endblock page_content %}
+
