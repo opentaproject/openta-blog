@@ -55,10 +55,8 @@ def blog_index(request, *args, **kwargs ) :
     #for key in request.session.keys() :
     #    print(f" {key} {request.session[key]}")
     if request.method == 'POST' :
-
+        author_type = get_author_type( request )
         data = dict( request.POST )
-        logger.error(f"DATA = {data}")
-        print(f"DATA = {data}")
         username = data.get('custom_canvas_login_id', [''])[0]
         subdomain = data.get('resource_link_title', [''])[0]
         request.session['username'] = username
