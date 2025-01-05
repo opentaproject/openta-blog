@@ -12,7 +12,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('grappelli/', include('grappelli.urls')),
     path('config_lti',views.config_lti,name='config_lti'),
-    #url(r'^$', views.home,name='home'),
     path('', include('users.urls')),
     path("", include("blog.urls")),
     path('lti_landing/', views.lti_landing, name='lti_landing'),
