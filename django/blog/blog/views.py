@@ -24,6 +24,8 @@ def get_username( request ):
 def blog_index(request, *args, **kwargs ) :
     print(f"ARGS = {args}")
     print(f"KWARGS = {kwargs}")
+    print(f"full_url={request.get_full_path()}")
+    print(f"METHOD = {request.method}")
     pk = kwargs.get('pk',None)
     category_selected = kwargs.get('category_selected',None)
     pksave = pk
@@ -81,8 +83,8 @@ def blog_index(request, *args, **kwargs ) :
 
         is_authenticated = request.session.get('is_authenticated',False)
         is_staff = request.session.get('is_staff',False)
-        if pk == None :
-            pk = request.session.get('last_post_pk', None )
+        #if pk == None :
+        #    pk = request.session.get('last_post_pk', None )
         if posts :
             if pk == None :
                 selected_posts = []
@@ -123,12 +125,12 @@ def blog_index(request, *args, **kwargs ) :
             }
         logger.error(f"ERROR = {type(e).__name__} {str(e)}")
     request.session['last_post_pk'] = pk
-    if pksave == None :
-        return render(request, "blog/leftside.html", context)
-    else :
-        return render(request, "blog/rightside.html", context)
+    #if pksave == None :
+    #    return render(request, "blog/leftside.html", context)
+    #else :
+    #    return render(request, "blog/rightside.html", context)
 
-    #return render(request, "blog/sidebyside.html", context)
+    return render(request, "blog/sidebyside.html", context)
 
 def blog_category(request, category):
     posts = Post.objects.filter(
