@@ -1,5 +1,5 @@
 # blogs/views.py
-from django.db.models import Count, Subquery, Sum, OuterRef
+from django.db.models import Count, Subquery, Sum, OuterRef, F
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
@@ -22,14 +22,9 @@ def get_username( request ):
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
 def blog_index(request, *args, **kwargs ) :
-    print(f"ARGS = {args}")
-    print(f"KWARGS = {kwargs}")
-    print(f"full_url={request.get_full_path()}")
-    print(f"METHOD = {request.method}")
     pk = kwargs.get('pk',None)
-    category_selected = kwargs.get('category_selected',None)
+    category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
     pksave = pk
-    print(f"BLOG_INDEX pk= {pk}")
     request.session['is_staff'] = False
     if request.user and request.user.username  :
         username = request.user.username
@@ -49,6 +44,7 @@ def blog_index(request, *args, **kwargs ) :
         request.session['username'] = username
         request.session['is_authenticated'] = not username ==  ''
         request.session['subdomain'] = subdomain
+        request.session['category_selected'] =  category_selected
     else :
         if 'username' in request.session :
             username = request.session['username']
@@ -56,6 +52,7 @@ def blog_index(request, *args, **kwargs ) :
             username = request.GET.get('user',request.user.username)
         request.session['username'] = username
         request.session['is_authenticated'] = not username == ''
+        request.session['category_selected'] =  category_selected
     subdomain = request.session.get('subdomain',None )
     if subdomain and not Category.objects.filter(name=subdomain) :
         new_category = Category.objects.create(name=subdomain,restricted=True)
@@ -69,6 +66,7 @@ def blog_index(request, *args, **kwargs ) :
                 post.delete()
         post_subquery = Post.objects.filter(id=OuterRef('id'),author=username).annotate(viewed=Count('author')).values('viewed')
         visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=username).annotate(viewed=Count('visitor')).values('viewed')
+        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=username,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
         if request.session['is_staff'] :
             categories = Category.objects.all()
@@ -95,7 +93,7 @@ def blog_index(request, *args, **kwargs ) :
             selected_posts = []
 
         for post in selected_posts :
-            visit = Visit.objects.get_or_create(visitor=username,post=post)
+            visit = Visit.objects.update_or_create(visitor=username,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
         author_type_display = request.session.get('author_type_display','Anonymous')

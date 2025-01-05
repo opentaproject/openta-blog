@@ -54,7 +54,8 @@ class PostForm(forms.ModelForm):
 
       class Meta:
           model = Post
-          fields = ['author_type','visibility','author','title','author','body','category']
+          fields = ['author_type','visibility','author','title','author','body','category' ]
+          #fields = '__all__'
           widgets = {
               "body": CKEditor5Widget( attrs={"class": "django_ckeditor_5"}, config_name="extends"),
               #"category": forms.HiddenInput(),

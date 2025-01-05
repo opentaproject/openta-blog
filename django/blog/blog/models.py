@@ -20,6 +20,7 @@ from django.urls import reverse_lazy
 class Visit(models.Model) :
     visitor = models.CharField(max_length=60)
     post = models.ForeignKey("Post", on_delete=models.CASCADE)
+    date =  models.DateTimeField(auto_now=True)
 
 
 class Post(models.Model):
@@ -49,7 +50,8 @@ class Post(models.Model):
         return v
 
     def visits(self,username) :
-        v = Visit.objects.filter(visitor=username,post=self).count()
+        v = Visit.objects.filter(visitor=username,post=self, post__last_modified__lt=F('date') ).count()
+        print(f"V = {v}")
         return v
 
     def bgclass(self ):
@@ -69,6 +71,12 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.author} on '{self.post}'"
+
+    def save( self, *args, **kwargs ):
+        post = self.post
+        post.save() 
+        super().save(*args,**kwargs)
+
 
 
 class CommentUpdateView(UpdateView):
