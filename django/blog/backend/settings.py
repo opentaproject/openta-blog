@@ -33,8 +33,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
-    'https://blog.openta.se',
+    'https://www.openta.se',
     'http://localhost:8000',
+    'https://instructure.com',
+    'https://*',
+    'http://*',
 ]
 
 

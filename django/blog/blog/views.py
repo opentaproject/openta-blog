@@ -124,7 +124,7 @@ def get_author_type( request ):
     return td
 
 def load_session_variables( request , *args, **kwargs ):
-    logger.error(f"LOAD SESSION_VARIABLES")
+    logger.error(f"LOAD SESSION_VARIABLES {args} {kwargs} ")
     if request.data :
         validate_oauth_signature('POST', "https://www.openta.se", request.data ,settings.LTI_SECRET )
         t = str( int(  time.time() )).encode() ;
@@ -201,6 +201,7 @@ def load_session_variables( request , *args, **kwargs ):
     if request.method == 'POST' :
         author_type = get_author_type( request )
         data = dict( request.POST )
+        print(f"DATA = {data}")
         username = data.get('custom_canvas_login_id', [''])[0]
         subdomain = data.get('resource_link_title', [''])[0]
         request.session['username'] = username
@@ -217,6 +218,8 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['category_selected'] =  category_selected
     for v in request.session.keys():
         logger.error(f"{v} = {request.session[v]}")
+    category_selected = request.session['category_selected']
+    author_type = request.session['author_type']
     logger.error(f"ARGS = {args}")
     logger.error(f"KWARGS = {kwargs}")
     logger.error(f"DATA = {request.data}")
