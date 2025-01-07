@@ -35,14 +35,14 @@ def get_author_type( request ):
     request.session['author_type_display'] = td
     return td
 
-
-@api_view(["GET", "POST"])
-@xframe_options_exempt  # N
-def blog_index(request, *args, **kwargs ) :
+def load_session_variables( request , *args, **kwargs ):
+    #if request.data :
+    #    from oauthlib.oauth1 import RequestValidator
+    #print(f"ARGS = {args}")
+    #print(f"ARG0 = {args[1]}")
     pk = kwargs.get('pk',None)
-    category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
-    pksave = pk
     request.session['is_staff'] = False
+    #category_selected = args[1].get('category_selected',request.session.get('category_selected',None ) )
     if request.user and request.user.username  :
         username = request.user.username
         request.session['username'] = username
@@ -71,6 +71,60 @@ def blog_index(request, *args, **kwargs ) :
         request.session['username'] = username
         request.session['is_authenticated'] = not username == ''
         request.session['category_selected'] =  category_selected
+    for v in request.session.keys():
+        print(f"{v} = {request.session[v]}")
+    print(f"ARGS = {args}")
+    print(f"KWARGS = {kwargs}")
+    print(f"DATA = {request.data}")
+    print(f"CATEGORY_SELECTED = {category_selected}")
+    return True
+
+
+
+
+
+@api_view(["GET", "POST"])
+@xframe_options_exempt  # N
+def blog_index(request, *args, **kwargs ) :
+    print(f"BLOG_INDEX METHOD = {request.method}")
+    pk = kwargs.get('pk',None)
+    category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
+    print(f"PK = {pk}")
+    load_session_variables( request, args, kwargs );
+    #category_selected = request.session['category_selected']
+    username = request.session['username']
+    #category_selected = request.session['category_selected']
+    print(f"CATEGORY_SELECTED = {category_selected}")
+    subdomain = request.session['subdomain']
+    #request.session['is_staff'] = False
+    #if request.user and request.user.username  :
+    #    username = request.user.username
+    #    request.session['username'] = username
+    #    request.session['is_staff'] = request.user.is_staff
+    #    request.session['is_authenticated'] = True
+    #if category_selected == None :
+    #    category_selected = Category.objects.all()[0].pk
+    #if not pk == None :
+    #    category_selected = Post.objects.get(pk=pk).category.pk;
+    ##for key in request.session.keys() :
+    ##    print(f" {key} {request.session[key]}")
+    #if request.method == 'POST' :
+    #    author_type = get_author_type( request )
+    #    data = dict( request.POST )
+    #    username = data.get('custom_canvas_login_id', [''])[0]
+    #    subdomain = data.get('resource_link_title', [''])[0]
+    #    request.session['username'] = username
+    #    request.session['is_authenticated'] = not username ==  ''
+    #    request.session['subdomain'] = subdomain
+    #    request.session['category_selected'] =  category_selected
+    #else :
+    #    if 'username' in request.session :
+    #        username = request.session['username']
+    #    else :
+    #        username = request.GET.get('user',request.user.username)
+    #    request.session['username'] = username
+    #    request.session['is_authenticated'] = not username == ''
+    #    request.session['category_selected'] =  category_selected
     subdomain = request.session.get('subdomain',None )
     if subdomain and not Category.objects.filter(name=subdomain) :
         new_category = Category.objects.create(name=subdomain,restricted=True)
@@ -141,10 +195,6 @@ def blog_index(request, *args, **kwargs ) :
             }
         logger.error(f"ERROR = {type(e).__name__} {str(e)}")
     request.session['last_post_pk'] = pk
-    #if pksave == None :
-    #    return render(request, "blog/leftside.html", context)
-    #else :
-    #    return render(request, "blog/rightside.html", context)
 
     return render(request, "blog/sidebyside.html", context)
 
