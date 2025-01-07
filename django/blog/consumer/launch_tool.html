@@ -16,7 +16,7 @@
     <button type="submit" form="ltiForm">POST to LTI Tool Provider!</button>
 
     <script type="module">
-        var action = 'http://localhost:8000/';
+        var action = 'http://localhost:8000';
         var method = 'POST';
         var timestamp = Math.round(Date.now() / 1000);
 
@@ -26,10 +26,10 @@
             lti_version: 'LTI-1p0',
 	    subdomain :  'ffm516-2024',
             resource_link_id: 'resourceLinkId',
-            // OAuth 1.0a Required Parameters
 	    custom_canvas_login_id: 'ulf',
 	    lis_person_name_contact_email_primary: 'ulf@chalmers.se',
-	    lti_roles: 'Instructor,ContentDeveloper,TeachingAssistant',
+	    roles: 'Instructor,ContentDeveloper,TeachingAssistant',
+	    resource_link_title: 'ffm516-2024',
             oauth_consumer_key: '889d570f472',
             oauth_nonce: btoa(timestamp),
             oauth_signature_method: 'HMAC-SHA1',

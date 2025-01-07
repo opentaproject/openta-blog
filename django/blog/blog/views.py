@@ -21,23 +21,80 @@ from django.http import JsonResponse
 from oauthlib.oauth1 import RequestValidator
 logger = logging.getLogger(__name__)
 from oauthlib.oauth1 import RequestValidator
-from lti.contrib.django import DjangoToolProvider
 
-def percent_encode(s):
-    return urllib.parse.quote(s, safe='')
 
-def create_signature_base_string(http_method, base_url, params):
-    encoded_base_url = percent_encode(base_url)
-    sorted_params = sorted((percent_encode(k), percent_encode(v)) for k, v in params.items())
-    normalized_params = '&'.join(f'{k}={v}' for k, v in sorted_params)
-    encoded_params = percent_encode(normalized_params)
-    return f'{http_method.upper()}&{encoded_base_url}&{encoded_params}'
+#def create_signature_base_string(http_method, base_url, params):
+#    encoded_base_url = base_url ; # percent_encode(base_url)
+#    sorted_params = sorted((k), percent_encode(v)) for k, v in params.items())
+#    normalized_params = '&'.join(f'{k}={v}' for k, v in sorted_params)
+#    encoded_params = percent_encode(normalized_params)
+#    return f'{http_method.upper()}&{encoded_base_url}&{encoded_params}'
+#
+#def create_signing_key(consumer_secret, token_secret=''):
+#    return f'{percent_encode(consumer_secret)}&{percent_encode(token_secret)}'
 
-def create_signing_key(consumer_secret, token_secret=''):
-    return f'{percent_encode(consumer_secret)}&{percent_encode(token_secret)}'
+def generate_base_string(method, base_url, params):
+    # Ensure parameters are percent-encoded and sorted
+    encoded_params = urllib.parse.urlencode(sorted(params.items()), quote_via=urllib.parse.quote)
+    # Construct the base string
+    base_string = '&'.join([
+        method.upper(),
+        urllib.parse.quote(base_url, safe=''),
+        urllib.parse.quote(encoded_params, safe='')
+    ])
+    return base_string
+
+def validate_oauth_signature(method, base_url, params, consumer_secret, token_secret=None, received_signature=None):
+
+    def generate_base_string(method, base_url, params):
+        encoded_params = urllib.parse.urlencode(sorted(params.items()), quote_via=urllib.parse.quote)
+        base_string = '&'.join([
+            method.upper(),
+            urllib.parse.quote(base_url, safe=''),
+            urllib.parse.quote(encoded_params, safe='')
+        ])
+        return base_string
+
+    print(f"PARAMS = {params}")
+    base_string = generate_base_string(method, base_url, params)
+    signing_key = f"{urllib.parse.quote(consumer_secret, safe='')}&{urllib.parse.quote(token_secret, safe='') if token_secret else ''}"
+    hashed = hmac.new(signing_key.encode('utf-8'), base_string.encode('utf-8'), hashlib.sha1)
+    print(f"HASHED = {hashed}")
+    generated_signature = base64.b64encode( hashed.digest() )
+    print(f"GENERATED_SIGNATUE = {generated_signature}")
+    return True
+    #return hmac.compare_digest(generated_signature, received_signature)
+    #request_method = 'POST'
+    #base_url = 'https://your.tool.url/launch'
+    #params = {
+    #    'oauth_consumer_key': 'your_consumer_key',
+    #    'oauth_token': 'your_token',
+    #    'oauth_signature_method': 'HMAC-SHA1',
+    #    'oauth_timestamp': 'timestamp',
+    #    'oauth_nonce': 'nonce',
+    #    # Include all other LTI parameters here
+    #}
+    #consumer_secret = settings.LTI_SECRET
+    #received_signature = 'signature_from_request'
+    #is_valid = validate_oauth_signature(request_method, base_url, params, consumer_secret, token_secret, received_signature)
+
+
 
 def create_oauth_signature(http_method, base_url, params, consumer_secret, token_secret=''):
+    def percent_encode(s):
+        return urllib.parse.quote(s, safe='')
+    def create_signature_base_string(http_method, base_url, params):
+        encoded_base_url = percent_encode(base_url)
+        sorted_params = ((percent_encode(k), percent_encode(v)) for k, v in params.items())
+        normalized_params = '&'.join(f'{k}={v}' for k, v in sorted_params)
+        encoded_params = percent_encode(normalized_params)
+        return f'{http_method.upper()}&{encoded_base_url}&{encoded_params}'
+
+    def create_signing_key(consumer_secret, token_secret=''):
+        return f'{percent_encode(consumer_secret)}&{percent_encode(token_secret)}'
+
     signature_base_string = create_signature_base_string(http_method, base_url, params)
+    print(f"SIGNATURE_BASE_STRING {signature_base_string}")
     signing_key = create_signing_key(consumer_secret, token_secret)
     hashed = hmac.new(signing_key.encode(), signature_base_string.encode(), hashlib.sha1)
     signature = base64.b64encode(hashed.digest()).decode()
@@ -49,7 +106,8 @@ def get_username( request ):
     return request.session.get('username',request.user.username)
 
 def get_author_type( request ):
-    roles  =  request.POST.get('roles',['Anonymous'])
+    roles  =  request.POST.get('lti_roles',request.POST.get('roles',['Anonymous']) )
+    print(f"ROLES = {roles}")
     t = Post.AuthorType.ANONYMOUS
     td = 'Anonymous'
     if 'Student' in roles  or 'Learner' in roles :
@@ -68,21 +126,41 @@ def get_author_type( request ):
 def load_session_variables( request , *args, **kwargs ):
     logger.error(f"LOAD SESSION_VARIABLES")
     if request.data :
+        validate_oauth_signature('POST', "https://www.openta.se", request.data ,settings.LTI_SECRET )
         t = str( int(  time.time() )).encode() ;
         bt = base64.b64encode(t)
         logger.error(f"T = {t}")
         logger.error(f"BT = {bt}")
+        data = request.data
         data_ = {
             'lti_message_type': 'basic-lti-launch-request',
             'lti_version': 'LTI-1p0',
-	        'subdomain':  'ffm516-2024',
+	        'subdomain': 'ffm516-2024',
             'resource_link_id': 'resourceLinkId',
 	        'custom_canvas_login_id': 'ulf',
 	        'lis_person_name_contact_email_primary': 'ulf@chalmers.se',
-	        'lti_roles': 'Instructor,ContentDeveloper,TeachingAssistant',
-	        'lti_roles': 'Teacher',
+	        'roles': 'Instructor,ContentDeveloper,TeachingAssistant',
+	        'resource_link_title': 'ffm516-2024',
             'oauth_consumer_key': '889d570f472',
-            'oauth_nonce':  bt.strip() ,
+            'oauth_nonce': bt.strip() ,
+            'oauth_signature_method': 'HMAC-SHA1',
+            'oauth_timestamp': t,
+            'oauth_version': '1.0'
+        };
+
+
+
+        odata = {
+            'lti_message_type': 'basic-lti-launch-request',
+            'lti_version': 'LTI-1p0',
+            'subdomain': 'ffm516-2024',
+            'resource_link_id': 'resourceLinkId',
+	        'custom_canvas_login_id': 'ulf',
+	        'lis_person_name_contact_email_primary': 'ulf@chalmers.se',
+            'roles': 'Instructor,ContentDeveloper,TeachingAssistant',
+	        'resource_link_title': 'ffm516-2024',
+            'oauth_consumer_key': '889d570f472',
+            'oauth_nonce': bt.strip() ,
             'oauth_signature_method': 'HMAC-SHA1',
             'oauth_timestamp': t,
             'oauth_version': '1.0'
@@ -95,14 +173,16 @@ def load_session_variables( request , *args, **kwargs ):
         logger.error(f"OK CLIENT KEY?  { client_key_ok }")
         nonce = base64.b64decode( data_['oauth_nonce'] ) 
         client_nonce = base64.b64decode( request.data.get('oauth_nonce',None ) )
-        nonce_ok =  client_nonce == nonce
-        logger.error(f"OK NONCE? {nonce_ok}")
+        nonce_ok =  abs( int( client_nonce )  - int(  nonce ) ) < 4 
+        logger.error(f"OK NONCE? {nonce}=={ client_nonce} {nonce_ok}")
         method = 'POST'
-        url = "https://www.openta.se"
+        url = "http://localhost:8000"
         consumer_key = settings.LTI_KEY
         consumer_secret = settings.LTI_SECRET
-        signature = create_oauth_signature(method, url, data_, consumer_key , consumer_secret)
-        logger.error(f"SIGNATURES = {client_signature }  {signature}")
+        signature = create_oauth_signature(method, url, data, consumer_secret ) # , consumer_secret)
+        signature_ = create_oauth_signature(method, url, data_, consumer_secret) # , consumer_secret)
+        osignature = create_oauth_signature(method, url, odata, consumer_secret) # , consumer_secret)
+        logger.error(f"SIGNATURES = {client_signature }  {signature} {signature_} {osignature} ")
         
     pk = kwargs.get('pk',None)
     request.session['is_staff'] = False
@@ -141,6 +221,7 @@ def load_session_variables( request , *args, **kwargs ):
     logger.error(f"KWARGS = {kwargs}")
     logger.error(f"DATA = {request.data}")
     logger.error(f"CATEGORY_SELECTED = {category_selected}")
+    logger.error(f"AUTHORTYPE = {author_type}")
     return True
 
 
