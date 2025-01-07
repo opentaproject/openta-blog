@@ -42,7 +42,7 @@ def load_session_variables( request , *args, **kwargs ):
     #print(f"ARG0 = {args[1]}")
     pk = kwargs.get('pk',None)
     request.session['is_staff'] = False
-    #category_selected = args[1].get('category_selected',request.session.get('category_selected',None ) )
+    category_selected = args[1].get('category_selected',request.session.get('category_selected',None ) )
     if request.user and request.user.username  :
         username = request.user.username
         request.session['username'] = username

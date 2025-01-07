@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from blog.models import Post
+import logging
+logger = logging.getLogger(__name__)
+
+
 
 def home(request):
     print(f"GET HOME.HTML")
