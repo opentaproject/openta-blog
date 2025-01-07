@@ -1,5 +1,9 @@
 # blogs/views.py
 from django.db.models import Count, Subquery, Sum, OuterRef, F
+import hmac
+import hashlib
+import urllib.parse
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
@@ -8,11 +12,37 @@ from django.db import ProgrammingError
 from blog.forms import CommentForm, PostForm
 from rest_framework.decorators import api_view
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseForbidden
 from django.views.decorators.clickjacking import xframe_options_exempt
+import time, base64
 import logging
 import json
 from django.http import JsonResponse
+from oauthlib.oauth1 import RequestValidator
 logger = logging.getLogger(__name__)
+from oauthlib.oauth1 import RequestValidator
+from lti.contrib.django import DjangoToolProvider
+
+def percent_encode(s):
+    return urllib.parse.quote(s, safe='')
+
+def create_signature_base_string(http_method, base_url, params):
+    encoded_base_url = percent_encode(base_url)
+    sorted_params = sorted((percent_encode(k), percent_encode(v)) for k, v in params.items())
+    normalized_params = '&'.join(f'{k}={v}' for k, v in sorted_params)
+    encoded_params = percent_encode(normalized_params)
+    return f'{http_method.upper()}&{encoded_base_url}&{encoded_params}'
+
+def create_signing_key(consumer_secret, token_secret=''):
+    return f'{percent_encode(consumer_secret)}&{percent_encode(token_secret)}'
+
+def create_oauth_signature(http_method, base_url, params, consumer_secret, token_secret=''):
+    signature_base_string = create_signature_base_string(http_method, base_url, params)
+    signing_key = create_signing_key(consumer_secret, token_secret)
+    hashed = hmac.new(signing_key.encode(), signature_base_string.encode(), hashlib.sha1)
+    signature = base64.b64encode(hashed.digest()).decode()
+    return signature
+
 
 
 def get_username( request ):
@@ -36,10 +66,44 @@ def get_author_type( request ):
     return td
 
 def load_session_variables( request , *args, **kwargs ):
-    #if request.data :
-    #    from oauthlib.oauth1 import RequestValidator
-    #print(f"ARGS = {args}")
-    #print(f"ARG0 = {args[1]}")
+    logger.error(f"LOAD SESSION_VARIABLES")
+    if request.data :
+        t = str( int(  time.time() )).encode() ;
+        bt = base64.b64encode(t)
+        logger.error(f"T = {t}")
+        logger.error(f"BT = {bt}")
+        data_ = {
+            'lti_message_type': 'basic-lti-launch-request',
+            'lti_version': 'LTI-1p0',
+	        'subdomain':  'ffm516-2024',
+            'resource_link_id': 'resourceLinkId',
+	        'custom_canvas_login_id': 'ulf',
+	        'lis_person_name_contact_email_primary': 'ulf@chalmers.se',
+	        'lti_roles': 'Instructor,ContentDeveloper,TeachingAssistant',
+	        'lti_roles': 'Teacher',
+            'oauth_consumer_key': '889d570f472',
+            'oauth_nonce':  bt.strip() ,
+            'oauth_signature_method': 'HMAC-SHA1',
+            'oauth_timestamp': t,
+            'oauth_version': '1.0'
+        };
+        logger.error(f"DATA EXISTS {request.data}")
+        logger.error(f"DATA_ = {data_}")
+        client_key = request.data.get('oauth_consumer_key',None)
+        client_signature = request.data.get('oauth_signature',None)
+        client_key_ok =  client_key  == settings.LTI_KEY 
+        logger.error(f"OK CLIENT KEY?  { client_key_ok }")
+        nonce = base64.b64decode( data_['oauth_nonce'] ) 
+        client_nonce = base64.b64decode( request.data.get('oauth_nonce',None ) )
+        nonce_ok =  client_nonce == nonce
+        logger.error(f"OK NONCE? {nonce_ok}")
+        method = 'POST'
+        url = "https://www.openta.se"
+        consumer_key = settings.LTI_KEY
+        consumer_secret = settings.LTI_SECRET
+        signature = create_oauth_signature(method, url, data_, consumer_key , consumer_secret)
+        logger.error(f"SIGNATURES = {client_signature }  {signature}")
+        
     pk = kwargs.get('pk',None)
     request.session['is_staff'] = False
     category_selected = args[1].get('category_selected',request.session.get('category_selected',None ) )
@@ -53,7 +117,7 @@ def load_session_variables( request , *args, **kwargs ):
     if not pk == None :
         category_selected = Post.objects.get(pk=pk).category.pk;
     #for key in request.session.keys() :
-    #    print(f" {key} {request.session[key]}")
+    #    logger.error(f" {key} {request.session[key]}")
     if request.method == 'POST' :
         author_type = get_author_type( request )
         data = dict( request.POST )
@@ -72,11 +136,11 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['is_authenticated'] = not username == ''
         request.session['category_selected'] =  category_selected
     for v in request.session.keys():
-        print(f"{v} = {request.session[v]}")
-    print(f"ARGS = {args}")
-    print(f"KWARGS = {kwargs}")
-    print(f"DATA = {request.data}")
-    print(f"CATEGORY_SELECTED = {category_selected}")
+        logger.error(f"{v} = {request.session[v]}")
+    logger.error(f"ARGS = {args}")
+    logger.error(f"KWARGS = {kwargs}")
+    logger.error(f"DATA = {request.data}")
+    logger.error(f"CATEGORY_SELECTED = {category_selected}")
     return True
 
 
@@ -86,15 +150,17 @@ def load_session_variables( request , *args, **kwargs ):
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
 def blog_index(request, *args, **kwargs ) :
-    print(f"BLOG_INDEX METHOD = {request.method}")
+    logger.error(f"BLOG_INDEX METHOD = {request.method}")
     pk = kwargs.get('pk',None)
-    category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
-    print(f"PK = {pk}")
-    load_session_variables( request, args, kwargs );
-    #category_selected = request.session['category_selected']
+    #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
+    logger.error(f"PK = {pk}")
+    if not load_session_variables( request, args, kwargs ) :
+        return HttpResponseForbidden("AJABAJA")
+        
+    category_selected = request.session['category_selected']
     username = request.session['username']
     #category_selected = request.session['category_selected']
-    print(f"CATEGORY_SELECTED = {category_selected}")
+    logger.error(f"CATEGORY_SELECTED = {category_selected}")
     subdomain = request.session['subdomain']
     #request.session['is_staff'] = False
     #if request.user and request.user.username  :
@@ -107,7 +173,7 @@ def blog_index(request, *args, **kwargs ) :
     #if not pk == None :
     #    category_selected = Post.objects.get(pk=pk).category.pk;
     ##for key in request.session.keys() :
-    ##    print(f" {key} {request.session[key]}")
+    ##    logger.error(f" {key} {request.session[key]}")
     #if request.method == 'POST' :
     #    author_type = get_author_type( request )
     #    data = dict( request.POST )
