@@ -85,7 +85,7 @@ def create_oauth_signature(http_method, base_url, params, consumer_secret, token
         return urllib.parse.quote(s, safe='')
     def create_signature_base_string(http_method, base_url, params):
         encoded_base_url = percent_encode(base_url)
-        sorted_params = ((percent_encode(k), percent_encode(v)) for k, v in params.items())
+        sorted_params = ((percent_encode(k), percent_encode(v)) for k, v in params.items() if not k == 'oauth_signature')
         normalized_params = '&'.join(f'{k}={v}' for k, v in sorted_params)
         encoded_params = percent_encode(normalized_params)
         return f'{http_method.upper()}&{encoded_base_url}&{encoded_params}'
@@ -167,14 +167,13 @@ def load_session_variables( request , *args, **kwargs ):
         };
         logger.error(f"DATA EXISTS {request.data}")
         logger.error(f"DATA_ = {data_}")
+        timestamp = data_['oauth_timestamp']
         client_key = request.data.get('oauth_consumer_key',None)
         client_signature = request.data.get('oauth_signature',None)
+        client_timestamp = request.data.get('oauth_timestamp',None)
         client_key_ok =  client_key  == settings.LTI_KEY 
         logger.error(f"OK CLIENT KEY?  { client_key_ok }")
-        nonce = base64.b64decode( data_['oauth_nonce'] ) 
-        client_nonce = base64.b64decode( request.data.get('oauth_nonce',None ) )
-        nonce_ok =  abs( int( client_nonce )  - int(  nonce ) ) < 4 
-        logger.error(f"OK NONCE? {nonce}=={ client_nonce} {nonce_ok}")
+        logger.error(f"OK TIMESTAMP ? {timestamp}=={ client_timestamp} ")
         method = 'POST'
         url = "http://localhost:8000"
         consumer_key = settings.LTI_KEY
