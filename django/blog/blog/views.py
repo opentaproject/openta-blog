@@ -127,7 +127,7 @@ def load_session_variables( request , *args, **kwargs ):
     logger.error(f"LOAD SESSION_VARIABLES {args} {kwargs} ")
     if request.data :
         params = {};
-        for key in ['oauth_consumer_key','oauth_nonce','oauth_timestamp','oauth_signature_method','oauth_version' ]:
+        for key in ['oauth_consumer_key','oauth_nonce','oauth_timestamp','oauth_signature_method','oauth_version','lti_message_type','lti_version','resource_link_id' ]:
             params[key] = request.data.get(key,None)
         validate_oauth_signature('POST', "https://www.openta.se", params ,settings.LTI_SECRET )
         t = str( int(  time.time() )).encode() ;
