@@ -21,31 +21,9 @@ from django.http import JsonResponse
 from oauthlib.oauth1 import RequestValidator
 logger = logging.getLogger(__name__)
 from oauthlib.oauth1 import RequestValidator
-from backend.oauth1 import load_session_variables
+from backend.oauth1 import load_session_variables, get_author_type, get_username
 
 
-
-
-def get_username( request ):
-    return request.session.get('username',request.user.username)
-
-def get_author_type( request ):
-    roles  =  request.POST.get('lti_roles',request.POST.get('roles',['Anonymous']) )
-    print(f"ROLES = {roles}")
-    t = Post.AuthorType.ANONYMOUS
-    td = 'Anonymous'
-    if 'Student' in roles  or 'Learner' in roles :
-        t = Post.AuthorType.STUDENT
-        td = 'Student'
-    if 'Teacher' in roles or 'Examiner' in roles or 'ContentDeveloper' in roles or 'TeachingAssistant' in roles  or 'Instructor' in roles:
-        t = Post.AuthorType.TEACHER
-        td = 'Teacher'
-    if request.user.is_staff :
-        t = Post.AuthorType.STAFF
-        td = 'Admin'
-    request.session['author_type'] = td;
-    request.session['author_type_display'] = td
-    return td
 
 
 
@@ -64,35 +42,6 @@ def blog_index(request, *args, **kwargs ) :
     #category_selected = request.session['category_selected']
     logger.error(f"CATEGORY_SELECTED = {category_selected}")
     subdomain = request.session['subdomain']
-    #request.session['is_staff'] = False
-    #if request.user and request.user.username  :
-    #    username = request.user.username
-    #    request.session['username'] = username
-    #    request.session['is_staff'] = request.user.is_staff
-    #    request.session['is_authenticated'] = True
-    #if category_selected == None :
-    #    category_selected = Category.objects.all()[0].pk
-    #if not pk == None :
-    #    category_selected = Post.objects.get(pk=pk).category.pk;
-    ##for key in request.session.keys() :
-    ##    logger.error(f" {key} {request.session[key]}")
-    #if request.method == 'POST' :
-    #    author_type = get_author_type( request )
-    #    data = dict( request.POST )
-    #    username = data.get('custom_canvas_login_id', [''])[0]
-    #    subdomain = data.get('resource_link_title', [''])[0]
-    #    request.session['username'] = username
-    #    request.session['is_authenticated'] = not username ==  ''
-    #    request.session['subdomain'] = subdomain
-    #    request.session['category_selected'] =  category_selected
-    #else :
-    #    if 'username' in request.session :
-    #        username = request.session['username']
-    #    else :
-    #        username = request.GET.get('user',request.user.username)
-    #    request.session['username'] = username
-    #    request.session['is_authenticated'] = not username == ''
-    #    request.session['category_selected'] =  category_selected
     subdomain = request.session.get('subdomain',None )
     if subdomain and not Category.objects.filter(name=subdomain) :
         new_category = Category.objects.create(name=subdomain,restricted=True)
@@ -137,6 +86,7 @@ def blog_index(request, *args, **kwargs ) :
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
         author_type_display = request.session.get('author_type_display','Anonymous')
+        print(f"AUTHOR_TYPE = {author_type}")
         if request.user.is_staff :
             author_type = Post.AuthorType.STAFF
             author_type_display = 'Admin'

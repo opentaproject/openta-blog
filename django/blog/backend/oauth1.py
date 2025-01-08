@@ -2,6 +2,7 @@ import hmac
 import hashlib
 import urllib.parse
 from django.conf import settings
+from blog.models import Category, Post
 import time, base64
 import logging
 logger = logging.getLogger(__name__)
@@ -192,4 +193,27 @@ def load_session_variables( request , *args, **kwargs ):
     logger.error(f"AUTHORTYPE = {author_type}")
     return True
 
+
+def get_author_type( request ):
+    roles  =  request.POST.get('lti_roles',request.POST.get('roles',['Anonymous']) )
+    print(f"ROLES = {roles}")
+    t = Post.AuthorType.ANONYMOUS
+    td = 'Anonymous'
+    if 'Student' in roles  or 'Learner' in roles :
+        t = Post.AuthorType.STUDENT
+        td = 'Student'
+    if 'Teacher' in roles or 'Examiner' in roles or 'ContentDeveloper' in roles or 'TeachingAssistant' in roles  or 'Instructor' in roles:
+        t = Post.AuthorType.TEACHER
+        td = 'Teacher'
+    if request.user.is_staff :
+        t = Post.AuthorType.STAFF
+        td = 'Admin'
+    print(f"T = {t}")
+    request.session['author_type'] = t
+    request.session['author_type_display'] = td
+    return t
+
+
+def get_username( request ):
+    return request.session.get('username',request.user.username)
 
