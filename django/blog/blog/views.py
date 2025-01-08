@@ -126,7 +126,10 @@ def get_author_type( request ):
 def load_session_variables( request , *args, **kwargs ):
     logger.error(f"LOAD SESSION_VARIABLES {args} {kwargs} ")
     if request.data :
-        validate_oauth_signature('POST', "https://www.openta.se", request.data ,settings.LTI_SECRET )
+        params = {};
+        for key in ['oauth_consumer_key','oauth_nonce','oauth_timestamp','oauth_signature_method','oauth_version' ]:
+            params[key] = request.data.get(key,None)
+        validate_oauth_signature('POST', "https://www.openta.se", params ,settings.LTI_SECRET )
         t = str( int(  time.time() )).encode() ;
         bt = base64.b64encode(t)
         logger.error(f"T = {t}")
@@ -178,7 +181,7 @@ def load_session_variables( request , *args, **kwargs ):
         url = "http://localhost:8000"
         consumer_key = settings.LTI_KEY
         consumer_secret = settings.LTI_SECRET
-        signature = create_oauth_signature(method, url, data, consumer_secret ) # , consumer_secret)
+        signature = create_oauth_signature(method, url, params , consumer_secret ) # , consumer_secret)
         signature_ = create_oauth_signature(method, url, data_, consumer_secret) # , consumer_secret)
         osignature = create_oauth_signature(method, url, odata, consumer_secret) # , consumer_secret)
         logger.error(f"SIGNATURES = {client_signature }  {signature} {signature_} {osignature} ")
