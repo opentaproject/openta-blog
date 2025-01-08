@@ -26,7 +26,7 @@
 {% if not post.viewed %}     <i class="fa-solid fa-circle "></i> {% endif %} 
 		    <a class="" href="{% url 'blog_index'  post.pk %}"> 
 		      <button  id="check{{ post.pk }}"  class=""> <i class="{{ post.bgclass }} far fa-square-check lhs"></i></button>
-                <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
+                <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:30 | safe }} </span> </span>
 		</span> 
 		<span class="OpenTA-post-last-modified"> {{ post.author }} {{ post.last_modified | naturaltime }} </span>
               </a>
@@ -42,7 +42,7 @@
               <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}">
 
 		      <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class=" {{ post.bgclass }} far fa-square "></i>   </button>
-                <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:10 | safe }} </span> </span>
+                <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:30 | safe }} </span> </span>
 	    </span> 
 	    <span class="OpenTA-post-last-modified"> {{ post.author }} {{ post.last_modified | naturaltime }} </span>
               </a>

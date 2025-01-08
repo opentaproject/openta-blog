@@ -41,7 +41,6 @@ def blog_index(request, *args, **kwargs ) :
     username = request.session['username']
     #category_selected = request.session['category_selected']
     logger.error(f"CATEGORY_SELECTED = {category_selected}")
-    subdomain = request.session['subdomain']
     subdomain = request.session.get('subdomain',None )
     if subdomain and not Category.objects.filter(name=subdomain) :
         new_category = Category.objects.create(name=subdomain,restricted=True)

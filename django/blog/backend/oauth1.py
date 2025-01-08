@@ -185,7 +185,7 @@ def load_session_variables( request , *args, **kwargs ):
     for v in request.session.keys():
         logger.error(f"{v} = {request.session[v]}")
     category_selected = request.session['category_selected']
-    author_type = request.session['author_type']
+    author_type = request.session.get('author_type',0)
     logger.error(f"ARGS = {args}")
     logger.error(f"KWARGS = {kwargs}")
     logger.error(f"DATA = {request.data}")
