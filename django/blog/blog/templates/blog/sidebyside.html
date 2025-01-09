@@ -6,17 +6,19 @@
 
  <div class="hidden md:block">
   <div class="bg-gray-300">
-    <table class="min-w-full border-collapse border border-blue-800"> <tr>
-      <td class="w-1/4 align-top">
+    <table class="OpenTA-table-sidebyside"> <tr>
+      <td class="OpenTA-lhs-sidebyside">
 
       {% block posts %}
       {% include "blog/posts_lhs.html" %}
       {% endblock posts %}
 
     </td> 
-    <td class="OpenTA-rhs-sidebyside w-3/4 align-top px-2"> 
+    {% if selected_posts %}
+    <td class="OpenTA-rhs-sidebyside"> 
       {% include "blog/posts_rhs.html" %}
     </td> 
+    {% endif %}
 	    
 	    </tr> </table>
   </table>
@@ -26,7 +28,7 @@
 
  <div class="block md:hidden">
   <div class="bg-gray-300">
-    <table class="min-w-full border-collapse border border-blue-800"> <tr>
+    <table class="OpenTA-table-sidebyside"> <tr>
     {% if not selected %}
       <td class="align-top">
 
@@ -36,7 +38,7 @@
 
     </td> 
     {% else %}
-    <td class="OpenTA-rhs-sidebyside align-top px-2"> 
+    <td class="OpenTA-rhs-sidebyside"> 
       {% include "blog/posts_rhs.html" %}
     </td> 
     {% endif %}

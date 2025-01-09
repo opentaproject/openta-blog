@@ -1,6 +1,6 @@
 {% load humanize %} 
 {% block posts %}
-    <div class="OpenTA-post-list bg-blue-800">
+    <div class="OpenTA-post-list">
       {% for post in selected_posts %}
 
 
@@ -9,7 +9,7 @@
 
 	    <div  class="OpenTA-post-entry">
 
-		<div class=" OpenTA-post-body mt-2 flex justify-between w-full">
+		<div class=" OpenTA-post-body">
 
 		    <span class="OpenTA-post-title"> {{ post.title }} 	 </span>
 		    <span>  <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  {% if is_authenticated %} Leave a comment {% endif %} </a> 
