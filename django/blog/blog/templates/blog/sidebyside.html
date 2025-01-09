@@ -4,49 +4,49 @@
 
 {% block page_content %}
 
- <div class="hidden md:block">
-  <div class="bg-gray-300">
-    <table class="OpenTA-table-sidebyside"> <tr>
-      <td class="OpenTA-lhs-sidebyside">
+  <div class="hidden md:block">
+    <div class="bg-gray-300">
+      <table class="OpenTA-table-sidebyside"> <tr>
+        <td class="OpenTA-lhs-sidebyside">
 
-      {% block posts %}
-      {% include "blog/posts_lhs.html" %}
-      {% endblock posts %}
+          {% block posts %}
+            {% include "blog/posts_lhs.html" %}
+          {% endblock posts %}
 
-    </td> 
-    {% if selected_posts %}
-    <td class="OpenTA-rhs-sidebyside"> 
-      {% include "blog/posts_rhs.html" %}
-    </td> 
-    {% endif %}
-	    
-	    </tr> </table>
-  </table>
+        </td>
+        {% if selected_posts %}
+          <td class="OpenTA-rhs-sidebyside">
+            {% include "blog/posts_rhs.html" %}
+          </td>
+        {% endif %}
+
+      </tr> </table>
+    </table>
   </div>
- </div> 
-
-
- <div class="block md:hidden">
-  <div class="bg-gray-300">
-    <table class="OpenTA-table-sidebyside"> <tr>
-    {% if not selected %}
-      <td class="align-top">
-
-      {% block posts2 %}
-      {% include "blog/posts_lhs.html" %}
-      {% endblock posts2 %}
-
-    </td> 
-    {% else %}
-    <td class="OpenTA-rhs-sidebyside"> 
-      {% include "blog/posts_rhs.html" %}
-    </td> 
-    {% endif %}
-	    
-	    </tr> </table>
-  </table>
   </div>
- </div> 
+
+
+  <div class="block md:hidden">
+    <div class="bg-gray-300">
+      <table class="OpenTA-table-sidebyside"> <tr>
+        {% if not selected %}
+          <td class="align-top">
+
+            {% block posts2 %}
+              {% include "blog/posts_lhs.html" %}
+            {% endblock posts2 %}
+
+          </td>
+        {% else %}
+          <td class="OpenTA-rhs-sidebyside">
+            {% include "blog/posts_rhs.html" %}
+          </td>
+        {% endif %}
+
+      </tr> </table>
+    </table>
+  </div>
+  </div>
 
 
 

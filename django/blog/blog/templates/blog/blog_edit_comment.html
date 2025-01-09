@@ -8,24 +8,24 @@
 
 {% block page_content %}
 
-  <div class="OpenTA-post-entry p-0">
-<div> {{ post.title }} {{ post.last_modified }} </div>
-    {{ post.body | safe | linebreaks }}
-    <div class="OpenTA-toggle sm:italic bg-red-100  ">
-    USERNAME = {{ username }} 
-    <form method="post">
-        {% csrf_token %}
-	  {% for field in form %}
-        <div>
-            {{ field.label_tag }}: {{ field }}
-            {{ field.errors }}
-        </div>
-    {% endfor %}
-        <button type="submit" class="OpenTA-submit-button">Submit Edit </button>
-	<button type="submit" name="action" value="delete" class="OpenTA-submit-button">Delete </button>
+    <div class="OpenTA-post-entry p-0">
+        <div> {{ post.title }} {{ post.last_modified }} </div>
+        {{ post.body | safe | linebreaks }}
+        <div class="OpenTA-toggle sm:italic bg-red-100  ">
+            USERNAME = {{ username }}
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div>
+                        {{ field.label_tag }}: {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="OpenTA-submit-button">Submit Edit </button>
+                <button type="submit" name="action" value="delete" class="OpenTA-submit-button">Delete </button>
 
-    </form>
-    </div> 
-  </div> 
+            </form>
+        </div>
+    </div>
 
 {% endblock page_content %}

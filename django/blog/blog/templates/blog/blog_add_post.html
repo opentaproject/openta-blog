@@ -2,7 +2,7 @@
 
 {% extends "base.html" %}
 {% block header %}
-    {{ form.media }} # Required for styling/js to make ckeditor5 work
+  {{ form.media }} # Required for styling/js to make ckeditor5 work
 {% endblock %}
 
 
@@ -10,15 +10,15 @@
 
   <div class="OpenTA-post-entry p-0">
     <div class="OpenTA-toggle sm:italic bg-red-100  ">
-     <div id={{ post.pk }} class="OpenTA-post-form bg-blue-100">
-    <form method="post">
-        {% csrf_token %}
-        <div> POST AUTHOR={{ author }}    </div>
-        <div> {{ form.body | safe }} </div>
-        <button type="submit" class="OpenTA-submit-button">Submit</button>
-    </form>
-    </div> 
-    </div> 
-  </div> 
+      <div id={{ post.pk }} class="OpenTA-post-form bg-blue-100">
+        <form method="post">
+          {% csrf_token %}
+          <div> POST AUTHOR={{ author }}    </div>
+          <div> {{ form.body | safe }} </div>
+          <button type="submit" class="OpenTA-submit-button">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
 {% endblock page_content %}
