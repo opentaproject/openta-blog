@@ -1,80 +1,80 @@
-{% load humanize %} 
+{% load humanize %}
 {% block posts %}
-    <div class="OpenTA-post-list">
-      {% for post in selected_posts %}
+  <div class="OpenTA-post-list">
+    {% for post in selected_posts %}
 
 
       <div id="{{post.pk}}" class="hideshow " >
 
 
-	    <div  class="OpenTA-post-rhs-entry">
+        <div  class="OpenTA-post-rhs-entry">
 
-<div class=" OpenTA-post-body mt-2 flex justify-between w-full">
-
-
-		    <span class="OpenTA-post-title"> {{ post.title }} 	 </span>
-		    <span>  <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  {% if is_authenticated %} Leave a comment {% endif %} </a> 
-<span class="p-1 rounded-l bg-gray-400"> {{ post.tot_visits }}  Views </span> 
-
-		</div> 
-
-              <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body  | safe }} 
-
-	      <div>
-<div class="mt-2 flex justify-between w-full">
-<span>
-<span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_edit_post' post.pk %}">  {% if post.author == username or  is_staff %} Edit {% endif %} </a> </span>
-<span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if post.author == username or  is_staff %} Delete {% endif %} </a> </span>
-</span>
-
-<span class="{{ post.textclass }}">   {{ post.author }} {{ post.last_modified  | naturaltime }} 
-
-	</span>
-</div>
+          <div class=" OpenTA-post-body mt-2 flex justify-between w-full">
 
 
+            <span class="OpenTA-post-title"> {{ post.title }} 	 </span>
+            <span>  <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  {% if is_authenticated %} Leave a comment {% endif %} </a>
+              <span class="p-1 rounded-l bg-gray-400"> {{ post.tot_visits }}  Views </span>
 
-	     </div> 
+            </div>
+
+            <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body  | safe }}
+
+              <div>
+                <div class="mt-2 flex justify-between w-full">
+                  <span>
+                    <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_edit_post' post.pk %}">  {% if post.author == username or  is_staff %} Edit {% endif %} </a> </span>
+                    <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if post.author == username or  is_staff %} Delete {% endif %} </a> </span>
+                  </span>
+
+                  <span class="{{ post.textclass }}">   {{ post.author }} {{ post.last_modified  | naturaltime }}
+
+                  </span>
+                </div>
 
 
 
-
-	      </div> 
-
-              <div class="OpenTA-comment-list">
-                {% for comment in comments %}
-                  <div class="OpenTA-comment-entry">
-                    {% if comment.author != "" %}
-                    {% else %}
-		    <p> On {{ comment.created_on.date }} <b>{{ comment.author }} </b> wrote: </p>
-                    {% endif %}
-
-		    <div class="OpenTA-comment-body"> {{ comment.body | safe }}   </div>
-		    <div>
-			     <div class="mt-2 flex justify-between w-full">
-				     	{% if comment.author == username or is_staff %}
-					<span> <a class="OpenTA-leave-comment-link" href="{% url 'blog_edit_comment' comment.pk %}">  Edit </a> 
-			<a class="OpenTA-leave-comment-link" href="{% url 'blog_delete_comment' comment.pk %}">  Delete </a> 
-					</span>
-			{% else %}
-			&nbsp;
-			{% endif %}
-
-			    <span class=""> {{ comment.author }}      {{ comment.created_on | naturaltime }}    </span>
-			     </div>
-		  </div>
-		  </div> 
-
-                {% endfor %}
               </div>
+
+
+
+
+            </div>
+
+            <div class="OpenTA-comment-list">
+              {% for comment in comments %}
+                <div class="OpenTA-comment-entry">
+                  {% if comment.author != "" %}
+                  {% else %}
+                    <p> On {{ comment.created_on.date }} <b>{{ comment.author }} </b> wrote: </p>
+                  {% endif %}
+
+                  <div class="OpenTA-comment-body"> {{ comment.body | safe }}   </div>
+                  <div>
+                    <div class="mt-2 flex justify-between w-full">
+                      {% if comment.author == username or is_staff %}
+                        <span> <a class="OpenTA-leave-comment-link" href="{% url 'blog_edit_comment' comment.pk %}">  Edit </a>
+                          <a class="OpenTA-leave-comment-link" href="{% url 'blog_delete_comment' comment.pk %}">  Delete </a>
+                        </span>
+                      {% else %}
+                        &nbsp;
+                      {% endif %}
+
+                      <span class=""> {{ comment.author }}      {{ comment.created_on | naturaltime }}    </span>
+                    </div>
+                  </div>
+                </div>
+
+              {% endfor %}
+            </div>
 
 
 
 
           </div>
         </div>
-      {% endfor %}
-    </div>
+    {% endfor %}
+  </div>
 
 
-  {% endblock posts %}
+{% endblock posts %}
