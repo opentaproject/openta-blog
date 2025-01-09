@@ -15,14 +15,15 @@ class ResponseRewriteMiddleware(MiddlewareMixin):
             'OpenTA-leave-comment-link' : '',\
             'OpenTA-navigation-bar' : 'flex p-2 border-b bg-transparent bg-[#cccccc]', \
             'OpenTA-post-selected-entry' : 'border border-gray-300 p-2 rounded-lg bg-yellow-100  shadow-md',\
-            'OpenTA-post-entry' :          'border bg-white    border-gray-300 p-2 rounded-lg shadow-md',\
-            'OpenTA-post-body' : 'bg-yellow-100 mt-2 flex justify-between w-full' , \
+            'OpenTA-post-rhs-entry' :      'bg-yellow-100 border border-gray-300 p-2 rounded-lg shadow-md',\
+            'OpenTA-post-entry' :          'border border-gray-300 p-2 rounded-lg shadow-md',\
+            'OpenTA-post-body' : '',\
             'OpenTA-post-last-modified' : 'font-light text-xs ',\
             'OpenTA-post-title' : 'font-semibold',\
             'OpenTA-show-button' : 'hover:bg-blue-400 bg-blue-200',\
             'OpenTA-submit-button' : 'hover:bg-blue-400 btn btn-primary',\
             'OpenTA-rhs-sidebyside' : 'w-3/4 align-top px-2',\
-            'OpenTA-lhs-sidebyside' : 'w-1/4 align-top px-2',\
+            'OpenTA-lhs-sidebyside' : 'bg-white w-1/4 align-top px-2',\
             'OpenTA-table-sidebyside' : 'min-w-full border-collapse border border-blue-800',\
             'OpenTA-toggle' : 'sm:italic',}
     
