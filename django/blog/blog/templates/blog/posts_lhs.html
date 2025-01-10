@@ -6,8 +6,8 @@
         <form method="post" action="{% url 'blog_add_post' %}">
           {% csrf_token %}
           <span class="flex">
-            <button class="p-1 text-white bg-blue-400 font-medium rounded me-2 " type="submit">New post: </button>
-            <input class="px-2 grow border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400" type="text" id="title" name="title" placeholder="title ..." required>
+            <button class="OpenTA-new-button" type="submit">New post: </button>
+            <input class="OpenTA-text-size px-2 grow border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400" type="text" id="title" name="title" placeholder="title ..." required>
             <input type="hidden" id="visibility" name="visibility" value="{{ visibility }}">
             <input type="hidden" id="author_type" name="author_type" value="{{ author_type}}">
             <input type="hidden" id="author" name="author" value="{{ username }}">
@@ -31,7 +31,7 @@
                 <span class="OpenTA-post-last-modified"> {{ post.author }} {{ post.last_modified | naturaltime }} </span>
               </a>
             </div>
-            <div class="text-xs" > {{ post.body | striptags | truncatechars:200   | safe }} </div>
+            <div class="text-xs" > {{ post.body | striptags | truncatechars:80   | safe }} </div>
           </div>
 
         {% else %}
@@ -42,12 +42,20 @@
                 <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}">
 
                   <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class=" {{ post.bgclass }} far fa-square "></i>   </button>
+		  {% if selected_posts %}
                   <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:30 | safe }} </span> </span>
+		  {% else %} 
+<span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | safe }} </span> </span>
+		 {% endif %}
                 </span>
                 <span class="OpenTA-post-last-modified"> {{ post.author }} {{ post.last_modified | naturaltime }} </span>
               </a>
             </div>
-            <div class="text-xs"> {{ post.body | truncatechars:200 | safe }} </div>
+	    {% if selected_posts %}
+            <div class="text-xs"> {{ post.body | truncatechars:80 | safe }} </div>
+	    {% else %}
+<div class="text-xs"> {{ post.body | truncatechars:200 | safe }} </div>
+		{% endif %}
           </div>
         {% endif %}
 
