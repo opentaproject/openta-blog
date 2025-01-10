@@ -1,6 +1,6 @@
 {% block posts %}
   {% load humanize %}
-  <div class="OpenTA-post-list">
+  <div class="OpenTA-post-list OpenTA-text-size">
     {% if is_authenticated %}
       <div class="p-2 bg-gray-200">
         <form method="post" action="{% url 'blog_add_post' %}">
@@ -31,7 +31,7 @@
                 <span class="OpenTA-post-last-modified"> {{ post.author }} {{ post.last_modified | naturaltime }} </span>
               </a>
             </div>
-            <div class="text-xs" > {{ post.body | striptags | truncatechars:80   | safe }} </div>
+            <div class="OpenTA-text-size" > {{ post.body | striptags | truncatechars:80   | safe }} </div>
           </div>
 
         {% else %}
@@ -52,9 +52,9 @@
               </a>
             </div>
 	    {% if selected_posts %}
-            <div class="text-xs"> {{ post.body | truncatechars:80 | safe }} </div>
+            <div class="OpenTA-text-size"> {{ post.body | truncatechars:80 | safe }} </div>
 	    {% else %}
-<div class="text-xs"> {{ post.body | truncatechars:200 | safe }} </div>
+<div class="OpenTA-text-size"> {{ post.body | truncatechars:200 | safe }} </div>
 		{% endif %}
           </div>
         {% endif %}

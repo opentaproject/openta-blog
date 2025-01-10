@@ -40,9 +40,9 @@ MathJax = {
 {% load static %}
 {% load humanize %}
 <body class="min-h-screen">
-<div class="OpenTA-body">
-<img class="inline w-16 h-8 " src="{% static '/images/s.ico' %}" alt="My Image">
-<a  class="hover:font-bold p-4" href="{% url "blog_index" %}"> OpenTA-sidecar </a> 
+<div class="OpenTA-body OpenTA-text-size">
+<img class="inline w-8 h-4 md:w-12 md:h-6 lg:w-12 lg:h-6 " src="{% static '/images/s.ico' %}" alt="">
+<a  class="OpenTA-text-size hover:font-bold p-4" href="{% url "blog_index" %}"> OpenTA-sidecar </a> 
 {% if is_authenticated %}  {{ username }} @ {{ subdomain }}  {{ author_type_display }} 
 			   
 {% endif %}

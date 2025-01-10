@@ -2,7 +2,7 @@
     <ul class="OpenTA-navigation-bar">
 
         {% for category in categories %}
-            <li class="-mb-px mr-1">
+            <li class="OpenTA-text-size -mb-px mr-1">
                 {% if category.pk == category_selected %}
                     <a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} </a>
                     </li>
