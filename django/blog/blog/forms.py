@@ -10,9 +10,9 @@ class CommentForm(forms.ModelForm):
       def __init__(self, *args, **kwargs):
           super().__init__(*args, **kwargs)
           self.fields["body"].required = False
-          self.fields["author"].required = False
+          self.fields["comment_author"].required = False
           self.fields['post'].widget = forms.HiddenInput();
-          self.fields['author'].widget = forms.HiddenInput();
+          self.fields['comment_author'].widget = forms.HiddenInput();
 
 
       class Meta:
@@ -33,8 +33,8 @@ class PostForm(forms.ModelForm):
           super().__init__(*args, **kwargs)
           self.fields["body"].required = True
           self.fields["title"].required = True
+          self.fields["post_author"].required = True
           self.fields["is_staff"].required = False
-          self.fields['is_staff'].widget = forms.HiddenInput();
           if not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput();
             self.fields['category'].widget = forms.HiddenInput();
@@ -54,8 +54,8 @@ class PostForm(forms.ModelForm):
 
       class Meta:
           model = Post
-          fields = ['author_type','visibility','author','title','author','body','category' ]
-          #fields = '__all__'
+          #fields = ['author_type','visibility','post_author','title','body','category' ]
+          fields = '__all__'
           widgets = {
               "body": CKEditor5Widget( attrs={"class": "django_ckeditor_5"}, config_name="extends"),
               #"category": forms.HiddenInput(),

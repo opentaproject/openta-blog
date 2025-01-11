@@ -9,6 +9,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 class Category(models.Model):
     name = models.CharField(max_length=30)
     restricted = models.BooleanField(default=False)
+    hidden = models.BooleanField(default=False,)
     class Meta:
         verbose_name_plural = "category"
 
@@ -17,10 +18,39 @@ class Category(models.Model):
     
 from django.urls import reverse_lazy
 
+class Visitor(models.Model) :
+
+    class VisitorType( models.IntegerChoices ):
+        ANONYMOUS = 0
+        STUDENT = 1
+        TEACHER = 2
+        STAFF = 3
+
+    name = models.CharField(max_length=60)
+    subdomain = models.ForeignKey("Subdomain", on_delete=models.CASCADE,null=True, blank=True,  related_name="visitor")
+    last_visit =  models.DateTimeField(auto_now=True)
+    visitor_type =  models.IntegerField(choices=VisitorType, default=0 )
+
+
+    def __str__(self):
+        return self.name+'@'+f"{self.subdomain}"
+
+
+class Subdomain( models.Model) :
+    name = models.CharField(max_length=60)
+
+    def __str__(self):
+        return self.name
+
+
 class Visit(models.Model) :
-    visitor = models.CharField(max_length=60)
-    post = models.ForeignKey("Post", on_delete=models.CASCADE)
+    visitor = models.ForeignKey("Visitor", on_delete=models.CASCADE, related_name="visit_visitor")
+    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="visit_post")
     date =  models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{ self.visitor}-{self.post.title}"
+
 
 
 class Post(models.Model):
@@ -34,12 +64,13 @@ class Post(models.Model):
         STAFF = 3
     visibility = models.IntegerField(choices=Visibility , default=2 )
     author_type = models.IntegerField(choices=AuthorType, default=0 )
-    author = models.CharField(max_length=60)
+    #author = models.CharField(max_length=60)
+    post_author =  models.ForeignKey("Visitor", null=True, blank=True, related_name="post",on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    body = CKEditor5Field('Text', config_name='extends')
+    body = CKEditor5Field('Post Body ', config_name='extends')
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
-    category = models.ForeignKey("Category", on_delete=models.CASCADE,null=True, blank=True,  related_name="posts")
+    category = models.ForeignKey("Category", null=True, blank=True, related_name="post",on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -64,13 +95,14 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    author = models.CharField(max_length=60,default='',blank=True)
-    body =   CKEditor5Field('Text', config_name='extends')
+    #author = models.CharField(max_length=60,default='',blank=True)
+    comment_author =  models.ForeignKey("Visitor", null=True, blank=True, related_name="comment_author",on_delete=models.CASCADE)
+    body =   CKEditor5Field('Comment Body', config_name='extends')
     created_on = models.DateTimeField(auto_now_add=True)
-    post = models.ForeignKey("Post", on_delete=models.CASCADE)
+    post = models.ForeignKey("Post", on_delete=models.CASCADE,related_name="comment")
 
     def __str__(self):
-        return f"{self.author} on '{self.post}'"
+        return f"{self.comment_author} on '{self.post}'"
 
     def save( self, *args, **kwargs ):
         post = self.post

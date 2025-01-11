@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
-from blog.models import Post, Comment, Category,Visit
+from blog.models import Post, Comment, Category,Visit,Visitor,Subdomain
 from django.db import ProgrammingError
 from blog.forms import CommentForm, PostForm
 from rest_framework.decorators import api_view
@@ -41,20 +41,22 @@ def blog_index(request, *args, **kwargs ) :
     username = request.session['username']
     #category_selected = request.session['category_selected']
     logger.error(f"CATEGORY_SELECTED = {category_selected}")
-    subdomain = request.session.get('subdomain',None )
+    subdomain = request.session.get('subdomain','default')
+    subd, _ = Subdomain.objects.get_or_create(name=subdomain)
     if subdomain and not Category.objects.filter(name=subdomain) :
         new_category = Category.objects.create(name=subdomain,restricted=True)
         new_category.save() 
 
     try :
+        visitor, _ = Visitor.objects.get_or_create(name=username,subdomain=subd,visitor_type=1)
         comments  = []
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
         for post in posts :
             if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
                 post.delete()
-        post_subquery = Post.objects.filter(id=OuterRef('id'),author=username).annotate(viewed=Count('author')).values('viewed')
-        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=username).annotate(viewed=Count('visitor')).values('viewed')
-        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=username,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
+        post_subquery = Post.objects.filter(id=OuterRef('id'),post_author=visitor).annotate(viewed=Count('post_author')).values('viewed')
+        #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
+        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
         if request.session['is_staff'] :
             categories = Category.objects.all()
@@ -81,7 +83,7 @@ def blog_index(request, *args, **kwargs ) :
             selected_posts = []
 
         for post in selected_posts :
-            visit = Visit.objects.update_or_create(visitor=username,post=post)
+            visit = Visit.objects.update_or_create(visitor=visitor,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
         author_type_display = request.session.get('author_type_display','Anonymous')
@@ -96,6 +98,8 @@ def blog_index(request, *args, **kwargs ) :
             "category_selected" : cat,
             "is_authenticated" : is_authenticated,
             "visibility" : Post.Visibility.PUBLIC , 
+            "comment_author" : visitor,
+            "post_author" : visitor, 
             "author_type" : author_type,
             "author_type_display" : author_type_display,
             "is_staff" : is_staff,
@@ -129,21 +133,24 @@ def blog_category(request, category):
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
 def blog_add_post(request ):
+    print("BLOG ADD POST")
     username = request.session.get('username',None)
     is_authenticated = request.session.get('is_authenticated',False)
     if not is_authenticated :
         raise PermissionDenied("You must be authenticated in to add a post")
         
-    author = username
+    subdomain = request.session.get('subdomain','default')
+    post_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
+    print(f"POST_AUTHOR_IN_ADD_POST = {post_author}")
     try :
         category_ = request.POST.get('category')[0]
         category = Category.objects.get(pk=category_)
     except ObjectDoesNotExist as e :
         category = Category.objects.all()[0].pk
-    post, _  = Post.objects.get_or_create(title='',body='',category=category)
+    post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
     if request.method == "POST":
         is_staff = request.session.get('is_staff',False)
-        form = PostForm( request.POST, is_staff=is_staff, instance=post)
+        form = PostForm( request.POST, is_staff=is_staff, instance=post )
         if form.is_valid() :
             form.save()  # S
             form.save()
@@ -152,7 +159,7 @@ def blog_add_post(request ):
             pass
     else :
         form = PostForm( is_staff=is_staff, instance=post)
-    return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  } )
+    return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  , 'post_author' : post_author } )
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
@@ -176,6 +183,9 @@ def blog_edit_post(request, pk ):
     action = request.POST.get('action','edit');
     post = get_object_or_404(Post, pk=pk)
     username = request.session.get('username',None)
+    subdomain = request.session.get('subdomain','default')
+    visitor = Visitor.objects.get(name=username,subdomain__name=subdomain)
+    post.post_author = visitor
     is_staff = request.session.get('is_staff',False)
 
     if request.method == "POST":
@@ -192,7 +202,7 @@ def blog_edit_post(request, pk ):
             pass
     else :
         form = PostForm( is_staff=is_staff, instance=post)
-        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff   } )
+        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  } )
 
 
 
@@ -204,12 +214,13 @@ def blog_leave_comment (request, pk):
     post = Post.objects.get(pk=pk)
     post_pk = pk
     username = get_username(request) 
-    author = username
+    subdomain = request.session.get('subdomain','default')
+    comment_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
     body = ''
-    comment , _ = Comment.objects.get_or_create(author=author,post=post,body=body)
+    comment , _ = Comment.objects.get_or_create(comment_author=comment_author,post=post,body=body)
     if request.method == "POST":
         form = CommentForm( request.POST, instance=comment)
-        if form.is_valid() and form.instance.body != '' and form.instance.author != '':
+        if form.is_valid() and form.instance.body != '' and form.instance.comment_author != '':
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/post/{comment.post.pk}')
@@ -227,6 +238,8 @@ def blog_leave_comment (request, pk):
 def blog_edit_comment(request, pk ):
     comment = get_object_or_404(Comment, pk=pk)
     username = get_username(request)
+    subdomain = request.session.get('subdomain','default')
+    comment_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
     action = request.POST.get('action','edit');
     post = comment.post
     if comment.body in [ '<p>&nbsp;</p>' ,'']  :
