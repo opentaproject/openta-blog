@@ -44,12 +44,12 @@ class Subdomain( models.Model) :
 
 
 class Visit(models.Model) :
-    visitor = models.CharField(max_length=60)
-    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="visit")
+    visitor = models.ForeignKey("Visitor", on_delete=models.CASCADE, related_name="visit_visitor")
+    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="visit_post")
     date =  models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{ self.visitor.name}-{self.post.title}"
+        return f"{ self.visitor}-{self.post.title}"
 
 
 

@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
-from blog.models import Post, Comment, Category,Visit
+from blog.models import Post, Comment, Category,Visit,Visitor,Subdomain
 from django.db import ProgrammingError
 from blog.forms import CommentForm, PostForm
 from rest_framework.decorators import api_view
@@ -42,19 +42,21 @@ def blog_index(request, *args, **kwargs ) :
     #category_selected = request.session['category_selected']
     logger.error(f"CATEGORY_SELECTED = {category_selected}")
     subdomain = request.session.get('subdomain',None )
+    subd, _ = Subdomain.objects.get_or_create(name=subdomain)
     if subdomain and not Category.objects.filter(name=subdomain) :
         new_category = Category.objects.create(name=subdomain,restricted=True)
         new_category.save() 
 
     try :
+        visitor, _ = Visitor.objects.get_or_create(name=username,subdomain=subd,visitor_type=1)
         comments  = []
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
         for post in posts :
             if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
                 post.delete()
         post_subquery = Post.objects.filter(id=OuterRef('id'),author=username).annotate(viewed=Count('author')).values('viewed')
-        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=username).annotate(viewed=Count('visitor')).values('viewed')
-        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=username,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
+        #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
+        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('post') ).values('viewed')
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
         if request.session['is_staff'] :
             categories = Category.objects.all()
@@ -81,7 +83,7 @@ def blog_index(request, *args, **kwargs ) :
             selected_posts = []
 
         for post in selected_posts :
-            visit = Visit.objects.update_or_create(visitor=username,post=post)
+            visit = Visit.objects.update_or_create(visitor=visitor,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
         author_type_display = request.session.get('author_type_display','Anonymous')
