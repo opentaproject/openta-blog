@@ -41,7 +41,7 @@ def blog_index(request, *args, **kwargs ) :
     username = request.session['username']
     #category_selected = request.session['category_selected']
     logger.error(f"CATEGORY_SELECTED = {category_selected}")
-    subdomain = request.session.get('subdomain',None )
+    subdomain = request.session.get('subdomain','default')
     subd, _ = Subdomain.objects.get_or_create(name=subdomain)
     if subdomain and not Category.objects.filter(name=subdomain) :
         new_category = Category.objects.create(name=subdomain,restricted=True)
@@ -56,7 +56,7 @@ def blog_index(request, *args, **kwargs ) :
                 post.delete()
         post_subquery = Post.objects.filter(id=OuterRef('id'),author=username).annotate(viewed=Count('author')).values('viewed')
         #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
-        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('post') ).values('viewed')
+        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
         if request.session['is_staff'] :
             categories = Category.objects.all()
