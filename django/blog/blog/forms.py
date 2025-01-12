@@ -30,19 +30,12 @@ class PostForm(forms.ModelForm):
       is_staff = forms.BooleanField()
 
       def __init__(self, *args, is_staff=None, **kwargs):
-          print(f"ARGS = {args}")
-          print(f"KWARGS = {kwargs}")
           super().__init__(*args, **kwargs)
           self.fields["body"].required = True
           self.fields["title"].required = True
           self.fields["post_author"].required = True
-          self.fields['post_author'].selected = 1
-          #self.fields["post_author"].widgetv = forms.HiddenInput();
-          postauthor = self.fields["post_author"];
-          print(f"POST_AUTHOR = {postauthor}")
           self.fields["is_staff"].required = False
-          #self.fields['is_staff'].widget = forms.HiddenInput();
-          if False and  not is_staff :
+          if not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput();
             self.fields['category'].widget = forms.HiddenInput();
             self.is_staff = is_staff
