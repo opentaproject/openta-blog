@@ -39,6 +39,8 @@ class PostForm(forms.ModelForm):
             self.fields['author_type'].widget = forms.HiddenInput();
             self.fields['category'].widget = forms.HiddenInput();
             self.is_staff = is_staff
+            self.fields["is_staff"].widget = forms.HiddenInput();
+            self.fields["post_author"].widget = forms.HiddenInput();
                 
 
       def clean(self):
