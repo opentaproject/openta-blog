@@ -139,7 +139,8 @@ def blog_add_post(request ):
     if not is_authenticated :
         raise PermissionDenied("You must be authenticated in to add a post")
         
-    post_author = Visitor.objects.get(name=username)
+    subdomain = request.session.get('subdomain','default')
+    post_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
     print(f"POST_AUTHOR_IN_ADD_POST = {post_author}")
     try :
         category_ = request.POST.get('category')[0]
@@ -182,7 +183,8 @@ def blog_edit_post(request, pk ):
     action = request.POST.get('action','edit');
     post = get_object_or_404(Post, pk=pk)
     username = request.session.get('username',None)
-    visitor = Visitor.objects.get(name=username)
+    subdomain = request.session.get('subdomain','default')
+    visitor = Visitor.objects.get(name=username,subdomain__name=subdomain)
     post.post_author = visitor
     is_staff = request.session.get('is_staff',False)
 
@@ -212,7 +214,8 @@ def blog_leave_comment (request, pk):
     post = Post.objects.get(pk=pk)
     post_pk = pk
     username = get_username(request) 
-    comment_author = Visitor.objects.get(name=username)
+    subdomain = request.session.get('subdomain','default')
+    comment_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
     body = ''
     comment , _ = Comment.objects.get_or_create(comment_author=comment_author,post=post,body=body)
     if request.method == "POST":

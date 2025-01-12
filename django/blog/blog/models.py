@@ -33,7 +33,7 @@ class Visitor(models.Model) :
 
 
     def __str__(self):
-        return self.name
+        return self.name+'@'+f"{self.subdomain}"
 
 
 class Subdomain( models.Model) :
