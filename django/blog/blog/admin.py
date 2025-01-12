@@ -6,12 +6,12 @@ class CategoryAdmin(admin.ModelAdmin):
     pass
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['title','visibility','last_modified','author','post_author','category']
+    list_display = ['title','visibility','last_modified','post_author','category']
     readonly_fields = ['created_on', 'last_modified']  # Replace with your field names
     pass
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['id','author','post','created_on']
+    list_display = ['id','comment_author','post','created_on']
     pass
 
 class VisitAdmin(admin.ModelAdmin):
