@@ -96,6 +96,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     author = models.CharField(max_length=60,default='',blank=True)
+    comment_author =  models.ForeignKey("Visitor", null=True, blank=True, related_name="comment_author",on_delete=models.CASCADE)
     body =   CKEditor5Field('Text', config_name='extends')
     created_on = models.DateTimeField(auto_now_add=True)
     post = models.ForeignKey("Post", on_delete=models.CASCADE,related_name="comment")
