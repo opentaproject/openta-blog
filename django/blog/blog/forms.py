@@ -10,9 +10,9 @@ class CommentForm(forms.ModelForm):
       def __init__(self, *args, **kwargs):
           super().__init__(*args, **kwargs)
           self.fields["body"].required = False
-          self.fields["author"].required = False
+          self.fields["comment_author"].required = False
           self.fields['post'].widget = forms.HiddenInput();
-          self.fields['author'].widget = forms.HiddenInput();
+          self.fields['comment_author'].widget = forms.HiddenInput();
 
 
       class Meta:
@@ -30,12 +30,19 @@ class PostForm(forms.ModelForm):
       is_staff = forms.BooleanField()
 
       def __init__(self, *args, is_staff=None, **kwargs):
+          print(f"ARGS = {args}")
+          print(f"KWARGS = {kwargs}")
           super().__init__(*args, **kwargs)
           self.fields["body"].required = True
           self.fields["title"].required = True
+          self.fields["post_author"].required = True
+          self.fields['post_author'].selected = 1
+          #self.fields["post_author"].widgetv = forms.HiddenInput();
+          postauthor = self.fields["post_author"];
+          print(f"POST_AUTHOR = {postauthor}")
           self.fields["is_staff"].required = False
-          self.fields['is_staff'].widget = forms.HiddenInput();
-          if not is_staff :
+          #self.fields['is_staff'].widget = forms.HiddenInput();
+          if False and  not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput();
             self.fields['category'].widget = forms.HiddenInput();
             self.is_staff = is_staff
@@ -54,8 +61,8 @@ class PostForm(forms.ModelForm):
 
       class Meta:
           model = Post
-          fields = ['author_type','visibility','author','title','author','body','category' ]
-          #fields = '__all__'
+          #fields = ['author_type','visibility','post_author','title','body','category' ]
+          fields = '__all__'
           widgets = {
               "body": CKEditor5Widget( attrs={"class": "django_ckeditor_5"}, config_name="extends"),
               #"category": forms.HiddenInput(),

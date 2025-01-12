@@ -1,6 +1,7 @@
 {% block posts %}
   {% load humanize %}
   <div class="OpenTA-post-list OpenTA-text-size">
+	  POST_AUTHOR = {{ post_author.name }} {{ post_author.pk }} 
     {% if is_authenticated %}
       <div class="p-2 bg-gray-200">
         <form method="post" action="{% url 'blog_add_post' %}">
@@ -10,7 +11,7 @@
             <input class="OpenTA-text-size px-2 grow border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400" type="text" id="title" name="title" placeholder="title ..." required>
             <input type="hidden" id="visibility" name="visibility" value="{{ visibility }}">
             <input type="hidden" id="author_type" name="author_type" value="{{ author_type}}">
-            <input type="hidden" id="post_author" name="author" value="{{ username }}">
+            <input type="hidden" id="post_author" name="post_author" value="{{ post_author.pk }}">
             <input type="hidden" id="category" name="category" value="{{ category_selected }}">
           </span>
         </form>
@@ -21,7 +22,7 @@
       <div>
         {% if post.pk == selected %}
           <div class="OpenTA-post-selected-entry">
-            <div class=" {{ post.textclass }} flex justify-between w-full">
+            <div class=" {{ pauthorost.textclass }} flex justify-between w-full">
               <span>
                 {% if not post.viewed %}     <i class="fa-solid fa-circle "></i> {% endif %}
                 <a class="" href="{% url 'blog_index'  post.pk %}">

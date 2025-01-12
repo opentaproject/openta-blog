@@ -98,6 +98,8 @@ def blog_index(request, *args, **kwargs ) :
             "category_selected" : cat,
             "is_authenticated" : is_authenticated,
             "visibility" : Post.Visibility.PUBLIC , 
+            "comment_author" : visitor,
+            "post_author" : visitor, 
             "author_type" : author_type,
             "author_type_display" : author_type_display,
             "is_staff" : is_staff,
@@ -131,22 +133,23 @@ def blog_category(request, category):
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
 def blog_add_post(request ):
+    print("BLOG ADD POST")
     username = request.session.get('username',None)
     is_authenticated = request.session.get('is_authenticated',False)
     if not is_authenticated :
         raise PermissionDenied("You must be authenticated in to add a post")
         
-    author = username
-    visitor = Visitor.objects.get(name=username)
+    post_author = Visitor.objects.get(name=username)
+    print(f"POST_AUTHOR_IN_ADD_POST = {post_author}")
     try :
         category_ = request.POST.get('category')[0]
         category = Category.objects.get(pk=category_)
     except ObjectDoesNotExist as e :
         category = Category.objects.all()[0].pk
-    post, _  = Post.objects.get_or_create(title='',body='',category=category)
+    post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
     if request.method == "POST":
         is_staff = request.session.get('is_staff',False)
-        form = PostForm( request.POST, is_staff=is_staff, instance=post)
+        form = PostForm( request.POST, is_staff=is_staff, instance=post )
         if form.is_valid() :
             form.save()  # S
             form.save()
@@ -155,7 +158,7 @@ def blog_add_post(request ):
             pass
     else :
         form = PostForm( is_staff=is_staff, instance=post)
-    return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  } )
+    return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  , 'post_author' : post_author } )
 
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
@@ -179,6 +182,8 @@ def blog_edit_post(request, pk ):
     action = request.POST.get('action','edit');
     post = get_object_or_404(Post, pk=pk)
     username = request.session.get('username',None)
+    visitor = Visitor.objects.get(name=username)
+    post.post_author = visitor
     is_staff = request.session.get('is_staff',False)
 
     if request.method == "POST":
@@ -195,7 +200,7 @@ def blog_edit_post(request, pk ):
             pass
     else :
         form = PostForm( is_staff=is_staff, instance=post)
-        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff   } )
+        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  } )
 
 
 
