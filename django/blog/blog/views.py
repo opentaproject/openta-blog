@@ -238,6 +238,8 @@ def blog_leave_comment (request, pk):
 def blog_edit_comment(request, pk ):
     comment = get_object_or_404(Comment, pk=pk)
     username = get_username(request)
+    subdomain = request.session.get('subdomain','default')
+    comment_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
     action = request.POST.get('action','edit');
     post = comment.post
     if comment.body in [ '<p>&nbsp;</p>' ,'']  :
