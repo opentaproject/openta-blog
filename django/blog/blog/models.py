@@ -64,7 +64,7 @@ class Post(models.Model):
         STAFF = 3
     visibility = models.IntegerField(choices=Visibility , default=2 )
     author_type = models.IntegerField(choices=AuthorType, default=0 )
-    author = models.CharField(max_length=60)
+    #author = models.CharField(max_length=60)
     post_author =  models.ForeignKey("Visitor", null=True, blank=True, related_name="post",on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     body = CKEditor5Field('Text', config_name='extends')
@@ -95,7 +95,7 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    author = models.CharField(max_length=60,default='',blank=True)
+    #author = models.CharField(max_length=60,default='',blank=True)
     comment_author =  models.ForeignKey("Visitor", null=True, blank=True, related_name="comment_author",on_delete=models.CASCADE)
     body =   CKEditor5Field('Text', config_name='extends')
     created_on = models.DateTimeField(auto_now_add=True)
