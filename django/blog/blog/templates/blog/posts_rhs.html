@@ -23,11 +23,11 @@
               <div>
                 <div class="mt-2 flex justify-between w-full">
                   <span>
-                    <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_edit_post' post.pk %}">  {% if post.author == username or  is_staff %} Edit {% endif %} </a> </span>
-                    <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if post.author == username or  is_staff %} Delete {% endif %} </a> </span>
+                    <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_edit_post' post.pk %}">  {% if post.post_author.name == username or  is_staff %} Edit {% endif %} </a> </span>
+                    <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if post.post_author.name == username or  is_staff %} Delete {% endif %} </a> </span>
                   </span>
 
-                  <span class="{{ post.textclass }}">   {{ post.author }} {{ post.last_modified  | naturaltime }}
+                  <span class="{{ post.textclass }}">   {{ post.post_author.name }} {{ post.last_modified  | naturaltime }}
 
                   </span>
                 </div>
@@ -44,15 +44,15 @@
             <div class="OpenTA-comment-list">
               {% for comment in comments %}
                 <div class="OpenTA-comment-entry">
-                  {% if comment.author != "" %}
+                  {% if comment.comment_author != "" %}
                   {% else %}
-                    <p> On {{ comment.created_on.date }} <b>{{ comment.author }} </b> wrote: </p>
+                    <p> On {{ comment.created_on.date }} <b>{{ comment.comment_author.name }} </b> wrote: </p>
                   {% endif %}
 
                   <div class="OpenTA-comment-body"> {{ comment.body | safe }}   </div>
                   <div>
                     <div class="mt-2 flex justify-between w-full">
-                      {% if comment.author == username or is_staff %}
+                      {% if comment.comment_author.name == username or is_staff %}
                         <span> <a class="OpenTA-leave-comment-link" href="{% url 'blog_edit_comment' comment.pk %}">  Edit </a>
                           <a class="OpenTA-leave-comment-link" href="{% url 'blog_delete_comment' comment.pk %}">  Delete </a>
                         </span>
@@ -60,7 +60,7 @@
                         &nbsp;
                       {% endif %}
 
-                      <span class=""> {{ comment.author }}      {{ comment.created_on | naturaltime }}    </span>
+                      <span class=""> {{ comment.comment_author.name }}      {{ comment.created_on | naturaltime }}    </span>
                     </div>
                   </div>
                 </div>

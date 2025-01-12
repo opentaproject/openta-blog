@@ -10,7 +10,7 @@
             <input class="OpenTA-text-size px-2 grow border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400" type="text" id="title" name="title" placeholder="title ..." required>
             <input type="hidden" id="visibility" name="visibility" value="{{ visibility }}">
             <input type="hidden" id="author_type" name="author_type" value="{{ author_type}}">
-            <input type="hidden" id="author" name="author" value="{{ username }}">
+            <input type="hidden" id="post_author" name="author" value="{{ username }}">
             <input type="hidden" id="category" name="category" value="{{ category_selected }}">
           </span>
         </form>
@@ -28,7 +28,7 @@
                   <button  id="check{{ post.pk }}"  class=""> <i class="{{ post.bgclass }} far fa-square-check lhs"></i></button>
                   <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:30 | safe }} </span> </span>
                 </span>
-                <span class="OpenTA-post-last-modified"> {{ post.author }} {{ post.last_modified | naturaltime }} </span>
+                <span class="OpenTA-post-last-modified"> {{ post.post_author.name }} {{ post.last_modified | naturaltime }} </span>
               </a>
             </div>
             <div class="OpenTA-text-size" > {{ post.body | striptags | truncatechars:80   | safe }} </div>
@@ -48,7 +48,7 @@
 <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | safe }} </span> </span>
 		 {% endif %}
                 </span>
-                <span class="OpenTA-post-last-modified"> {{ post.author }} {{ post.last_modified | naturaltime }} </span>
+                <span class="OpenTA-post-last-modified"> {{ post.post_author }} {{ post.last_modified | naturaltime }} </span>
               </a>
             </div>
 	    {% if selected_posts %}

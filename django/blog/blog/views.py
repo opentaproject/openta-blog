@@ -54,7 +54,7 @@ def blog_index(request, *args, **kwargs ) :
         for post in posts :
             if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
                 post.delete()
-        post_subquery = Post.objects.filter(id=OuterRef('id'),author=username).annotate(viewed=Count('author')).values('viewed')
+        post_subquery = Post.objects.filter(id=OuterRef('id'),post_author=visitor).annotate(viewed=Count('post_author')).values('viewed')
         #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
@@ -137,6 +137,7 @@ def blog_add_post(request ):
         raise PermissionDenied("You must be authenticated in to add a post")
         
     author = username
+    visitor = Visitor.objects.get(name=username)
     try :
         category_ = request.POST.get('category')[0]
         category = Category.objects.get(pk=category_)
@@ -206,12 +207,12 @@ def blog_leave_comment (request, pk):
     post = Post.objects.get(pk=pk)
     post_pk = pk
     username = get_username(request) 
-    author = username
+    comment_author = Visitor.objects.get(name=username)
     body = ''
-    comment , _ = Comment.objects.get_or_create(author=author,post=post,body=body)
+    comment , _ = Comment.objects.get_or_create(comment_author=comment_author,post=post,body=body)
     if request.method == "POST":
         form = CommentForm( request.POST, instance=comment)
-        if form.is_valid() and form.instance.body != '' and form.instance.author != '':
+        if form.is_valid() and form.instance.body != '' and form.instance.comment_author != '':
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/post/{comment.post.pk}')
