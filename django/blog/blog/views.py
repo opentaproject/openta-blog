@@ -146,7 +146,7 @@ def blog_add_post(request ):
         category_ = request.POST.get('category')[0]
         category = Category.objects.get(pk=category_)
     except ObjectDoesNotExist as e :
-        category = Category.objects.all()[0].pk
+        category = Category.objects.all()[0]
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
     if request.method == "POST":
         is_staff = request.session.get('is_staff',False)
