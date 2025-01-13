@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
-from blog.models import Post, Comment, Category,Visit,Visitor,Subdomain
+from blog.models import Post, Comment, Category,Visit,Visitor,Subdomain, FilterKey
 from django.db import ProgrammingError
 from blog.forms import CommentForm, PostForm
 from rest_framework.decorators import api_view
@@ -22,25 +22,39 @@ from oauthlib.oauth1 import RequestValidator
 logger = logging.getLogger(__name__)
 from oauthlib.oauth1 import RequestValidator
 from backend.oauth1 import load_session_variables, get_author_type, get_username
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+
 
 
 
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+@csrf_exempt
+#@xframe_options_exempt  
 def blog_index(request, *args, **kwargs ) :
     logger.error(f"BLOG_INDEX METHOD = {request.method}")
+    #logger.error(f"BLOG_INDEX {args} {kwargs}")
     pk = kwargs.get('pk',None)
     #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
     logger.error(f"PK = {pk}")
     if not load_session_variables( request, args, kwargs ) :
         return HttpResponseForbidden("AJABAJA")
+    print(f"RETURN = {request.session.get('return_url','')}")
+    referer =  request.session.get('referer','')
+    print(f"REFERER = {referer}")
+    #for key in request.sesssion.keys():
+    #    print(f"SESSIONS {key} = {request.session[key] }")
         
+    name = str( request.session.get('filter_key','')  )
+    #logger.error(f"FILTER_KEY_NAME = {name}")
+    filter_key , _  = FilterKey.objects.get_or_create(name=name)
+    #logger.error(f"FILTER_KEY_OBJECT = {filter_key}")
     category_selected = request.session['category_selected']
     username = request.session['username']
     #category_selected = request.session['category_selected']
     logger.error(f"CATEGORY_SELECTED = {category_selected}")
+    logger.error(f"FILTER_KEY = {filter_key.name}")
     subdomain = request.session.get('subdomain','default')
     subd, _ = Subdomain.objects.get_or_create(name=subdomain)
     if subdomain and not Category.objects.filter(name=subdomain) :
@@ -48,7 +62,7 @@ def blog_index(request, *args, **kwargs ) :
         new_category.save() 
 
     try :
-        visitor, _ = Visitor.objects.get_or_create(name=username,subdomain=subd,visitor_type=1)
+        visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subd,visitor_type=1)
         comments  = []
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
         for post in posts :
@@ -58,6 +72,8 @@ def blog_index(request, *args, **kwargs ) :
         #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
+        #if not filter_key.name  == '' :
+        #    posts = posts.filter(filter_key=filter_key )
         if request.session['is_staff'] :
             categories = Category.objects.all()
         else :
@@ -66,8 +82,6 @@ def blog_index(request, *args, **kwargs ) :
             categories = ( closed | copen )
         categories = categories.order_by ('restricted')
         cat = int( category_selected )
-
-
 
         is_authenticated = request.session.get('is_authenticated',False)
         is_staff = request.session.get('is_staff',False)
@@ -83,11 +97,11 @@ def blog_index(request, *args, **kwargs ) :
             selected_posts = []
 
         for post in selected_posts :
-            visit = Visit.objects.update_or_create(visitor=visitor,post=post)
+            visit , _  = Visit.objects.update_or_create(visitor=visitor,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
         author_type_display = request.session.get('author_type_display','Anonymous')
-        print(f"AUTHOR_TYPE = {author_type}")
+        #logger.error(f"AUTHOR_TYPE = {author_type}")
         if request.user.is_staff :
             author_type = Post.AuthorType.STAFF
             author_type_display = 'Admin'
@@ -107,6 +121,8 @@ def blog_index(request, *args, **kwargs ) :
             "selected" : pk,
             "selected_posts" : selected_posts,
             "comments" : comments,
+            "filter_key" : filter_key,
+            "referer" : referer,
         }
     except ProgrammingError as e:
         context = {
@@ -131,9 +147,9 @@ def blog_category(request, category):
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_add_post(request ):
-    print("BLOG ADD POST")
+    logger.error("BLOG ADD POST")
     username = request.session.get('username',None)
     is_authenticated = request.session.get('is_authenticated',False)
     if not is_authenticated :
@@ -141,13 +157,20 @@ def blog_add_post(request ):
         
     subdomain = request.session.get('subdomain','default')
     post_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
-    print(f"POST_AUTHOR_IN_ADD_POST = {post_author}")
+    #logger.error(f"POST_AUTHOR_IN_ADD_POST = {post_author}")
     try :
         category_ = request.POST.get('category')[0]
         category = Category.objects.get(pk=category_)
     except ObjectDoesNotExist as e :
         category = Category.objects.all()[0]
+    filter_key , _ = FilterKey.objects.get_or_create( name='ABCDEFG')
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
+    post.filter_key.clear()
+    post.filter_key.add(filter_key)
+    post.save()
+    logger.error(f"A")
+    #logger.error(f"ADD POST {filter_key}")
+    logger.error(f"B")
     if request.method == "POST":
         is_staff = request.session.get('is_staff',False)
         form = PostForm( request.POST, is_staff=is_staff, instance=post )
@@ -158,11 +181,16 @@ def blog_add_post(request ):
         else :
             pass
     else :
+        logger.error(f"C")
         form = PostForm( is_staff=is_staff, instance=post)
-    return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  , 'post_author' : post_author } )
+    logger.error(f"D")
+    logger.error(f"FILTER_KEY = {filter_key.name}")
+    r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  } )
+    return r
+
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_delete_post(request, pk ):
     if not request.session.get('is_authenticated',False ):
         raise PermissionDenied("You must be authenticated in to edit a post")
@@ -176,8 +204,9 @@ def blog_delete_post(request, pk ):
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_edit_post(request, pk ):
+    logger.error(f"EDIT_POST")
     if not request.session.get('is_authenticated',False ):
         raise PermissionDenied("You must be authenticated in to edit a post")
     action = request.POST.get('action','edit');
@@ -202,13 +231,14 @@ def blog_edit_post(request, pk ):
             pass
     else :
         form = PostForm( is_staff=is_staff, instance=post)
-        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  } )
+        logger.error(f"NOW RENDER POST EDIT FORM")
+        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'newfield' : 'NEWFIELD' } )
 
 
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_leave_comment (request, pk):
 
     post = Post.objects.get(pk=pk)
@@ -234,7 +264,7 @@ def blog_leave_comment (request, pk):
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_edit_comment(request, pk ):
     comment = get_object_or_404(Comment, pk=pk)
     username = get_username(request)
@@ -264,7 +294,7 @@ def blog_edit_comment(request, pk ):
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_delete_comment(request, pk ):
     comment = get_object_or_404(Comment, pk=pk)
     username = request.user.username

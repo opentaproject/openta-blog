@@ -34,8 +34,10 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
     'https://www.openta.se',
-    'http://localhost:8000',
+    'http://ffm516-2023.localhost:8000',
+    'http://*.localhost:8080',
     'https://instructure.com',
+    'http://127.0.0.1:8000',
     'https://*',
     'http://*',
 ]
@@ -326,9 +328,9 @@ LTI_TOOL_CONFIGURATION = {
     'allow_ta_access': False,
 }
 
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
-SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = True
+#SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+#SESSION_COOKIE_SAMESITE = 'None'
+#SESSION_COOKIE_SECURE = True
 LTI_KEY =  os.environ.get('LTI_KEY', 'lti-key')
 LTI_SECRET = os.environ.get('LTI_SECRET', 'lti-secret')
 

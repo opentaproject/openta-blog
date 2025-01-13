@@ -44,7 +44,14 @@ MathJax = {
 <img class="inline w-8 h-4 md:w-12 md:h-6 lg:w-12 lg:h-6 " src="{% static '/images/s.ico' %}" alt="">
 <a  class="OpenTA-text-size hover:bg-blue-200 hover:font-bold px-4" href="{% url "blog_index" %}"> OpenTA-sidecar </a> 
 {% if is_authenticated %}  
-<a class="hover:font-bold hover:bg-blue-200" href="https://{{ subdomain }}.opentaproject.com"> {{ username }} @ {{ subdomain }}  </a> {{ author_type_display }} 
+{% if referer %}
+<a class="hover:font-bold hover:bg-blue-200" href="{{ referer }} "> {{ username }} @ {{ subdomain }}  {{ author_type_display }} </a>
+{% endif %}
+{% if filter_key.name %}
+<span class="text-xs">  
+	"{{ filter_key.name }}"  </span>
+{% endif %}
+
 			   
 {% endif %}
 

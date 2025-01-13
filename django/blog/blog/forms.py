@@ -3,6 +3,9 @@
 from django import forms
 from django_ckeditor_5.widgets import CKEditor5Widget
 from .models import Comment, Post
+import logging
+logger = logging.getLogger(__name__)
+
 
 class CommentForm(forms.ModelForm):
       """Form for comments to the article."""
@@ -29,12 +32,18 @@ class PostForm(forms.ModelForm):
 
       is_staff = forms.BooleanField()
 
-      def __init__(self, *args, is_staff=None, **kwargs):
+      def __init__(self,   *args, is_staff=None, **kwargs ):
+          logger.error(f"POST_FORM ARGS = {args}")
+          logger.error(f"KPOST_FORM WARGS = {kwargs}")
           super().__init__(*args, **kwargs)
+          for k in self.fields.keys() :
+              print(f" K = {k} val = {self.fields[k]}")
           self.fields["body"].required = True
           self.fields["title"].required = True
           self.fields["post_author"].required = True
           self.fields["is_staff"].required = False
+          self.fields["filter_key"].required = False
+          #self.fields["filter_key"].widget = forms.HiddenInput();
           if not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput();
             self.fields['category'].widget = forms.HiddenInput();
