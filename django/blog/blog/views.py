@@ -31,7 +31,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 
 @api_view(["GET", "POST"])
 @csrf_exempt
-@xframe_options_exempt  
+#@xframe_options_exempt  
 def blog_index(request, *args, **kwargs ) :
     logger.error(f"BLOG_INDEX METHOD = {request.method}")
     #print(f"BLOG_INDEX {args} {kwargs}")
@@ -142,9 +142,9 @@ def blog_category(request, category):
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_add_post(request ):
-    #print("BLOG ADD POST")
+    print("BLOG ADD POST")
     username = request.session.get('username',None)
     is_authenticated = request.session.get('is_authenticated',False)
     if not is_authenticated :
@@ -159,11 +159,13 @@ def blog_add_post(request ):
     except ObjectDoesNotExist as e :
         category = Category.objects.all()[0]
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
+    print(f"A")
     #if 'filter_key' in request.session :
     #    filter_key , _ = FilterKey.objects.get_or_create( name=request.session['filter_key'] )
     #    if not filter_key.name == '' :
     #        post.filter_key.add( filter_key )
     #print(f"ADD POST {filter_key}")
+    print(f"B")
     if request.method == "POST":
         is_staff = request.session.get('is_staff',False)
         form = PostForm( request.POST, is_staff=is_staff, instance=post )
@@ -174,11 +176,16 @@ def blog_add_post(request ):
         else :
             pass
     else :
+        print(f"C")
         form = PostForm( is_staff=is_staff, instance=post)
-    return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  , 'post_author' : post_author } )
+    print(f"D")
+    r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  } )
+    print(f"E {r} {r.content} ")
+    return r
+
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_delete_post(request, pk ):
     if not request.session.get('is_authenticated',False ):
         raise PermissionDenied("You must be authenticated in to edit a post")
@@ -192,7 +199,7 @@ def blog_delete_post(request, pk ):
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_edit_post(request, pk ):
     print(f"EDIT_POST")
     if not request.session.get('is_authenticated',False ):
@@ -225,7 +232,7 @@ def blog_edit_post(request, pk ):
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_leave_comment (request, pk):
 
     post = Post.objects.get(pk=pk)
@@ -251,7 +258,7 @@ def blog_leave_comment (request, pk):
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_edit_comment(request, pk ):
     comment = get_object_or_404(Comment, pk=pk)
     username = get_username(request)
@@ -281,7 +288,7 @@ def blog_edit_comment(request, pk ):
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+#@xframe_options_exempt  # N
 def blog_delete_comment(request, pk ):
     comment = get_object_or_404(Comment, pk=pk)
     username = request.user.username
