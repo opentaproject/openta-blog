@@ -1,5 +1,10 @@
 from django.contrib import admin
-from blog.models import Category, Comment, Post, Visit, Visitor, Subdomain
+from blog.models import Category, Comment, Post, Visit, Visitor, Subdomain, FilterKey
+
+
+class FilterKeyAdmin(admin.ModelAdmin):
+    list_display = ['id','name']
+    pass
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['id','name','hidden']
@@ -31,4 +36,5 @@ admin.site.register(Visit, VisitAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Subdomain, SubdomainAdmin)
+admin.site.register(FilterKey, FilterKeyAdmin)
 admin.site.register(Visitor, VisitorAdmin)

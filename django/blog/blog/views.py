@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
-from blog.models import Post, Comment, Category,Visit,Visitor,Subdomain
+from blog.models import Post, Comment, Category,Visit,Visitor,Subdomain, FilterKey
 from django.db import ProgrammingError
 from blog.forms import CommentForm, PostForm
 from rest_framework.decorators import api_view
@@ -34,12 +34,17 @@ from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 @xframe_options_exempt  
 def blog_index(request, *args, **kwargs ) :
     logger.error(f"BLOG_INDEX METHOD = {request.method}")
+    print(f"BLOG_INDEX {args} {kwargs}")
     pk = kwargs.get('pk',None)
     #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
     logger.error(f"PK = {pk}")
     if not load_session_variables( request, args, kwargs ) :
         return HttpResponseForbidden("AJABAJA")
         
+    name = str( request.session.get('filter_key','')  )
+    print(f"FILTER_KEY_NAME = {name}")
+    filter_key , _  = FilterKey.objects.get_or_create(name=name)
+    print(f"FILTER_KEY_OBJECT = {filter_key}")
     category_selected = request.session['category_selected']
     username = request.session['username']
     #category_selected = request.session['category_selected']
@@ -110,6 +115,7 @@ def blog_index(request, *args, **kwargs ) :
             "selected" : pk,
             "selected_posts" : selected_posts,
             "comments" : comments,
+            "filter_key" : filter_key,
         }
     except ProgrammingError as e:
         context = {
@@ -151,6 +157,10 @@ def blog_add_post(request ):
     except ObjectDoesNotExist as e :
         category = Category.objects.all()[0]
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
+    filter_key , _ = FilterKey.objects.get_or_create( name=request.session['filter_key'] )
+    if not filter_key.name == '' :
+        post.filter_key.add( filter_key )
+    print(f"ADD POST {filter_key}")
     if request.method == "POST":
         is_staff = request.session.get('is_staff',False)
         form = PostForm( request.POST, is_staff=is_staff, instance=post )

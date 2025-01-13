@@ -6,6 +6,15 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 
 
+class FilterKey(models.Model):
+
+    name = models.CharField(max_length=120)
+
+    def __str__(self):
+        return self.name
+
+
+
 class Category(models.Model):
     name = models.CharField(max_length=30)
     restricted = models.BooleanField(default=False)
@@ -26,7 +35,7 @@ class Visitor(models.Model) :
         TEACHER = 2
         STAFF = 3
 
-    name = models.CharField(max_length=60)
+    name = models.CharField(max_length=120)
     subdomain = models.ForeignKey("Subdomain", on_delete=models.CASCADE,null=True, blank=True,  related_name="visitor")
     last_visit =  models.DateTimeField(auto_now=True)
     visitor_type =  models.IntegerField(choices=VisitorType, default=0 )
@@ -71,6 +80,7 @@ class Post(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     category = models.ForeignKey("Category", null=True, blank=True, related_name="post",on_delete=models.CASCADE)
+    filter_key = models.ManyToManyField(FilterKey)
 
     def __str__(self):
         return self.title
