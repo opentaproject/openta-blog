@@ -22,13 +22,16 @@ from oauthlib.oauth1 import RequestValidator
 logger = logging.getLogger(__name__)
 from oauthlib.oauth1 import RequestValidator
 from backend.oauth1 import load_session_variables, get_author_type, get_username
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+
 
 
 
 
 
 @api_view(["GET", "POST"])
-@xframe_options_exempt  # N
+@csrf_exempt
+@xframe_options_exempt  
 def blog_index(request, *args, **kwargs ) :
     logger.error(f"BLOG_INDEX METHOD = {request.method}")
     pk = kwargs.get('pk',None)
