@@ -198,7 +198,7 @@ def load_session_variables( request , *args, **kwargs ):
 
 def get_author_type( request ):
     roles  =  request.POST.get('lti_roles',request.POST.get('roles',['Anonymous']) )
-    print(f"ROLES = {roles}")
+    #print(f"ROLES = {roles}")
     t = Post.AuthorType.ANONYMOUS
     td = 'Anonymous'
     if 'Student' in roles  or 'Learner' in roles :
@@ -210,7 +210,7 @@ def get_author_type( request ):
     if request.user.is_staff :
         t = Post.AuthorType.STAFF
         td = 'Admin'
-    print(f"T = {t}")
+    #print(f"T = {t}")
     request.session['author_type'] = t
     request.session['author_type_display'] = td
     return t

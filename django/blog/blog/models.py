@@ -92,7 +92,7 @@ class Post(models.Model):
 
     def visits(self,username) :
         v = Visit.objects.filter(visitor=username,post=self, post__last_modified__lt=F('date') ).count()
-        print(f"V = {v}")
+        #print(f"V = {v}")
         return v
 
     def bgclass(self ):
@@ -127,7 +127,7 @@ class CommentUpdateView(UpdateView):
 
     def get_success_url(self)  :
         url = f'/post/{self.post.pk}'
-        print(f"REDIRECT TO {url}")
+        #print(f"REDIRECT TO {url}")
         return redirect(url)
 
 class CommentCreateView(CreateView):
@@ -135,7 +135,7 @@ class CommentCreateView(CreateView):
     fields = ['body', 'category','title']
 
     def get_success_url(self)  :
-        print(f"CREATE_VIEW_SUCCESS_URL")
+        #print(f"CREATE_VIEW_SUCCESS_URL")
         url = f'/post/{self.post.pk}'
-        print(f"REDIRECT TO {url}")
+        #print(f"REDIRECT TO {url}")
         return redirect(url)

@@ -35,6 +35,7 @@ class PostForm(forms.ModelForm):
           self.fields["title"].required = True
           self.fields["post_author"].required = True
           self.fields["is_staff"].required = False
+          self.fields["filter_key"].widget = forms.HiddenInput();
           if not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput();
             self.fields['category'].widget = forms.HiddenInput();

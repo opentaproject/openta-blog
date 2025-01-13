@@ -34,7 +34,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 @xframe_options_exempt  
 def blog_index(request, *args, **kwargs ) :
     logger.error(f"BLOG_INDEX METHOD = {request.method}")
-    print(f"BLOG_INDEX {args} {kwargs}")
+    #print(f"BLOG_INDEX {args} {kwargs}")
     pk = kwargs.get('pk',None)
     #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
     logger.error(f"PK = {pk}")
@@ -42,9 +42,9 @@ def blog_index(request, *args, **kwargs ) :
         return HttpResponseForbidden("AJABAJA")
         
     name = str( request.session.get('filter_key','')  )
-    print(f"FILTER_KEY_NAME = {name}")
+    #print(f"FILTER_KEY_NAME = {name}")
     filter_key , _  = FilterKey.objects.get_or_create(name=name)
-    print(f"FILTER_KEY_OBJECT = {filter_key}")
+    #print(f"FILTER_KEY_OBJECT = {filter_key}")
     category_selected = request.session['category_selected']
     username = request.session['username']
     #category_selected = request.session['category_selected']
@@ -56,7 +56,7 @@ def blog_index(request, *args, **kwargs ) :
         new_category.save() 
 
     try :
-        visitor, _ = Visitor.objects.get_or_create(name=username,subdomain=subd,visitor_type=1)
+        visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subd,visitor_type=1)
         comments  = []
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
         for post in posts :
@@ -66,6 +66,8 @@ def blog_index(request, *args, **kwargs ) :
         #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
+        if not filter_key.name  == '' :
+            posts = posts.filter(filter_key=filter_key )
         if request.session['is_staff'] :
             categories = Category.objects.all()
         else :
@@ -91,11 +93,11 @@ def blog_index(request, *args, **kwargs ) :
             selected_posts = []
 
         for post in selected_posts :
-            visit = Visit.objects.update_or_create(visitor=visitor,post=post)
+            visit , _  = Visit.objects.update_or_create(visitor=visitor,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
         author_type_display = request.session.get('author_type_display','Anonymous')
-        print(f"AUTHOR_TYPE = {author_type}")
+        #print(f"AUTHOR_TYPE = {author_type}")
         if request.user.is_staff :
             author_type = Post.AuthorType.STAFF
             author_type_display = 'Admin'
@@ -142,7 +144,7 @@ def blog_category(request, category):
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
 def blog_add_post(request ):
-    print("BLOG ADD POST")
+    #print("BLOG ADD POST")
     username = request.session.get('username',None)
     is_authenticated = request.session.get('is_authenticated',False)
     if not is_authenticated :
@@ -150,17 +152,18 @@ def blog_add_post(request ):
         
     subdomain = request.session.get('subdomain','default')
     post_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
-    print(f"POST_AUTHOR_IN_ADD_POST = {post_author}")
+    #print(f"POST_AUTHOR_IN_ADD_POST = {post_author}")
     try :
         category_ = request.POST.get('category')[0]
         category = Category.objects.get(pk=category_)
     except ObjectDoesNotExist as e :
         category = Category.objects.all()[0]
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
-    filter_key , _ = FilterKey.objects.get_or_create( name=request.session['filter_key'] )
-    if not filter_key.name == '' :
-        post.filter_key.add( filter_key )
-    print(f"ADD POST {filter_key}")
+    #if 'filter_key' in request.session :
+    #    filter_key , _ = FilterKey.objects.get_or_create( name=request.session['filter_key'] )
+    #    if not filter_key.name == '' :
+    #        post.filter_key.add( filter_key )
+    #print(f"ADD POST {filter_key}")
     if request.method == "POST":
         is_staff = request.session.get('is_staff',False)
         form = PostForm( request.POST, is_staff=is_staff, instance=post )
@@ -191,6 +194,7 @@ def blog_delete_post(request, pk ):
 @api_view(["GET", "POST"])
 @xframe_options_exempt  # N
 def blog_edit_post(request, pk ):
+    print(f"EDIT_POST")
     if not request.session.get('is_authenticated',False ):
         raise PermissionDenied("You must be authenticated in to edit a post")
     action = request.POST.get('action','edit');
