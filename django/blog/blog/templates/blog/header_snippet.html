@@ -3,8 +3,7 @@
         {% for category in categories %}
             <li class="OpenTA-text-size -mb-px mr-1">
                 {% if category.pk == category_selected %}
-                    <a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} </a>
-                    </li>
+		<a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} </a> {{ filter_key.title }} </li>
                 {% else %}
                     <li class="mr-1">
                         <a class="OpenTA-category-not-selected" href="/blog/{{ category.pk }}/">{{ category }}</a>

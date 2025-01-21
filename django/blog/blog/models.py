@@ -9,6 +9,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 class FilterKey(models.Model):
 
     name = models.CharField(max_length=120)
+    title = models.TextField(blank=True, default='')
 
     def __str__(self):
         return self.name

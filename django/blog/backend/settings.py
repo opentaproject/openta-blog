@@ -348,3 +348,19 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 #CRISPY_TEMPLATE_PACK = 'tailwind'
 #CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+    },
+    'loggers': {
+        'django.server': {
+            'handlers': ['null'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}

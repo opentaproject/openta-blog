@@ -36,8 +36,8 @@ class PostForm(forms.ModelForm):
           logger.error(f"POST_FORM ARGS = {args}")
           logger.error(f"KPOST_FORM WARGS = {kwargs}")
           super().__init__(*args, **kwargs)
-          for k in self.fields.keys() :
-              print(f" K = {k} val = {self.fields[k]}")
+          #for k in self.fields.keys() :
+          #    print(f" K = {k} val = {self.fields[k]}")
           self.fields["body"].required = True
           self.fields["title"].required = True
           self.fields["post_author"].required = True

@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 def home(request):
-    print(f"GET HOME.HTML")
     return render(request, 'home.html') 
 
 @csrf_exempt

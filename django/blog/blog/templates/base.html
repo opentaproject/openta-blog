@@ -47,10 +47,12 @@ MathJax = {
 {% if referer %}
 <a class="hover:font-bold hover:bg-blue-200" href="{{ referer }} "> {{ username }} @ {{ subdomain }}  {{ author_type_display }} </a>
 {% endif %}
-{% if filter_key.name %}
+<!--
+{% if filter_key.title%}
 <span class="text-xs">  
-	"{{ filter_key.name }}"  </span>
+	"{{ filter_key.title}}"  </span>
 {% endif %}
+--!>
 
 			   
 {% endif %}
