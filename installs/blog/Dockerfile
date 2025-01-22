@@ -15,9 +15,10 @@ RUN apt update
 RUN mkdir -p /srv/openta-blog
 WORKDIR /srv/openta-blog
 RUN pip install --upgrade pip
+RUN pip install lti
 COPY . /srv
 WORKDIR /srv
-RUN git clone https://github.com/opentaproject/openta-blog.git
+RUN git clone https://github.com/opentaproject/openta-blog.git -b wip11 
 WORKDIR /srv/openta-blog
 RUN pip install -r django/requirements.txt
 WORKDIR /srv/openta-blog/django/blog

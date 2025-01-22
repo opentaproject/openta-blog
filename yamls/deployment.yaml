@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: www # prefix for  pod names
+  name: sidecar # prefix for  pod names
   labels:
-    app: www
+    app: sidecar
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app:  www
+      app:  sidecar
   template:
     metadata:
       labels:
-        app: www
+        app: sidecar
     spec:  
 
       volumes:
@@ -44,7 +44,7 @@ spec:
             - name: DEBUG
               value: 'True'
             - name:  SUBDOMAIN
-              value: 'www'
+              value: 'sidecar'
 
             - name: SUPERUSER_PASSWORD
               valueFrom:
@@ -81,9 +81,15 @@ spec:
               value: 'default'
 
 
+            - name: LTI_KEY
+              value: '889d570f472'
+
+            - name: LTI_SECRET
+              value: 'b317476faed2e879'
+
+
             - name: PGDATABASE
               value: 'wwwdb'
-
 
 
             - name: HTTP_PROTOCOL
@@ -95,9 +101,10 @@ spec:
           args: 
             - cd django/blog;
               ./db_setup ;
-              python manage.py makemigrations;
               python manage.py migrate;
               python manage.py collectstatic --no-input;
+              git checkout latest;
+              git pull;
               /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
               #python manage.py runserver
 
@@ -121,10 +128,10 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: www-service
+  name: sidecar-service
 spec:
   selector:
-    app: www
+    app: sidecar
   type: ClusterIP
   ports:
     - port: 8000

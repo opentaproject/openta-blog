@@ -24,9 +24,16 @@ spec:
       value: 'postgres'
     - name: POOL_MODE
       value: transaction
+    - name: PGPASSWORD
+      value: postgres
     - name: SERVER_RESET_QUERY
       value: DISCARD ALL
     image: edoburu/pgbouncer:1.9.0
+    livenessProbe:
+      exec:
+       command: ["PGHOST=$PGBOUNCER_SERVICE_SERVICE_HOST","PGPASSWORD='postgres'" , "psql", "-U", "postgres" , 'pgbouncer', '-c' , 'SHOW POOLS;' ]
+      initialDelaySeconds: 30
+      periodSeconds: 10
     #volumeMounts:
     #  - mountPath: "/subdomain-data"
     #    name: subdomain-vol
