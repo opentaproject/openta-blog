@@ -6,14 +6,18 @@ metadata:
     app: pgbouncer
   name: pgbouncer
 spec:
-  #volumes:
-  #- name: subdomain-vol
-  #  persistentVolumeClaim:
-  #    claimName: subdomain-pvc
+  volumes:
+  - name: subdomain-vol
+    persistentVolumeClaim:
+      claimName: subdomain-pvc
   containers:
   - env:
     - name: TZ
       value: "Europe/StocholEurope/Stocholmm" # Set your desired timezone
+    - name: PGHOST
+      value: pgbouncer
+    - name: PGPASSWORD
+      value: 'postgres'
     - name: DB_HOST
       value: db-server
     - name: MAX_CLIENT_CONN
@@ -24,19 +28,17 @@ spec:
       value: 'postgres'
     - name: POOL_MODE
       value: transaction
-    - name: PGPASSWORD
-      value: postgres
     - name: SERVER_RESET_QUERY
       value: DISCARD ALL
-    image: edoburu/pgbouncer:1.9.0
+    image: 'localhost:32000/openta-blog-pgbouncer:latest'
     livenessProbe:
       exec:
-       command: ["PGHOST=$PGBOUNCER_SERVICE_SERVICE_HOST","PGPASSWORD='postgres'" , "psql", "-U", "postgres" , 'pgbouncer', '-c' , 'SHOW POOLS;' ]
-      initialDelaySeconds: 30
-      periodSeconds: 10
-    #volumeMounts:
-    #  - mountPath: "/subdomain-data"
-    #    name: subdomain-vol
+       command: ["/subdomain-data/ckpgbouncer"]
+      initialDelaySeconds: 10
+      periodSeconds: 5
+    volumeMounts:
+      - mountPath: "/subdomain-data"
+        name: subdomain-vol
 
     #lifecycle:
     #  preStop:

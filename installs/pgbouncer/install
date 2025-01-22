@@ -1,0 +1,4 @@
+export VERSION=latest
+echo creating docker openta-blog-pgbouncer:${VERSION}
+docker build . -t localhost:32000/openta-blog-pgbouncer:${VERSION}
+docker push localhost:32000/openta-blog-pgbouncer:${VERSION}
