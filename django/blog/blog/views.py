@@ -51,7 +51,8 @@ def blog_index(request, *args, **kwargs ) :
     if subdomain and not Category.objects.filter(name=subdomain) :
         new_category = Category.objects.create(name=subdomain,restricted=True)
         new_category.save() 
-
+    if not filter_key.name   == '' :
+        category_selected =  Category.objects.get(name=subdomain ).pk
     try :
         visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subd,visitor_type=1)
         comments  = []
@@ -71,8 +72,9 @@ def blog_index(request, *args, **kwargs ) :
             categories = ( closed | copen )
         categories = categories.order_by ('restricted')
         cat = int( category_selected )
-        if not str( filter_key  ) == '' :
-            posts = posts.filter(filter_key=filter_key)
+        if not str( filter_key  ) == ''  :
+            if posts.count() > 6 :
+                posts = posts.filter(filter_key=filter_key)
             categories = Category.objects.all().filter(name=subdomain)
             category_selected = int( categories[0].pk )
             cat = int( category_selected )
