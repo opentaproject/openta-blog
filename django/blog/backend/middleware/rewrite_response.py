@@ -1,4 +1,5 @@
 from django.utils.deprecation import MiddlewareMixin
+import re
 
 class ResponseRewriteMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
