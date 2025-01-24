@@ -34,6 +34,15 @@ class PostForm(forms.ModelForm):
 
       is_staff = forms.BooleanField()
 
+      OPTIONS = [ (1 ,'Private'),
+                  (2,'Public')
+                ]
+
+      #visibility = forms.ChoiceField(
+      #  choices=OPTIONS,
+      #  widget=forms.RadioSelect(attrs={'class': 'inline'})
+      #  )
+
       def __init__(self,   *args, is_staff=None, **kwargs ):
           kwargs.setdefault('label_suffix', 'ABC') 
           kwargs['label_suffix'] = ''
@@ -52,8 +61,11 @@ class PostForm(forms.ModelForm):
               self.fields[k].label = ''
           self.fields["title"].label = 'Title: '
           self.fields["visibility"].label = 'Visibility: '
+          self.fields["visibility"].label_class= 'text-xs'
+          self.fields["title"].label_class= 'text-xs'
+          self.fields["visibility"].widget = forms.RadioSelect(choices=self.OPTIONS,attrs=({'class' : 'px-2 gap-4 inline-flex'})  )
           if not is_staff :
-            self.fields['author_type'].widget = forms.HiddenInput({'label' : 'QRT' } );
+            self.fields['author_type'].widget = forms.HiddenInput({'label' : '' } );
             self.fields['category'].widget = forms.HiddenInput();
             self.is_staff = is_staff
             self.fields["is_staff"].widget = forms.HiddenInput();
