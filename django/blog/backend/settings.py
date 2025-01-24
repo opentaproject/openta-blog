@@ -61,10 +61,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "crispy_forms",
-    "crispy_tailwind",
-
-
 ]
 
 MIDDLEWARE = [
@@ -345,8 +341,6 @@ PYLTI_CONFIG = {
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 LTI_EXTRA_PARAMETERS = ["custom_canvas_login_id"]
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-CRISPY_TEMPLATE_PACK = 'tailwind'
-CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 
 LOGGING = {
     'version': 1,
