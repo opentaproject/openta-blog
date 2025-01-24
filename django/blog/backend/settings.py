@@ -299,7 +299,7 @@ CKEDITOR_5_CONFIGS = {
 
 # Define a constant in settings.py to specify file upload permissions
 #CKEDITOR_5_FILE_UPLOAD_PATH = f"/subdomain_data/{SUBDOMAIN}/media/"  # Possible values: "staff", "authenticated", "any"
-CKEDITOR_5_FILE_UPLOAD_PERMISSION = "authenticated"
+CKEDITOR_5_FILE_UPLOAD_PERMISSION = "any"
 CKEDITOR_5_FILE_STORAGE = "backend.util.CustomStorage" # optional
 #CKEDITOR_5_CONFIGS  = 'extended'
 AUTHENTICATION_BACKENDS = [
