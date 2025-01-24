@@ -48,11 +48,13 @@ class PostForm(forms.ModelForm):
           self.fields["is_staff"].required = False
           self.fields["filter_key"].required = False
           self.fields["filter_key"].widget = forms.MultipleHiddenInput();
-          for k in self.fields.keys() : # [ 'author_type', 'post_author','body','category','filter_key','is_staff'] :
+          for k in [ 'author_type', 'post_author','body','category','filter_key','is_staff'] :
               self.fields[k].label = ''
               self.fields[k].label_suffix = ''
               #self.fields[k].label_tag = 'tag'
               #self.fields[k].errors = 'ERR'
+          self.fields["title"].label = 'Title: '
+          self.fields["visibility"].label = 'Visibility: '
           if not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput({'label' : 'QRT' } );
             self.fields['category'].widget = forms.HiddenInput();
