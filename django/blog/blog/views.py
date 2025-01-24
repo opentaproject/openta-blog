@@ -24,9 +24,13 @@ from oauthlib.oauth1 import RequestValidator
 from backend.oauth1 import load_session_variables, get_author_type, get_username
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 
+ANONYMOUS = 0
+STUDENT = 1
+TEACHER = 2
+STAFF = 3
 
-
-
+PRIVATE = 1
+PUBLIC = 2 
 
 
 @api_view(["GET", "POST"])
@@ -64,11 +68,15 @@ def blog_index(request, *args, **kwargs ) :
         #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
+        if visitor.visitor_type in [ ANONYMOUS , STUDENT ] :
+            posts_visible = posts.filter(visibility=PUBLIC)
+            posts_own     = posts.filter(post_author=visitor)
+            posts = posts_visible | posts_own 
         if request.session['is_staff'] :
             categories = Category.objects.all()
         else :
-            copen = Category.objects.all().filter(restricted=False)
-            closed = Category.objects.all().filter(restricted=True,name=subdomain)
+            copen = Category.objects.all().filter(restricted=False,hidden=False)
+            closed = Category.objects.all().filter(restricted=True,name=subdomain,hidden=False)
             categories = ( closed | copen )
         categories = categories.order_by ('restricted')
         cat = int( category_selected )

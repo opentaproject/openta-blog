@@ -18,8 +18,8 @@ class FilterKey(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=30)
-    restricted = models.BooleanField(default=False)
-    hidden = models.BooleanField(default=False,)
+    restricted = models.BooleanField(default=False) # ONLY SEEN BY THOSE IN SAME SUBDOMAIN
+    hidden = models.BooleanField(default=False,) # ONLY SEEN BY STAFF
     class Meta:
         verbose_name_plural = "category"
 
@@ -31,10 +31,11 @@ from django.urls import reverse_lazy
 class Visitor(models.Model) :
 
     class VisitorType( models.IntegerChoices ):
-        ANONYMOUS = 0
-        STUDENT = 1
-        TEACHER = 2
-        STAFF = 3
+
+        ANONYMOUS = 0 # ANYONE ; CANNOT ADD POST
+        STUDENT = 1   # COMES VIA LTI  AS STUDENT
+        TEACHER = 2   # COMES VIA LTI  WITH ESCALATED ROLE
+        STAFF = 3     # IS LEGITIMATE STAFF OF SIDECAR; HAS NOTHING TO DO WITH ROLE ON OPENTA
 
     name = models.CharField(max_length=120)
     subdomain = models.ForeignKey("Subdomain", on_delete=models.CASCADE,null=True, blank=True,  related_name="visitor")
@@ -65,13 +66,13 @@ class Visit(models.Model) :
 
 class Post(models.Model):
     class Visibility( models.IntegerChoices ):
-        PRIVATE = 1
-        PUBLIC = 2 
+        PRIVATE = 1 # ONLY SEEN BY TEACHER,STAFF AND OWNER
+        PUBLIC = 2  # SEEN BY EVERYONE 
     class AuthorType( models.IntegerChoices ):
-        ANONYMOUS = 0
-        STUDENT = 1
-        TEACHER = 2
-        STAFF = 3
+        ANONYMOUS = 0 # ANYONE ; CANNOT ADD POST
+        STUDENT = 1   # COMES VIA LTI  AS STUDENT
+        TEACHER = 2   # COMES VIA LTI  WITH ESCALATED ROLE
+        STAFF = 3     # IS LEGITIMATE STAFF OF SIDECAR; HAS NOTHING TO DO WITH ROLE ON OPENTA
     visibility = models.IntegerField(choices=Visibility , default=2 )
     author_type = models.IntegerField(choices=AuthorType, default=0 )
     #author = models.CharField(max_length=60)
