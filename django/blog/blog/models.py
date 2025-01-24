@@ -41,7 +41,7 @@ class Visitor(models.Model) :
     subdomain = models.ForeignKey("Subdomain", on_delete=models.CASCADE,null=True, blank=True,  related_name="visitor")
     last_visit =  models.DateTimeField(auto_now=True)
     visitor_type =  models.IntegerField(choices=VisitorType, default=0 )
-
+    alias = models.CharField(max_length=120,blank=True, default='')
 
     def __str__(self):
         return self.name+'@'+f"{self.subdomain}"
@@ -83,6 +83,11 @@ class Post(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
     category = models.ForeignKey("Category", null=True, blank=True, related_name="post",on_delete=models.CASCADE)
     filter_key = models.ManyToManyField(FilterKey)
+
+    def save( self, *args, **kwargs):
+      print(f"POST_SAVE ARGS = {args} KWARGS = {kwargs}")
+      super().save(*args,**kwargs)
+
 
     def __str__(self):
         return self.title

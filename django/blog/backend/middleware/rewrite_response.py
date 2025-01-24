@@ -32,6 +32,7 @@ class ResponseRewriteMiddleware(MiddlewareMixin):
             'OpenTA-background' : 'bg-white',\
             'OpenTA-visibility' : "font-semibold inline-block",\
             'OpenTA-title' : "font-semibold",\
+            'OpenTA-alias' : "font-semibold",\
              }
     
         p = request.path
