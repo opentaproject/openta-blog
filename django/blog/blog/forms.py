@@ -33,6 +33,7 @@ class PostForm(forms.ModelForm):
       """Form for posts."""
 
       is_staff = forms.BooleanField()
+      alias = forms.CharField()
 
       OPTIONS = [ (1 ,'Private'),
                   (2,'Public')
@@ -43,16 +44,20 @@ class PostForm(forms.ModelForm):
       #  widget=forms.RadioSelect(attrs={'class': 'inline'})
       #  )
 
-      def __init__(self,   *args, is_staff=None, **kwargs ):
+      def __init__(self,   *args, is_staff=None, alias='',  **kwargs ):
+          print(f"ALIAS IN __INIT__  = {alias}")
           kwargs.setdefault('label_suffix', 'ABC') 
           kwargs['label_suffix'] = ''
           logger.error(f"POST_FORM ARGS = {args}")
-          logger.error(f"KPOST_FORM WARGS = {kwargs}")
+          logger.error(f"POST_FORM KWARGS = {kwargs}")
           super().__init__(*args, **kwargs)
+          print(f"INIT")
           for k in self.fields.keys() :
               print(f" K = {k} val = {self.fields[k]}")
           self.fields["body"].required = True
           self.fields["title"].required = True
+          self.fields["alias"].required = False
+          self.fields["alias"].initial = alias
           self.fields["post_author"].required = True
           self.fields["is_staff"].required = False
           self.fields["filter_key"].required = False
@@ -61,10 +66,11 @@ class PostForm(forms.ModelForm):
               self.fields[k].label = ''
           self.fields["title"].label = 'Title: '
           self.fields["visibility"].label = 'Visibility: '
+          self.fields["alias"].label = 'Alias: '
           self.fields["visibility"].label_class= 'text-xs'
           self.fields["title"].label_class= 'text-xs'
           self.fields["visibility"].widget = forms.RadioSelect(choices=self.OPTIONS,attrs=({'class' : 'px-2 gap-4 inline-flex'})  )
-          if not is_staff :
+          if True or not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput({'label' : '' } );
             self.fields['category'].widget = forms.HiddenInput();
             self.is_staff = is_staff
@@ -74,8 +80,13 @@ class PostForm(forms.ModelForm):
 
       def clean(self):
           cleaned_data = super().clean()
+          print(f"CLEAN {cleaned_data}")
           body = cleaned_data.get('body')
           title = cleaned_data.get('title')
+          alias = cleaned_data.get('alias')
+          post_author = cleaned_data.get('post_author')
+          post_author.alias = alias
+          post_author.save()
   
           if body and title:
               return cleaned_data
@@ -85,7 +96,7 @@ class PostForm(forms.ModelForm):
 
       class Meta:
           model = Post
-          fields = ['author_type','visibility','post_author','title','body','category' ,'filter_key']
+          fields = ['author_type','visibility','post_author','title','body','category' ,'filter_key','alias']
           #fields = '__all__'
           error_messages = {}
           for f in fields :

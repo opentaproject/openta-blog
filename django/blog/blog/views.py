@@ -59,6 +59,9 @@ def blog_index(request, *args, **kwargs ) :
         category_selected =  Category.objects.get(name=subdomain ).pk
     try :
         visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subd,visitor_type=1)
+        if visitor.alias == '' :
+            visitor.alias = visitor.name;
+            visitor.save()
         comments  = []
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
         for post in posts :
@@ -125,6 +128,7 @@ def blog_index(request, *args, **kwargs ) :
             "comments" : comments,
             "filter_key" : filter_key,
             "referer" : referer,
+            "alias" : visitor.alias,
         }
     except ProgrammingError as e:
         context = {
@@ -168,9 +172,14 @@ def blog_add_post(request ):
     post.filter_key.clear()
     post.filter_key.add(filter_key)
     post.save()
+    alias = post.post_author.alias
+    print(f"ADD_POST ALIAS = {alias}")
     if request.method == "POST":
         is_staff = request.session.get('is_staff',False)
-        form = PostForm( request.POST, is_staff=is_staff, instance=post )
+        instance = post
+        instance.alias = alias
+        print(f"BLOG_ADD_POST_1 alias = {alias}")
+        form = PostForm( request.POST, is_staff=is_staff, alias=alias, instance=instance)
         if form.is_valid() :
             form.save()  # S
             form.save()
@@ -178,8 +187,10 @@ def blog_add_post(request ):
         else :
             pass
     else :
-        form = PostForm( is_staff=is_staff, instance=post)
-    r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff  } )
+        print(f"BLOG_ADD_POST_2 alias = {alias}")
+        form = PostForm( is_staff=is_staff,alias=alias, instance=post)
+    print(f"RENDER BLOG_EDIT_POST alias = {alias}")
+    r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias  } )
     return r
 
 
@@ -207,6 +218,8 @@ def blog_edit_post(request, pk ):
     username = request.session.get('username',None)
     subdomain = request.session.get('subdomain','default')
     visitor = Visitor.objects.get(name=username,subdomain__name=subdomain)
+    alias = visitor.alias
+    print(f"BLOG_EDIT_POST ALIAS = {alias}")
     post.post_author = visitor
     is_staff = request.session.get('is_staff',False)
 
@@ -215,7 +228,8 @@ def blog_edit_post(request, pk ):
             post.delete();
             return HttpResponseRedirect(f'/')
 
-        form = PostForm( request.POST, is_staff=is_staff,instance=post)
+        print(f"BLOG_EDIT_POST_2 {alias}")
+        form = PostForm( request.POST,  is_staff=is_staff, alias=alias ,instance=post)
         if form.is_valid() and not post.body == '' :
             form.save()  # S
             form.save()
@@ -223,8 +237,9 @@ def blog_edit_post(request, pk ):
         else :
             pass
     else :
-        form = PostForm( is_staff=is_staff, instance=post)
-        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'newfield' : 'NEWFIELD' } )
+        print(f"BLOG_EDIT_POST_3 {alias}")
+        form = PostForm( is_staff=is_staff, alias=alias, instance=post)
+        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias } )
 
 
 

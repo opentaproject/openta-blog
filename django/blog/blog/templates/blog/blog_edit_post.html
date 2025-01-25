@@ -8,6 +8,13 @@
 
 {% block page_content %}
 
+<!-- table>
+{% for field in form %}
+  <hr><li> {{ field.name }} </li></hr>
+{% endfor %}
+</table --!>
+
+   ALIAS = {{ alias }} 
     <div class="OpenTA-post-entry p-0">
         <div> {{ post.title }} {{ post.last_modified }} </div>
         <div id={{ post.pk }} class="OpenTA-post-form bg-blue-100">
