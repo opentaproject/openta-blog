@@ -34,7 +34,7 @@
                   <button  id="check{{ post.pk }}"  class=""> <i class="{{ post.bgclass }} far fa-square-check lhs"></i></button>
                   <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:30 | safe }} </span> </span>
                 </span>
-                <span class="OpenTA-post-last-modified"> {{ post.post_author.name }} {{ post.last_modified | naturaltime }} </span>
+                <span class="OpenTA-post-last-modified"> {{ post.post_author.alias }} {{ post.last_modified | naturaltime }} </span>
               </a>
             </div>
             <div class="OpenTA-text-size" > {{ post.body | striptags | truncatechars:80   | safe }} </div>
@@ -54,7 +54,7 @@
 <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | safe }} </span> </span>
 		 {% endif %}
                 </span>
-                <span class="OpenTA-post-last-modified"> {{ post.post_author }} {{ post.last_modified | naturaltime }} </span>
+                <span class="OpenTA-post-last-modified"> {{ post.post_author.alias }} {{ post.last_modified | naturaltime }} </span>
               </a>
             </div>
 	    {% if selected_posts %}

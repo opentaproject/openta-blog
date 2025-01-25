@@ -141,6 +141,7 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['is_authenticated'] = True
     if category_selected == None :
         category_selected = Category.objects.all()[0].pk
+        category_selected = Category.objects.get(name='All').pk
     if not pk == None :
         category_selected = Post.objects.get(pk=pk).category.pk;
     #for key in request.session.keys() :
@@ -150,6 +151,7 @@ def load_session_variables( request , *args, **kwargs ):
         data = dict( request.POST )
         username = data.get('custom_canvas_login_id', [''])[0]
         subdomain = data.get('resource_link_title', [''])[0]
+        request.session['author_type'] = author_type
         request.session['username'] = username
         request.session['is_authenticated'] = not username ==  ''
         request.session['subdomain'] = subdomain
@@ -158,6 +160,12 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['return_url'] = data.get('return_url',[''])[0];
         request.session['referer']   = data.get('referer',["REFERER_IN_LOAD_SESSION_VARIABLES_NOT_DEFINED"])[0]
         request.session['filter_title'] = data.get('filter_title',[''])[0]
+        uri = str(  request.build_absolute_uri()  )
+        if 'home' in uri :
+            request.session['filter_key']  = ''
+        #    request.session['category_selected'] = None
+
+
         
     else :
         if 'username' in request.session :
@@ -181,20 +189,18 @@ def load_session_variables( request , *args, **kwargs ):
 
 
 def get_author_type( request ):
-    roles  =  request.POST.get('lti_roles',request.POST.get('roles',['Anonymous']) )
-    #print(f"ROLES = {roles}")
+    roles  =  request.POST.get('roles', request.POST.get('lti_roles', 'Anonymous') )
     t = Post.AuthorType.ANONYMOUS
     td = 'Anonymous'
     if 'Student' in roles  or 'Learner' in roles :
         t = Post.AuthorType.STUDENT
         td = 'Student'
-    if 'Teacher' in roles or 'Examiner' in roles or 'ContentDeveloper' in roles or 'TeachingAssistant' in roles  or 'Instructor' in roles:
+    if 'Teacher' in roles or 'Examiner' in roles or 'ContentDeveloper' in roles or 'TeachingAssistant' in roles  or 'Instructor' in roles or 'Admin' in roles  or 'Author' in roles :
         t = Post.AuthorType.TEACHER
         td = 'Teacher'
     if request.user.is_staff :
         t = Post.AuthorType.STAFF
         td = 'Admin'
-    #print(f"T = {t}")
     request.session['author_type'] = t
     request.session['author_type_display'] = td
     return t

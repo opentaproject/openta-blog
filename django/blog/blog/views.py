@@ -39,56 +39,76 @@ PUBLIC = 2
 def blog_index(request, *args, **kwargs ) :
     pk = kwargs.get('pk',None)
     #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
+    path =  request.build_absolute_uri() 
+    uri = str(  request.build_absolute_uri()  )
+    #if 'home' in uri :
+    #    request.session['filter_title']  = ''
+    #    request.session['category_selected'] = None
     if not load_session_variables( request, args, kwargs ) :
-        return HttpResponseForbidden("AJABAJA")
+        return HttpResponseForbidden("Session Variable Load failed")
     referer =  request.session.get('referer','')
     name = str( request.session.get('filter_key','')  )
     filter_title = request.session.get('filter_title','')
     filter_key , _  = FilterKey.objects.get_or_create(name=name)
     filter_key.title = filter_title
     filter_key.save()
-    category_selected = request.session['category_selected']
+    category_selected = request.session.get('category_selected',None)
     username = request.session['username']
-    subdomain = request.session.get('subdomain','default')
+    subdomain = request.session.get('subdomain','')
     filter_title = request.session.get('filter_title','')
     subd, _ = Subdomain.objects.get_or_create(name=subdomain)
     if subdomain and not Category.objects.filter(name=subdomain) :
         new_category = Category.objects.create(name=subdomain,restricted=True)
         new_category.save() 
-    if not filter_key.name   == '' :
-        category_selected =  Category.objects.get(name=subdomain ).pk
+    #if not filter_key.name   == '' :
+    #    category_selected =  Category.objects.get(name=subdomain ).pk
     try :
         visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subd,visitor_type=1)
-        if visitor.alias == '' :
-            visitor.alias = visitor.name;
+        if visitor.alias == ''  or '@' in visitor.alias :
+            visitor.alias = visitor.name.split('@')[0];
             visitor.save()
         comments  = []
-        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
-        for post in posts :
-            if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
-                post.delete()
-        post_subquery = Post.objects.filter(id=OuterRef('id'),post_author=visitor).annotate(viewed=Count('post_author')).values('viewed')
-        #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
-        visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
-        posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
-        if visitor.visitor_type in [ ANONYMOUS , STUDENT ] :
-            posts_visible = posts.filter(visibility=PUBLIC)
-            posts_own     = posts.filter(post_author=visitor)
-            posts = posts_visible | posts_own 
-        if request.session['is_staff'] :
-            categories = Category.objects.all()
-        else :
-            copen = Category.objects.all().filter(restricted=False,hidden=False)
-            closed = Category.objects.all().filter(restricted=True,name=subdomain,hidden=False)
-            categories = ( closed | copen )
-        categories = categories.order_by ('restricted')
-        cat = int( category_selected )
-        if not str( filter_key  ) == ''  :
-            if posts.count() > 6 :
-                posts = posts.filter(filter_key=filter_key)
-            categories = Category.objects.all().filter(name=subdomain)
-            category_selected = int( categories[0].pk )
+
+        def get_categories_and_posts( visitor, subdomain, category_selected ):
+            
+            category_all = Category.objects.filter(name='All')
+            ALL = None if len( category_all  ) == 0  else category_all[0].pk
+            category_selected = int( category_selected )
+            if  category_selected ==  ALL :
+                posts = Post.objects.all().order_by("-created_on").annotate(viewed=Count('comment') )
+            else :
+                posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
+            for post in posts :
+                if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
+                    post.delete()
+            post_subquery = Post.objects.filter(id=OuterRef('id'),post_author=visitor).annotate(viewed=Count('post_author')).values('viewed')
+            #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
+            visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
+            if category_selected ==  ALL :
+                posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
+            else :
+                posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
+            if visitor.visitor_type in [ ANONYMOUS , STUDENT ] :
+                posts_visible = posts.filter(visibility=PUBLIC)
+                posts_own     = posts.filter(post_author=visitor)
+                posts = posts_visible | posts_own 
+            if request.session['is_staff']  :
+                categories = Category.objects.all()
+            else :
+                copen = Category.objects.all().filter(restricted=False,hidden=False)
+                closed = Category.objects.all().filter(restricted=True,name=subdomain,hidden=False)
+                categories = ( closed | copen )
+            categories = categories.order_by('name')
             cat = int( category_selected )
+            if not str( filter_key  ) == ''  :
+                if posts.count() > 6 :
+                    posts = posts.filter(filter_key=filter_key)
+                categories = Category.objects.all().filter(name=subdomain)
+                category_selected = int( categories[0].pk )
+                cat = int( category_selected )
+            return ( categories , cat , posts )
+
+        categories, cat,  posts = get_categories_and_posts( visitor, subdomain, category_selected  )
         is_authenticated = request.session.get('is_authenticated',False)
         is_staff = request.session.get('is_staff',False)
         #if pk == None :
@@ -160,7 +180,7 @@ def blog_add_post(request ):
     if not is_authenticated :
         raise PermissionDenied("You must be authenticated in to add a post")
         
-    subdomain = request.session.get('subdomain','default')
+    subdomain = request.session.get('subdomain','')
     post_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
     try :
         category_ = request.POST.get('category')[0]
@@ -173,12 +193,10 @@ def blog_add_post(request ):
     post.filter_key.add(filter_key)
     post.save()
     alias = post.post_author.alias
-    print(f"ADD_POST ALIAS = {alias}")
     if request.method == "POST":
         is_staff = request.session.get('is_staff',False)
         instance = post
         instance.alias = alias
-        print(f"BLOG_ADD_POST_1 alias = {alias}")
         form = PostForm( request.POST, is_staff=is_staff, alias=alias, instance=instance)
         if form.is_valid() :
             form.save()  # S
@@ -187,7 +205,6 @@ def blog_add_post(request ):
         else :
             pass
     else :
-        print(f"BLOG_ADD_POST_2 alias = {alias}")
         form = PostForm( is_staff=is_staff,alias=alias, instance=post)
     print(f"RENDER BLOG_EDIT_POST alias = {alias}")
     r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias  } )
@@ -216,7 +233,7 @@ def blog_edit_post(request, pk ):
     action = request.POST.get('action','edit');
     post = get_object_or_404(Post, pk=pk)
     username = request.session.get('username',None)
-    subdomain = request.session.get('subdomain','default')
+    subdomain = request.session.get('subdomain','')
     visitor = Visitor.objects.get(name=username,subdomain__name=subdomain)
     alias = visitor.alias
     print(f"BLOG_EDIT_POST ALIAS = {alias}")
@@ -251,7 +268,7 @@ def blog_leave_comment (request, pk):
     post = Post.objects.get(pk=pk)
     post_pk = pk
     username = get_username(request) 
-    subdomain = request.session.get('subdomain','default')
+    subdomain = request.session.get('subdomain','')
     comment_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
     body = ''
     comment , _ = Comment.objects.get_or_create(comment_author=comment_author,post=post,body=body)
@@ -275,7 +292,7 @@ def blog_leave_comment (request, pk):
 def blog_edit_comment(request, pk ):
     comment = get_object_or_404(Comment, pk=pk)
     username = get_username(request)
-    subdomain = request.session.get('subdomain','default')
+    subdomain = request.session.get('subdomain','')
     comment_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
     action = request.POST.get('action','edit');
     post = comment.post
