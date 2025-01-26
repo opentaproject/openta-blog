@@ -39,15 +39,20 @@ PUBLIC = 2
 def blog_index(request, *args, **kwargs ) :
     pk = kwargs.get('pk',None)
     #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
+    path =  request.build_absolute_uri() 
+    uri = str(  request.build_absolute_uri()  )
+    #if 'home' in uri :
+    #    request.session['filter_title']  = ''
+    #    request.session['category_selected'] = None
     if not load_session_variables( request, args, kwargs ) :
-        return HttpResponseForbidden("AJABAJA")
+        return HttpResponseForbidden("Session Variable Load failed")
     referer =  request.session.get('referer','')
     name = str( request.session.get('filter_key','')  )
     filter_title = request.session.get('filter_title','')
     filter_key , _  = FilterKey.objects.get_or_create(name=name)
     filter_key.title = filter_title
     filter_key.save()
-    category_selected = request.session['category_selected']
+    category_selected = request.session.get('category_selected',None)
     username = request.session['username']
     subdomain = request.session.get('subdomain','default')
     filter_title = request.session.get('filter_title','')
@@ -59,8 +64,8 @@ def blog_index(request, *args, **kwargs ) :
         category_selected =  Category.objects.get(name=subdomain ).pk
     try :
         visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subd,visitor_type=1)
-        if visitor.alias == '' :
-            visitor.alias = visitor.name;
+        if visitor.alias == ''  or '@' in visitor.alias :
+            visitor.alias = visitor.name.split('@')[0];
             visitor.save()
         comments  = []
         posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )

@@ -6,6 +6,8 @@ from . import views
 urlpatterns = [
     path("", views.blog_index, name="blog_index"),
     path("blog/<category_selected>/", views.blog_index, name="blog_index"),
+    path("blog/home/", views.blog_index, name="blog_index"),
+    path("home/", views.blog_index, name="blog_index"),
     path("blog/<category_selected>/<filter_key>", views.blog_index, name="blog_index"),
     path("add_post/", views.blog_add_post, name="blog_add_post"),
     path("edit_post/<int:pk>/", views.blog_edit_post, name="blog_edit_post"),

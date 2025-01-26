@@ -27,7 +27,7 @@
                     <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if post.post_author.name == username or  is_staff %} Delete {% endif %} </a> </span>
                   </span>
 
-                  <span class="{{ post.textclass }}">   {{ post.post_author.name }} {{ post.last_modified  | naturaltime }}
+                  <span class="{{ post.textclass }}">   {{ post.post_author.alias }} {{ post.last_modified  | naturaltime }}
 
                   </span>
                 </div>
