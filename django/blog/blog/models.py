@@ -85,7 +85,6 @@ class Post(models.Model):
     filter_key = models.ManyToManyField(FilterKey)
 
     def save( self, *args, **kwargs):
-      print(f"POST_SAVE ARGS = {args} KWARGS = {kwargs}")
       super().save(*args,**kwargs)
 
 

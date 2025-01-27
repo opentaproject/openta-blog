@@ -141,7 +141,7 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['is_authenticated'] = True
     if category_selected == None :
         category_selected = Category.objects.all()[0].pk
-        category_selected = Category.objects.get(name='All').pk
+        category_selected = Category.objects.get(name='Unread').pk
     if not pk == None :
         category_selected = Post.objects.get(pk=pk).category.pk;
     #for key in request.session.keys() :
