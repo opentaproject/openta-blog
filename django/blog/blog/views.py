@@ -71,10 +71,10 @@ def blog_index(request, *args, **kwargs ) :
 
         def get_categories_and_posts( visitor, subdomain, category_selected ):
             
-            category_all = Category.objects.filter(name='All')
-            category_unread = Category.objects.filter(name='Unread')
-            ALL = None if len( category_all  ) == 0  else category_all[0].pk
-            UNREAD = None if len( category_unread ) == 0  else category_unread[0].pk
+            category_all ,_ = Category.objects.get_or_create(name='All')
+            category_unread , _  = Category.objects.get_or_create(name='Unread')
+            ALL = category_all.pk
+            UNREAD = category_unread.pk
             category_selected = int( category_selected )
             if  category_selected ==  ALL :
                 posts = Post.objects.all().order_by("-created_on").annotate(viewed=Count('comment') )
