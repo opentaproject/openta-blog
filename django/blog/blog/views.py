@@ -72,7 +72,9 @@ def blog_index(request, *args, **kwargs ) :
         def get_categories_and_posts( visitor, subdomain, category_selected ):
             
             category_all = Category.objects.filter(name='All')
+            category_unread = Category.objects.filter(name='Unread')
             ALL = None if len( category_all  ) == 0  else category_all[0].pk
+            UNREAD = None if len( category_unread ) == 0  else category_unread[0].pk
             category_selected = int( category_selected )
             if  category_selected ==  ALL :
                 posts = Post.objects.all().order_by("-created_on").annotate(viewed=Count('comment') )
@@ -86,6 +88,10 @@ def blog_index(request, *args, **kwargs ) :
             visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
             if category_selected ==  ALL :
                 posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
+            elif category_selected ==  UNREAD :
+                pks = Visit.objects.all().filter(visitor=visitor).values('post_id')
+                posts = Post.objects.exclude(pk__in=pks)
+                #posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
             else :
                 posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
             if visitor.visitor_type in [ ANONYMOUS , STUDENT ] :
@@ -98,10 +104,14 @@ def blog_index(request, *args, **kwargs ) :
                 copen = Category.objects.all().filter(restricted=False,hidden=False)
                 closed = Category.objects.all().filter(restricted=True,name=subdomain,hidden=False)
                 categories = ( closed | copen )
-            categories = categories.order_by('name')
+            first_list = ['All','Unread']
+            last_categories = categories.exclude(name__in=first_list).order_by('name')
+            first_categories = categories.filter(name__in=first_list).order_by('name')
+            categories = (first_categories | last_categories)
+
             cat = int( category_selected )
             if not str( filter_key  ) == ''  :
-                if posts.count() > 6 :
+                if posts.count() > 0 :
                     posts = posts.filter(filter_key=filter_key)
                 categories = Category.objects.all().filter(name=subdomain)
                 category_selected = int( categories[0].pk )
@@ -162,9 +172,7 @@ def blog_index(request, *args, **kwargs ) :
     return render(request, "blog/sidebyside.html", context)
 
 def blog_category(request, category):
-    posts = Post.objects.filter(
-        category__name__contains=category
-    ).order_by("-created_on")
+    posts = Post.objects.filter( category__name__contains=category).order_by("-created_on")
     context = {
         "category": category,
         "posts": posts,
