@@ -35,7 +35,7 @@ PUBLIC = 2
 
 @api_view(["GET", "POST"])
 @csrf_exempt
-#@xframe_options_exempt  
+@xframe_options_exempt  
 def blog_index(request, *args, **kwargs ) :
     pk = kwargs.get('pk',None)
     #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
