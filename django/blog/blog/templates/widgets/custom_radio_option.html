@@ -1,0 +1,4 @@
+<label class="custom-radio">
+    <input type="radio" name="{{ widget.name }}" value="{{ widget.value }}" {% if widget.attrs.checked %}checked{% endif %} {{ widget.attrs|flatatt }}>
+    <span>{{ widget.label }}</span>
+</label>

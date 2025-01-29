@@ -43,7 +43,6 @@ class PostForm(forms.ModelForm):
       #  choices=OPTIONS,
       #  widget=forms.RadioSelect(attrs={'class': 'inline'})
       #  )
-
       def __init__(self,   *args, is_staff=None, alias='',  **kwargs ):
           print(f"ALIAS IN __INIT__  = {alias}")
           kwargs.setdefault('label_suffix', 'ABC') 
@@ -67,13 +66,12 @@ class PostForm(forms.ModelForm):
           self.fields["title"].label = 'Title: '
           self.fields["visibility"].label = 'Visibility: '
           self.fields["alias"].label = 'Alias: '
-          self.fields["visibility"].label_class= 'text-xs'
-          self.fields["title"].label_class= 'text-xs'
-          self.fields["visibility"].widget = forms.RadioSelect(choices=self.OPTIONS,attrs=({'class' : 'px-2 gap-4 inline-flex'})  )
-          tx = 'p-1 px-4 text-sm text-gray-900 bg-gray-150 rounded-lg border border-gray-800 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
-          self.fields["title"].widget.attrs.update({'class' : tx ,})
-          self.fields["alias"].widget.attrs.update({'class' : tx ,})
-          if not is_staff :
+          self.fields["title"].widget=forms.TextInput(attrs={'class': 'OpenTA-text-input' });
+          self.fields["alias"].widget=forms.TextInput(attrs={'class': 'OpenTA-text-input',});
+          self.fields["visibility"].widget = forms.RadioSelect(choices=self.OPTIONS);
+          #self.fields["title"].widget.attrs.update({'class' : 'OpenTA-title',})
+          #self.fields["alias"].widget.attrs.update({'class' : 'OpenTA-alias'})
+          if True or not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput({'label' : '' } );
             self.fields['category'].widget = forms.HiddenInput();
             self.is_staff = is_staff
