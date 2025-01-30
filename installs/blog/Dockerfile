@@ -10,7 +10,8 @@ RUN apt update -y \
     postgresql-14\
     apt-utils \
     redis   \
-    supervisor
+    supervisor \
+    npm
 RUN apt update
 RUN mkdir -p /srv/openta-blog
 WORKDIR /srv/openta-blog
@@ -22,8 +23,9 @@ WORKDIR /srv/openta-blog
 RUN pip install -r django/requirements.txt
 WORKDIR /srv/openta-blog/django/blog
 RUN pip install gunicorn
-RUN apt-get install -y npm
 RUN npm install --force @tailwindcss/cli 
-RUN npm audit fix
-RUN css-update
+#RUN npm audit fix
+#RUN ["npx","@tailwindcss/cli -i static/css/input.css -o static/css/output.css "]
+#RUN python manage.py collectstatic
 EXPOSE 8000
+

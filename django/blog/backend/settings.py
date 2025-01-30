@@ -358,3 +358,4 @@ LOGGING = {
         },
     },
 }
+print(f"PGDATABAS {PGDATABASE}")
