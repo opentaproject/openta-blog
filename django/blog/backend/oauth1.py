@@ -149,6 +149,10 @@ def load_session_variables( request , *args, **kwargs ):
     if request.method == 'POST' :
         author_type = get_author_type( request )
         data = dict( request.POST )
+        print(f"DATA = {data}")
+        server = data.get('server',['NONE'] )[0]
+        print(f"SERVER= {server}")
+        request.session['server'] = data.get('server',['NONE'] )[0]
         username = data.get('custom_canvas_login_id', [''])[0]
         subdomain = data.get('resource_link_title', [''])[0]
         request.session['author_type'] = author_type
@@ -161,6 +165,7 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['referer']   = data.get('referer',["REFERER_IN_LOAD_SESSION_VARIABLES_NOT_DEFINED"])[0]
         request.session['filter_title'] = data.get('filter_title',[''])[0]
         uri = str(  request.build_absolute_uri()  )
+        print(f"URI = {uri}")
         if 'home' in uri :
             request.session['filter_key']  = ''
         #    request.session['category_selected'] = None

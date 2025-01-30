@@ -718,6 +718,9 @@
   .min-h-screen {
     min-height: 100vh;
   }
+  .w-1\/1 {
+    width: calc(1/1 * 100%);
+  }
   .w-1\/4 {
     width: calc(1/4 * 100%);
   }
@@ -779,6 +782,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .\!rounded {
+    border-radius: 0.25rem !important;
   }
   .rounded {
     border-radius: 0.25rem;
