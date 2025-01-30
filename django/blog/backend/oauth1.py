@@ -152,7 +152,7 @@ def load_session_variables( request , *args, **kwargs ):
         print(f"DATA = {data}")
         server = data.get('server',['NONE'] )[0]
         print(f"SERVER= {server}")
-        request.session['server'] = data.get('server',['NONE'] )[0]
+        request.session['server'] = server
         username = data.get('custom_canvas_login_id', [''])[0]
         subdomain = data.get('resource_link_title', [''])[0]
         request.session['author_type'] = author_type

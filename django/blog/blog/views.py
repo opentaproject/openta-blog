@@ -48,6 +48,7 @@ def blog_index(request, *args, **kwargs ) :
         return HttpResponseForbidden("Session Variable Load failed")
     referer =  request.session.get('referer','')
     name = str( request.session.get('filter_key','')  )
+    server = str( request.session.get('server','')  )
     filter_title = request.session.get('filter_title','')
     filter_key , _  = FilterKey.objects.get_or_create(name=name)
     filter_key.title = filter_title
@@ -159,6 +160,7 @@ def blog_index(request, *args, **kwargs ) :
             "filter_key" : filter_key,
             "referer" : referer,
             "alias" : visitor.alias,
+            "server" : server,
         }
     except ProgrammingError as e:
         context = {
