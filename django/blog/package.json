@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@tailwindcss/cli": "^4.0.1",
+    "lodash": "^4.17.21",
+    "oath": "^1.0.0",
+    "require": "^0.4.4"
+  },
+  "devDependencies": {
+    "browserify": "^17.0.1",
+    "oauth": "^0.10.0",
+    "oauth-sign": "^0.9.0",
+    "tailwindcss": "^4.0.1",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4"
+  }
+}
