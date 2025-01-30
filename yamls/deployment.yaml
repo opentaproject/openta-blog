@@ -25,7 +25,7 @@ spec:
 
       containers:
         - name: blog
-          image: 'localhost:32000/openta-blog:latest'
+          image: 'localhost:32000/openta-sidecar:latest'
           volumeMounts:
               - mountPath: "/subdomain-data"
                 name: subdomain-vol
@@ -100,11 +100,13 @@ spec:
           command: ["/bin/bash","-c"]
           args: 
             - cd django/blog;
-              ./db_setup ;
-              python manage.py migrate;
-              python manage.py collectstatic --no-input;
+              git fetch --all
               git checkout latest;
-              git pull;
+              ./db_setup ;
+              python manage.py makemigrations;
+              python manage.py migrate;
+              npx @tailwindcss/cli -i static/css/input.css -o static/css/output.css;
+              python manage.py collectstatic --no-input;
               /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
               #python manage.py runserver
 

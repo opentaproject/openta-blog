@@ -1,1 +1,44 @@
-blog_edit_post_test.html
+<!--  blog/templates/blog/detail.html -->
+
+{% extends "base.html" %}
+{% block header %}
+    {{ form.media }} # Required for styling/js to make ckeditor5 work
+{% endblock %}
+
+
+{% block page_content %}
+
+<!-- table>
+{% for field in form %}
+  <hr><li> {{ field.name }} </li></hr>
+{% endfor %}
+</table --!>
+
+    <div class="OpenTA-post-entry p-0">
+        <div> {{ post.title }} {{ post.last_modified }} </div>
+        <div id={{ post.pk }} class="OpenTA-post-form">
+            <form method="post">
+                {% csrf_token %}
+		<div class="OpenTA-title"> {{ form.title.label_tag }}{{ form.title}} {{ form.title.errors }}  </div> 
+		<div class="OpenTA-alias"> {{ form.alias.label_tag }}{{ form.alias}} {{ form.alias.errors }} </div> 
+		<div style="display: flex;">
+		 <span class="OpenTA-visibility"> {{ form.visibility.label_tag }} 
+		 <fieldset class="px-2" > {% for radio in form.visibility %} <span class="OpenTA-choice" > {{ radio }} </span> {% endfor %}
+		</fieldset>
+		 </span> 
+		 </div>
+		 <div class="OpenTA-is_staff"> {{ form.is_staff.label_tag }}{{ form.is_staff}} {{ form.is_staff.errors }} </div> 
+		 <div class="OpenTA-author_type"> {{ form.author_type.label_tag }}{{ form.author_type}} {{ form.author_type.errors }} </div> 
+		 <div class="OpenTA-post_author"> {{ form.post_author.label_tag }}{{ form.post_author}} {{ form.post_author.errors }} </div> 
+		 <div class="OpenTA-body"> {{ form.body.label_tag }}{{ form.body}} {{ form.body.errors }} </div> 
+		 <div class="OpenTA-filter_key"> {{ form.filter_key.label_tag }}{{ form.filter_key}} {{ form.filter_key.errors }} </div> 
+		 <div class="OpenTA-category"> {{ form.category.label_tag }}{{ form.category}} {{ form.category.errors }} </div>  
+		</table>
+                <button type="submit" class="OpenTA-delete-button">Submit</button>
+                <button type="submit" class="OpenTA-delete-button" name="action" value="delete" class="OpenTA-submit-button">Delete </button>
+
+            </form>
+        </div>
+    </div>
+
+{% endblock page_content %}
