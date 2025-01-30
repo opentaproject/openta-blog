@@ -1,24 +1,24 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: openta-se-www
+  name: openta-se-sidecar
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "700m"
 spec:
   tls:
     - hosts:
-      - 'www.openta.se'   #EDIR
+      - 'sidecar.openta.se'   #EDIR
       secretName: openta-se-secret
   ingressClassName: nginx
   rules:
-    - host: "www.openta.se" #EDIT THIS
+    - host: "sidecar.openta.se" #EDIT THIS
       http:
         paths:
           - pathType: "ImplementationSpecific"
             path: /
             backend:
               service:
-                name: www-service
+                name: sidecar-service
                 port:
                   number: 8000
 
