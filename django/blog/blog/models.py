@@ -3,13 +3,20 @@ from django_ckeditor_5.fields import CKEditor5Field
 from django.contrib.auth.models import User
 from django.views.generic.edit import UpdateView, CreateView
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy
 
+class Subdomain( models.Model) :
+    name = models.CharField(max_length=60)
+
+    def __str__(self):
+        return self.name
 
 
 class FilterKey(models.Model):
 
     name = models.CharField(max_length=120)
     title = models.TextField(blank=True, default='')
+    subdomain = models.ForeignKey(Subdomain, on_delete=models.CASCADE, null=True, blank=True,  related_name="filterkey")
 
     def __str__(self):
         return self.name
@@ -26,8 +33,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name
     
-from django.urls import reverse_lazy
-
 class Visitor(models.Model) :
 
     class VisitorType( models.IntegerChoices ):
@@ -46,12 +51,6 @@ class Visitor(models.Model) :
     def __str__(self):
         return self.name+'@'+f"{self.subdomain}"
 
-
-class Subdomain( models.Model) :
-    name = models.CharField(max_length=60)
-
-    def __str__(self):
-        return self.name
 
 
 class Visit(models.Model) :

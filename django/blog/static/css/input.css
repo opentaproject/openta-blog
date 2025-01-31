@@ -5,7 +5,7 @@
 
 @layer components {
     .OpenTA-background { @apply  bg-white;}
-    .OpenTA-text-size { @apply  text-xs md:text-sm lg:text-base;}
+    .OpenTA-text-size { @apply  text-xs md:text-xs lg:text-sm;}
     .OpenTA-category-not-selected { @apply  inline-block border border-white rounded hover:border-gray-200 hover:bg-gray-200 py-0 px-2;}
     .OpenTA-category-selected { @apply  inline-block border border-blue-500 rounded py-0 px-2 bg-blue-500 text-white;}
     .OpenTA-body { @apply  bg-[#ffffff] p-4 font-sans antialiased;}
