@@ -49,17 +49,17 @@ def blog_index(request, *args, **kwargs ) :
     referer =  request.session.get('referer','')
     name = str( request.session.get('filter_key','')  )
     server = str( request.session.get('server','')  )
+    subdomain_name = request.session.get('subdomain','')
     filter_title = request.session.get('filter_title','')
-    filter_key , _  = FilterKey.objects.get_or_create(name=name)
+    subd, _ = Subdomain.objects.get_or_create(name=subdomain_name)
+    filter_title = request.session.get('filter_title','')
+    filter_key , _  = FilterKey.objects.get_or_create(name=name,subdomain=subd)
     filter_key.title = filter_title
     filter_key.save()
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
-    subdomain = request.session.get('subdomain','')
-    filter_title = request.session.get('filter_title','')
-    subd, _ = Subdomain.objects.get_or_create(name=subdomain)
-    if subdomain and not Category.objects.filter(name=subdomain) :
-        new_category = Category.objects.create(name=subdomain,restricted=True)
+    if subdomain_name and not Category.objects.filter(name=subdomain_name) :
+        new_category = Category.objects.create(name=subdomain_name,restricted=True)
         new_category.save() 
     #if not filter_key.name   == '' :
     #    category_selected =  Category.objects.get(name=subdomain ).pk
@@ -70,7 +70,7 @@ def blog_index(request, *args, **kwargs ) :
             visitor.save()
         comments  = []
 
-        def get_categories_and_posts( visitor, subdomain, category_selected ):
+        def get_categories_and_posts( visitor, subdomain_name, category_selected ):
             
             category_all ,_ = Category.objects.get_or_create(name='All')
             category_unread , _  = Category.objects.get_or_create(name='Unread')
@@ -103,7 +103,7 @@ def blog_index(request, *args, **kwargs ) :
                 categories = Category.objects.all()
             else :
                 copen = Category.objects.all().filter(restricted=False,hidden=False)
-                closed = Category.objects.all().filter(restricted=True,name=subdomain,hidden=False)
+                closed = Category.objects.all().filter(restricted=True,name=subdomain_name,hidden=False)
                 categories = ( closed | copen )
             first_list = ['All','Unread']
             last_categories = categories.exclude(name__in=first_list).order_by('name')
@@ -114,12 +114,12 @@ def blog_index(request, *args, **kwargs ) :
             if not str( filter_key  ) == ''  :
                 if posts.count() > 0 :
                     posts = posts.filter(filter_key=filter_key)
-                categories = Category.objects.all().filter(name=subdomain)
+                categories = Category.objects.all().filter(name=subdomain_name)
                 category_selected = int( categories[0].pk )
                 cat = int( category_selected )
             return ( categories , cat , posts )
 
-        categories, cat,  posts = get_categories_and_posts( visitor, subdomain, category_selected  )
+        categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected  )
         is_authenticated = request.session.get('is_authenticated',False)
         is_staff = request.session.get('is_staff',False)
         #if pk == None :
@@ -144,7 +144,7 @@ def blog_index(request, *args, **kwargs ) :
         context = {
             "posts": posts,
             "categories":  categories,
-            "subdomain" : subdomain, 
+            "subdomain" : subdomain_name, 
             "category_selected" : cat,
             "is_authenticated" : is_authenticated,
             "visibility" : Post.Visibility.PUBLIC , 
@@ -186,20 +186,23 @@ def blog_category(request, category):
 #@xframe_options_exempt  # N
 def blog_add_post(request ):
     username = request.session.get('username',None)
+    filter_key_name = request.session.get('filter_key','')
     is_authenticated = request.session.get('is_authenticated',False)
     if not is_authenticated :
         raise PermissionDenied("You must be authenticated in to add a post")
         
-    subdomain = request.session.get('subdomain','')
-    post_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
+    subdomain_name = request.session.get('subdomain','')
+    subdomain,_ = Subdomain.objects.get_or_create(name=subdomain_name)
+
+    post_author = Visitor.objects.get(name=username,subdomain=subdomain)
     try :
         category_ = request.POST.get('category')[0]
         category = Category.objects.get(pk=category_)
     except ObjectDoesNotExist as e :
         category = Category.objects.all()[0]
-    filter_key , _ = FilterKey.objects.get_or_create( name='ABCDEFG')
+    filter_key , _ = FilterKey.objects.get_or_create(subdomain=subdomain,name=filter_key_name)
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
-    post.filter_key.clear()
+    #post.filter_key.clear()
     post.filter_key.add(filter_key)
     post.save()
     alias = post.post_author.alias
