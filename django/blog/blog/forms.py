@@ -81,10 +81,11 @@ class PostForm(forms.ModelForm):
 
       def clean(self):
           cleaned_data = super().clean()
+          print(f"VARS = {cleaned_data}")
           print(f"CLEAN {cleaned_data}")
-          body = cleaned_data.get('body')
-          title = cleaned_data.get('title')
-          alias = cleaned_data.get('alias')
+          body = cleaned_data.get('body','')
+          title = cleaned_data.get('title','')
+          alias = cleaned_data.get('alias','')
           post_author = cleaned_data.get('post_author')
           post_author.alias = alias
           post_author.save()

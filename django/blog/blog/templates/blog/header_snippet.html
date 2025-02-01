@@ -30,16 +30,21 @@
 
 
     <ul class="OpenTA-subcategories">
-	    <li class="OpenTA-text-size"> filters:  </li> 
+	    <li class="pe-2" > <span class="OpenTA-filterkey-selected"> All  </span> </li> 
         {% for category in categories %}
+{% if category.pk == category_selected %}
 	<li class="OpenTA-text-size -mb-px mr-1"> 
 
 
-                {% if category.pk == category_selected %}
-		{% for f in category.get_filterkeys %} <span class='OpenTA-filterkey '> <div class='hidden'> {{ f.name }} </div>  {{ f.title}} </span> {% endfor %}
+		{% for f in category.get_filterkeys %} 
+		{% if f.name %}
+			<span class='OpenTA-filterkey-not-selected '> <div class='hidden'> {{ f.name }} </div>  {{ f.title}} </span> 
+		{% else %} <span> EMPTY </span>
+		{% endif %}
+		{% endfor %}
 
 	</li>
-                {% endif %}
+      {% endif %}
         {% endfor %}
     </ul>
 

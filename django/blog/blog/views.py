@@ -41,11 +41,15 @@ def blog_index(request, *args, **kwargs ) :
     #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
     path =  request.build_absolute_uri() 
     uri = str(  request.build_absolute_uri()  )
-    #if 'home' in uri :
-    #    request.session['filter_title']  = ''
-    #    request.session['category_selected'] = None
     if not load_session_variables( request, args, kwargs ) :
         return HttpResponseForbidden("Session Variable Load failed")
+    print(f"SESSION = {request.session}")
+    for k in request.session.keys() :
+        print(f"K = {k} {request.session[k]} ")
+    if 'home' in uri :
+        pass
+        #del request.session['filter_title']  
+        #del request.session['category_selected'] 
     referer =  request.session.get('referer','')
     name = str( request.session.get('filter_key','')  )
     server = str( request.session.get('server','')  )
@@ -59,9 +63,9 @@ def blog_index(request, *args, **kwargs ) :
         new_category.save() 
     subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
     filter_title = request.session.get('filter_title','')
-    if  not subdomain_name == '' :
-        print(f"CREATE_FILTERKEY1")
+    if  not subdomain_name == '' and not filter_title == '' and not name == ''  :
         category = Category.objects.get(name=subdomain_name)
+        print(f"CREATE_FILTERKEY1 NAME={subdomain_name} SUBD={subdomain} CAT={category} TIT={filter_title}"  )
         filter_key , _  = FilterKey.objects.get_or_create(name=name,subdomain=subdomain,category=category,title=filter_title)
     else :
         filter_key = None
@@ -80,7 +84,7 @@ def blog_index(request, *args, **kwargs ) :
         comments  = []
 
         def get_categories_and_posts( visitor, subdomain_name, category_selected ):
-            
+            print(f"SUBDEF_CATEGORY_SELECTED = {category_selected}") 
             category_all ,_ = Category.objects.get_or_create(name='All')
             category_unread , _  = Category.objects.get_or_create(name='Unread')
             ALL = category_all.pk
@@ -128,17 +132,17 @@ def blog_index(request, *args, **kwargs ) :
             cat = int( category_selected )
             #try :
             #    if False and not str( filter_key  ) == ''  :
-            #        if posts.count() > 0 :
-            #            posts = posts.filter(filter_key=filter_key)
-            #        categories = Category.objects.all().filter(name=subdomain_name)
-            #        category_selected = int( categories[0].pk )
+            #        #if posts.count() > 0 :
+            #        #    posts = posts.filter(filter_key=filter_key)
+            #        cats = Category.objects.all().filter(name=subdomain_name)
+            #        category_selected = int( cats[0].pk )
             #        cat = int( category_selected )
             #except Exception as e :
             #    print(f"FILTER_KEY IS NOT DEFINED  {str(e)}")
             #    pass
             return ( categories , cat , posts )
-
         categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected  )
+        print(f"CAT = {cat}")
         is_authenticated = request.session.get('is_authenticated',False)
         is_staff = request.session.get('is_staff',False)
         #if pk == None :
@@ -219,6 +223,7 @@ def blog_add_post(request ):
         category = Category.objects.get(pk=category_)
     except ObjectDoesNotExist as e :
         category = Category.objects.all()[0]
+    print(f"CREATE POST WITH CATEBORY {category}")
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
     if category.name == subdomain.name :
         print(f"CREATE_FILTERKEY2")

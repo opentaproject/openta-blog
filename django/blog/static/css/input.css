@@ -7,8 +7,9 @@
     .OpenTA-background { @apply  bg-white;}
     .OpenTA-text-size { @apply  text-xs md:text-xs lg:text-sm;}
     .OpenTA-category-not-selected { @apply  inline-block border border-white rounded hover:border-gray-200 hover:bg-gray-200 py-0 px-2;}
-    .OpenTA-category-selected { @apply  inline-block border border-blue-500 rounded py-0 px-2 bg-blue-500 text-white;}
-    .OpenTA-filterkey { @apply  inline-block border border-blue-500 rounded py-0 px-2 bg-blue-400 text-white;}
+    .OpenTA-category-selected { @apply  inline-block border border-blue-500 rounded py-0  bg-blue-500 text-white px-2; }
+    .OpenTA-filterkey-selected { @apply  inline-block border border-blue-500 rounded py-0 px-2 bg-blue-400 text-white px-2;}
+    .OpenTA-filterkey-not-selected { @apply  inline-block border border-blue-500 rounded py-0  bg-white  px-2;}
     .OpenTA-body { @apply  bg-[#ffffff] p-4 font-sans antialiased;}
     .OpenTA-comment-body { @apply  border-b border-gray-300 py-1 rounded-lg shadow-md;}
     .OpenTA-post-list { @apply  h-full border border-gray-300 rounded-lg shadow-md ;}
@@ -17,7 +18,7 @@
     .OpenTA-hide-button { @apply   hover:bg-blue-400;}
     .OpenTA-leave-comment-form { @apply  px-0 ;}
     .OpenTA-leave-comment-link { @apply  px-0 ;}
-    .OpenTA-navigation-bar { @apply  flex p-2  bg-white  ; }
+    .OpenTA-navigation-bar { @apply  flex p-2  bg-white  px-4; }
     .OpenTA-subcategories { @apply  flex px-4  mb-2 bg-white  ; }
     .OpenTA-post-selected-entry { @apply  border border-gray-300 p-2 rounded-lg bg-yellow-100  shadow-md;}
     .OpenTA-post-rhs-entry { @apply       bg-yellow-100 border border-gray-300 p-2 rounded-lg shadow-md;}
