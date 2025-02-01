@@ -57,17 +57,17 @@ def blog_index(request, *args, **kwargs ) :
     if subdomain_name and not Category.objects.filter(name=subdomain_name) :
         new_category = Category.objects.create(name=subdomain_name,restricted=True)
         new_category.save() 
-
-
     subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
     filter_title = request.session.get('filter_title','')
-    filter_key , _  = FilterKey.objects.get_or_create(name=name,subdomain=subdomain)
-    filter_key.title = filter_title
-    filter_key.save()
-
-
-
-
+    if  not subdomain_name == '' :
+        print(f"CREATE_FILTERKEY1")
+        category = Category.objects.get(name=subdomain_name)
+        filter_key , _  = FilterKey.objects.get_or_create(name=name,subdomain=subdomain,category=category,title=filter_title)
+    else :
+        filter_key = None
+        #filter_key.title = filter_title
+        #filter_key.name = subdomain_name
+        #filter_key.save()
 
 
     #if not filter_key.name   == '' :
@@ -123,15 +123,19 @@ def blog_index(request, *args, **kwargs ) :
             first_list = ['All','Unread']
             last_categories = categories.exclude(name__in=first_list).order_by('name')
             first_categories = categories.filter(name__in=first_list).order_by('name')
-            categories = (first_categories | last_categories)
+            categories = (first_categories | last_categories).distinct() 
 
             cat = int( category_selected )
-            if not str( filter_key  ) == ''  :
-                if posts.count() > 0 :
-                    posts = posts.filter(filter_key=filter_key)
-                categories = Category.objects.all().filter(name=subdomain_name)
-                category_selected = int( categories[0].pk )
-                cat = int( category_selected )
+            #try :
+            #    if False and not str( filter_key  ) == ''  :
+            #        if posts.count() > 0 :
+            #            posts = posts.filter(filter_key=filter_key)
+            #        categories = Category.objects.all().filter(name=subdomain_name)
+            #        category_selected = int( categories[0].pk )
+            #        cat = int( category_selected )
+            #except Exception as e :
+            #    print(f"FILTER_KEY IS NOT DEFINED  {str(e)}")
+            #    pass
             return ( categories , cat , posts )
 
         categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected  )
@@ -209,17 +213,17 @@ def blog_add_post(request ):
         
     subdomain_name = request.session.get('subdomain','')
     subdomain,_ = Subdomain.objects.get_or_create(name=subdomain_name)
-
     post_author = Visitor.objects.get(name=username,subdomain=subdomain)
     try :
         category_ = request.POST.get('category')[0]
         category = Category.objects.get(pk=category_)
     except ObjectDoesNotExist as e :
         category = Category.objects.all()[0]
-    filter_key , _ = FilterKey.objects.get_or_create(subdomain=subdomain,name=filter_key_name)
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
-    #post.filter_key.clear()
-    post.filter_key.add(filter_key)
+    if category.name == subdomain.name :
+        print(f"CREATE_FILTERKEY2")
+        filter_key , _ = FilterKey.objects.get_or_create(subdomain=subdomain,category=category, name=filter_key_name)
+        post.filter_key.add(filter_key)
     post.save()
     alias = post.post_author.alias
     if request.method == "POST":

@@ -27,12 +27,13 @@ class Category(models.Model):
         #print(f"CATEGORY = {self.pk}")
         #print(f"POSTS = {posts}")
         filter_keys_with_posts = list( FilterKey.objects.all().filter(id__in=posts.values('filter_key').distinct() ).values('title','name') )
+        filter_keys = FilterKey.objects.all().filter(category=self)
         #subdomain = posts.first().category
         #print(f"SUBDOMAIN_IN_FILTERKEYS = {subdomain}")
         #for f in filter_keys :
         #    print(f"{f} {f.name}")
-        #print(f"FILTER_KEYS = {filter_keys}")
-        return filter_keys_with_posts 
+        print(f"FILTER_KEYS = {filter_keys}")
+        return filter_keys
 
 
 class FilterKey(models.Model):
