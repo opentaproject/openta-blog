@@ -1,9 +1,14 @@
 {% block category %}
     <ul class="OpenTA-navigation-bar">
         {% for category in categories %}
-            <li class="OpenTA-text-size -mb-px mr-1">
+	<li class="OpenTA-text-size -mb-px mr-1"> 
+
+
                 {% if category.pk == category_selected %}
-		<a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} {{ filter_key.title }}  </a> </li>
+		<a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} {{ filter_key.title }}  </a> 
+		{% for f in category.get_filterkeys %} <span class='bg-blue-200'> {{ f.name }} {{ f.title}} </span> {% endfor %}
+
+	</li>
                 {% else %}
                     <li class="mr-1">
                         <a class="OpenTA-category-not-selected" href="/blog/{{ category.pk }}/">{{ category }}</a>

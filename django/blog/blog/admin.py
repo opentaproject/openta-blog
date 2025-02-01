@@ -3,7 +3,7 @@ from blog.models import Category, Comment, Post, Visit, Visitor, Subdomain, Filt
 
 
 class FilterKeyAdmin(admin.ModelAdmin):
-    list_display = ['id','name','subdomain']
+    list_display = ['id','subdomain','title','name']
     pass
 
 class CategoryAdmin(admin.ModelAdmin):

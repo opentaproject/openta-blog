@@ -51,9 +51,9 @@ def blog_index(request, *args, **kwargs ) :
     server = str( request.session.get('server','')  )
     subdomain_name = request.session.get('subdomain','')
     filter_title = request.session.get('filter_title','')
-    subd, _ = Subdomain.objects.get_or_create(name=subdomain_name)
+    subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
     filter_title = request.session.get('filter_title','')
-    filter_key , _  = FilterKey.objects.get_or_create(name=name,subdomain=subd)
+    filter_key , _  = FilterKey.objects.get_or_create(name=name,subdomain=subdomain)
     filter_key.title = filter_title
     filter_key.save()
     category_selected = request.session.get('category_selected',None)
@@ -64,7 +64,7 @@ def blog_index(request, *args, **kwargs ) :
     #if not filter_key.name   == '' :
     #    category_selected =  Category.objects.get(name=subdomain ).pk
     try :
-        visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subd,visitor_type=1)
+        visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subdomain,visitor_type=1)
         if visitor.alias == ''  or '@' in visitor.alias :
             visitor.alias = visitor.name.split('@')[0];
             visitor.save()
@@ -85,6 +85,7 @@ def blog_index(request, *args, **kwargs ) :
                 if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
                     post.delete()
             post_subquery = Post.objects.filter(id=OuterRef('id'),post_author=visitor).annotate(viewed=Count('post_author')).values('viewed')
+            used_categories = Category.objects.filter( id__in= Post.objects.values('category').distinct() )
             #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
             visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
             if category_selected ==  ALL :
@@ -100,11 +101,16 @@ def blog_index(request, *args, **kwargs ) :
                 posts_own     = posts.filter(post_author=visitor)
                 posts = posts_visible | posts_own 
             if request.session['is_staff']  :
-                categories = Category.objects.all()
+                closed = used_categories
+                copen = Category.objects.all().filter(restricted=False,hidden=False)
+                categories = ( closed | copen )
             else :
                 copen = Category.objects.all().filter(restricted=False,hidden=False)
                 closed = Category.objects.all().filter(restricted=True,name=subdomain_name,hidden=False)
                 categories = ( closed | copen )
+            for c in categories :
+                f = c.get_filterkeys()
+                print(f" C={c} F = {f}")
             first_list = ['All','Unread']
             last_categories = categories.exclude(name__in=first_list).order_by('name')
             first_categories = categories.filter(name__in=first_list).order_by('name')

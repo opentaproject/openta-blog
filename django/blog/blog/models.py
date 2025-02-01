@@ -32,7 +32,19 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+    def get_filterkeys( self ):
+        posts = Post.objects.all().filter(category=self)
+        #print(f"CATEGORY = {self.pk}")
+        #print(f"POSTS = {posts}")
+        filter_keys = list( FilterKey.objects.all().filter(id__in=posts.values('filter_key').distinct() ).values('title','name') )
+        #for f in filter_keys :
+        #    print(f"{f} {f.name}")
+        #print(f"FILTER_KEYS = {filter_keys}")
+        return filter_keys
+
+
+
 class Visitor(models.Model) :
 
     class VisitorType( models.IntegerChoices ):
