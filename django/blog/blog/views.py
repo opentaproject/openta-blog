@@ -51,16 +51,25 @@ def blog_index(request, *args, **kwargs ) :
     server = str( request.session.get('server','')  )
     subdomain_name = request.session.get('subdomain','')
     filter_title = request.session.get('filter_title','')
-    subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
-    filter_title = request.session.get('filter_title','')
-    filter_key , _  = FilterKey.objects.get_or_create(name=name,subdomain=subdomain)
-    filter_key.title = filter_title
-    filter_key.save()
+
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
     if subdomain_name and not Category.objects.filter(name=subdomain_name) :
         new_category = Category.objects.create(name=subdomain_name,restricted=True)
         new_category.save() 
+
+
+    subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
+    filter_title = request.session.get('filter_title','')
+    filter_key , _  = FilterKey.objects.get_or_create(name=name,subdomain=subdomain)
+    filter_key.title = filter_title
+    filter_key.save()
+
+
+
+
+
+
     #if not filter_key.name   == '' :
     #    category_selected =  Category.objects.get(name=subdomain ).pk
     try :
@@ -108,9 +117,9 @@ def blog_index(request, *args, **kwargs ) :
                 copen = Category.objects.all().filter(restricted=False,hidden=False)
                 closed = Category.objects.all().filter(restricted=True,name=subdomain_name,hidden=False)
                 categories = ( closed | copen )
-            for c in categories :
-                f = c.get_filterkeys()
-                print(f" C={c} F = {f}")
+            #for c in categories :
+            #    f = c.get_filterkeys()
+            #    print(f" C={c} F = {f}")
             first_list = ['All','Unread']
             last_categories = categories.exclude(name__in=first_list).order_by('name')
             first_categories = categories.filter(name__in=first_list).order_by('name')
@@ -167,6 +176,7 @@ def blog_index(request, *args, **kwargs ) :
             "referer" : referer,
             "alias" : visitor.alias,
             "server" : server,
+            "dummy_field" : 'VIEWS_DUMMY_FIELD',
         }
     except ProgrammingError as e:
         context = {
@@ -179,13 +189,13 @@ def blog_index(request, *args, **kwargs ) :
 
     return render(request, "blog/sidebyside.html", context)
 
-def blog_category(request, category):
-    posts = Post.objects.filter( category__name__contains=category).order_by("-created_on")
-    context = {
-        "category": category,
-        "posts": posts,
-    }
-    return render(request, "blog/category.html", context)
+#def blog_category(request, category):
+#    posts = Post.objects.filter( category__name__contains=category).order_by("-created_on")
+#    context = {
+#        "category": category,
+#        "posts": posts,
+#    }
+#    return render(request, "blog/category.html", context)
 
 
 @api_view(["GET", "POST"])
@@ -226,7 +236,7 @@ def blog_add_post(request ):
     else :
         form = PostForm( is_staff=is_staff,alias=alias, instance=post)
     print(f"RENDER BLOG_EDIT_POST alias = {alias}")
-    r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias  } )
+    r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_ADD_POST' } )
     return r
 
 
@@ -275,7 +285,7 @@ def blog_edit_post(request, pk ):
     else :
         print(f"BLOG_EDIT_POST_3 {alias}")
         form = PostForm( is_staff=is_staff, alias=alias, instance=post)
-        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias } )
+        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_EDIT_POST'} )
 
 
 

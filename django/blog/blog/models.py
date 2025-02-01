@@ -12,17 +12,6 @@ class Subdomain( models.Model) :
         return self.name
 
 
-class FilterKey(models.Model):
-
-    name = models.CharField(max_length=120)
-    title = models.TextField(blank=True, default='')
-    subdomain = models.ForeignKey(Subdomain, on_delete=models.CASCADE, null=True, blank=True,  related_name="filterkey")
-
-    def __str__(self):
-        return self.name
-
-
-
 class Category(models.Model):
     name = models.CharField(max_length=30)
     restricted = models.BooleanField(default=False) # ONLY SEEN BY THOSE IN SAME SUBDOMAIN
@@ -37,11 +26,26 @@ class Category(models.Model):
         posts = Post.objects.all().filter(category=self)
         #print(f"CATEGORY = {self.pk}")
         #print(f"POSTS = {posts}")
-        filter_keys = list( FilterKey.objects.all().filter(id__in=posts.values('filter_key').distinct() ).values('title','name') )
+        filter_keys_with_posts = list( FilterKey.objects.all().filter(id__in=posts.values('filter_key').distinct() ).values('title','name') )
+        #subdomain = posts.first().category
+        #print(f"SUBDOMAIN_IN_FILTERKEYS = {subdomain}")
         #for f in filter_keys :
         #    print(f"{f} {f.name}")
         #print(f"FILTER_KEYS = {filter_keys}")
-        return filter_keys
+        return filter_keys_with_posts 
+
+
+class FilterKey(models.Model):
+
+    name = models.CharField(max_length=120)
+    title = models.TextField(blank=True, default='')
+    subdomain = models.ForeignKey(Subdomain, on_delete=models.CASCADE, null=True, blank=True,  related_name="filterkey")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True,  related_name="category")
+
+    def __str__(self):
+        return self.name
+
+
 
 
 

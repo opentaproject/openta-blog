@@ -16,5 +16,5 @@ urlpatterns = [
     path("blog_delete_comment/<int:pk>/", views.blog_delete_comment, name="blog_delete_comment"),
     path("post/<int:pk>/", views.blog_index, name="blog_index"),
     path("comment/<int:pk>/", views.blog_edit_comment, name="blog_edit_comment"),
-    path("category/<category>/", views.blog_category, name="blog_category"),
+    #path("category/<category>/", views.blog_category, name="blog_category"),
 ]
