@@ -32,7 +32,16 @@
 		 <div class="OpenTA-author_type"> {{ form.author_type.label_tag }}{{ form.author_type}} {{ form.author_type.errors }} </div> 
 		 <div class="OpenTA-post_author"> {{ form.post_author.label_tag }}{{ form.post_author}} {{ form.post_author.errors }} </div> 
 		 <div class="OpenTA-body"> {{ form.body.label_tag }}{{ form.body}} {{ form.body.errors }} </div> 
-		 <div class="OpenTA-filter_key"> {{ form.filter_key.label_tag }}{{ form.filter_key}} {{ form.filter_key.errors }} </div> 
+		 <div class="w-1/4 align-top">
+		 <span class="px-2"> Select </span> 
+		 <select  name="filter_key" id="id_filter_key" multiple> {% for value in form.filter_key  %} <option class="inline-block px-2 text-xs " value="{{ value }}">  {{ label }} </option> {% endfor %} </select> 
+		 </div> 
+
+
+
+
+
+
 		 <div class="OpenTA-category"> {{ form.category.label_tag }}{{ form.category}} {{ form.category.errors }} </div>  
 		</table>
                 <button type="submit" class="OpenTA-delete-button">Submit</button>

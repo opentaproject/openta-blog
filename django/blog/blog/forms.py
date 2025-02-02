@@ -60,8 +60,8 @@ class PostForm(forms.ModelForm):
           self.fields["post_author"].required = True
           self.fields["is_staff"].required = False
           self.fields["filter_key"].required = False
-          self.fields["filter_key"].widget = forms.MultipleHiddenInput();
-          for k in [ 'author_type', 'post_author','body','category','filter_key','is_staff'] :
+          #self.fields["filter_key"].widget = forms.SelectMultiple();
+          for k in [ 'author_type', 'post_author','body','category','is_staff'] :
               self.fields[k].label = ''
           self.fields["title"].label = 'Title: '
           self.fields["visibility"].label = 'Visibility: '
@@ -77,12 +77,12 @@ class PostForm(forms.ModelForm):
             self.is_staff = is_staff
             self.fields["is_staff"].widget = forms.HiddenInput();
             self.fields["post_author"].widget = forms.HiddenInput();
+            #self.fields["filter_key"].widget.attrs.update({'class':'OpenTA-category-selected',})
                 
 
       def clean(self):
           cleaned_data = super().clean()
-          print(f"VARS = {cleaned_data}")
-          print(f"CLEAN {cleaned_data}")
+          print(f"CLEANED = {cleaned_data}")
           body = cleaned_data.get('body','')
           title = cleaned_data.get('title','')
           alias = cleaned_data.get('alias','')
