@@ -159,6 +159,8 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['username'] = username
         request.session['is_authenticated'] = not username ==  ''
         request.session['subdomain'] = subdomain
+        if not subdomain == ''  :
+            category_selected = Category.objects.get(name=subdomain).pk
         request.session['category_selected'] =  category_selected
         request.session['filter_key'] = data.get('filter_key',[''])[0]
         request.session['return_url'] = data.get('return_url',[''])[0];

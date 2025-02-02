@@ -285,7 +285,8 @@ def blog_edit_post(request, pk ):
 
         print(f"BLOG_EDIT_POST_2 {alias}")
         form = PostForm( request.POST,  is_staff=is_staff, alias=alias ,instance=post)
-        if form.is_valid() and not post.body == '' :
+        #if form.is_valid() and not post.body == '' :
+        if  not post.body == '' :
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/post/{post.pk}')
