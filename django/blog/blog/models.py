@@ -1,9 +1,11 @@
-from django.db import models
+from django.db import models 
 from django_ckeditor_5.fields import CKEditor5Field
 from django.contrib.auth.models import User
 from django.views.generic.edit import UpdateView, CreateView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.db.models import Count, Subquery, Sum, OuterRef, F
+
 
 class Subdomain( models.Model) :
     name = models.CharField(max_length=60)
@@ -45,6 +47,10 @@ class FilterKey(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_posts( self ):
+        posts = self.post.all()
+        return posts
 
 
 
@@ -98,7 +104,7 @@ class Post(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     category = models.ForeignKey("Category", null=True, blank=True, related_name="post",on_delete=models.CASCADE)
-    filter_key = models.ManyToManyField(FilterKey)
+    filter_key = models.ManyToManyField(FilterKey,related_name="post")
 
     def save( self, *args, **kwargs):
       super().save(*args,**kwargs)
