@@ -2,7 +2,7 @@
 
 from django import forms
 from django_ckeditor_5.widgets import CKEditor5Widget
-from .models import Comment, Post
+from .models import Comment, Post, FilterKey
 import logging
 logger = logging.getLogger(__name__)
 from django.forms import TextInput, Textarea
@@ -45,7 +45,7 @@ class PostForm(forms.ModelForm):
       #  )
 
       filter_key = forms.ModelMultipleChoiceField(
-              queryset = Post.objects.all(),
+              queryset = FilterKey.objects.all(),
               widget=forms.CheckboxSelectMultiple,
               required = False 
               )
