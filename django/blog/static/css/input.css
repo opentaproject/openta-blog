@@ -46,3 +46,8 @@ option {
     font-size: 10px;
     background-color: #cccfff;
 }
+
+label:has(input[type="radio"]:checked) {
+  color: red;
+  font-weight: bold;
+}
