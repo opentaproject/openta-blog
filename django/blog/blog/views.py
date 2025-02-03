@@ -235,7 +235,9 @@ def blog_add_post(request ):
         is_staff = request.session.get('is_staff',False)
         instance = post
         instance.alias = alias
-        form = PostForm( request.POST, is_staff=is_staff, alias=alias, instance=instance)
+        fk = [i['pk'] for i in list( post.filter_key.all().values('pk') ) ]
+        initial = {'filter_key' : fk }
+        form = PostForm( request.POST, is_staff=is_staff, alias=alias, instance=instance,initial=initial)
         if form.is_valid() :
             form.save()  # S
             form.save()
@@ -243,9 +245,9 @@ def blog_add_post(request ):
         else :
             pass
     else :
-        form = PostForm( is_staff=is_staff,alias=alias, instance=post)
+        form = PostForm( is_staff=is_staff,alias=alias, instance=post,initial=initial)
     print(f"RENDER BLOG_EDIT_POST alias = {alias}")
-    r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_ADD_POST' } )
+    r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_ADD_POST', 'initial' : initial } )
     return r
 
 
@@ -277,14 +279,16 @@ def blog_edit_post(request, pk ):
     print(f"BLOG_EDIT_POST ALIAS = {alias}")
     post.post_author = visitor
     is_staff = request.session.get('is_staff',False)
+    fk = [i['pk'] for i in list( post.filter_key.all().values('pk') ) ]
+    initial = {'filter_key' : fk }
 
     if request.method == "POST":
         if action == 'delete' :
             post.delete();
             return HttpResponseRedirect(f'/')
 
-        print(f"BLOG_EDIT_POST_2 {alias}")
-        form = PostForm( request.POST,  is_staff=is_staff, alias=alias ,instance=post)
+        print(f"BLOG_EDIT_POST_2 {alias} {fk} ")
+        form = PostForm( request.POST,  is_staff=is_staff, alias=alias ,instance=post,initial=initial)
         #if form.is_valid() and not post.body == '' :
         if  not post.body == '' :
             form.save()  # S
@@ -294,8 +298,8 @@ def blog_edit_post(request, pk ):
             pass
     else :
         print(f"BLOG_EDIT_POST_3 {alias}")
-        form = PostForm( is_staff=is_staff, alias=alias, instance=post)
-        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_EDIT_POST'} )
+        form = PostForm( is_staff=is_staff, alias=alias, instance=post,initial=initial)
+        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_EDIT_POST','initial' : initial } )
 
 
 

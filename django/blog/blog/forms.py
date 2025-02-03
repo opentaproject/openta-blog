@@ -43,14 +43,24 @@ class PostForm(forms.ModelForm):
       #  choices=OPTIONS,
       #  widget=forms.RadioSelect(attrs={'class': 'inline'})
       #  )
+
+      filter_key = forms.ModelMultipleChoiceField(
+              queryset = Post.objects.all(),
+              widget=forms.CheckboxSelectMultiple,
+              required = False 
+              )
       def __init__(self,   *args, is_staff=None, alias='',  **kwargs ):
-          print(f"ALIAS IN __INIT__  = {alias}")
+          #print(f"POST FORM kwargs = {kwargs}")
+          #print(f"ALIAS IN __INIT__  = {alias}")
+          print(f"KWARGS = {kwargs}")
+          instance = kwargs['instance']
+          fk = [ i['pk'] for i in list( instance.filter_key.all().values('pk') ) ]
+          print(f"FK = {fk}")
           kwargs.setdefault('label_suffix', 'ABC') 
           kwargs['label_suffix'] = ''
           logger.error(f"POST_FORM ARGS = {args}")
           logger.error(f"POST_FORM KWARGS = {kwargs}")
           super().__init__(*args, **kwargs)
-          print(f"INIT")
           for k in self.fields.keys() :
               print(f" K = {k} val = {self.fields[k]}")
           self.fields["body"].required = True
@@ -63,6 +73,7 @@ class PostForm(forms.ModelForm):
           #self.fields["filter_key"].widget = forms.SelectMultiple();
           for k in [ 'author_type', 'post_author','body','category','is_staff'] :
               self.fields[k].label = ''
+          self.fields["filter_key"].initial = kwargs['initial']['filter_key']
           self.fields["title"].label = 'Title: '
           self.fields["visibility"].label = 'Visibility: '
           self.fields["alias"].label = 'Alias: '
@@ -77,7 +88,8 @@ class PostForm(forms.ModelForm):
             self.is_staff = is_staff
             self.fields["is_staff"].widget = forms.HiddenInput();
             self.fields["post_author"].widget = forms.HiddenInput();
-            #self.fields["filter_key"].widget.attrs.update({'class':'OpenTA-category-selected',})
+            self.fields["filter_key"].widget.attrs.update({'class' : 'px-2 pb-2 text-blue-400  ABCDEFG'} ,)
+            #self.fields["filter_key"].widget.attrs.update(attrs)
                 
 
       def clean(self):
