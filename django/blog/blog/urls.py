@@ -15,6 +15,9 @@ urlpatterns = [
     path("blog_leave_comment/<int:pk>/", views.blog_leave_comment, name="blog_leave_comment"),
     path("blog_delete_comment/<int:pk>/", views.blog_delete_comment, name="blog_delete_comment"),
     path("post/<int:pk>/", views.blog_index, name="blog_index"),
-    path("comment/<int:pk>/", views.blog_edit_comment, name="blog_edit_comment"),
-    #path("category/<category>/", views.blog_category, name="blog_category"),
+    path("filter_key/comment/<int:pk>/", views.blog_edit_comment, name="blog_edit_comment"),
+    path('filter_key/create/', views.FilterKeyCreateView.as_view(), name='filter_key_create'),
+    path('filter_key/<int:pk>/update/', views.FilterKeyUpdateView.as_view(), name='filter_key_update'),
+    path('filter_key/<int:pk>/delete/', views.FilterKeyDeleteView.as_view(), name='filter_key_delete'),
+    path('filter_key/list/', views.FilterKeyListView.as_view(), name='filter_key_list'),
 ]

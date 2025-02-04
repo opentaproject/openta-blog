@@ -3,6 +3,9 @@ from django.db.models import Count, Subquery, Sum, OuterRef, F
 import hmac
 import hashlib
 import urllib.parse
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.list import ListView
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
@@ -369,4 +372,31 @@ def blog_delete_comment(request, pk ):
     post = comment.post
     comment.delete();
     return HttpResponseRedirect(f'/post/{post.pk}')
+
+
+
+class FilterKeyCreateView(CreateView):
+    model = FilterKey
+    fields = ['name', 'title', 'category']  # List the fields you want to include in the form
+    template_name = 'filter_key_form.html'
+    success_url = reverse_lazy('filter_key_list')  # Redirect after successful creation
+
+# Update View
+class FilterKeyUpdateView(UpdateView):
+    model = FilterKey
+    fields = ['name', 'title', 'category']
+    template_name = 'filter_key_form.html'
+    success_url = reverse_lazy('filter_key_list')
+
+# Delete View
+class FilterKeyDeleteView(DeleteView):
+    model = FilterKey
+    template_name = 'filter_key_confirm_delete.html'
+    success_url = reverse_lazy('filter_key_list')
+
+
+class FilterKeyListView(ListView):
+    model = FilterKey
+    template_name = 'filter_key_list.html'
+    success_url = reverse_lazy('filter_key_list')
 
