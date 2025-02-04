@@ -1,6 +1,7 @@
 # blogs/views.py
 from django.db.models import Count, Subquery, Sum, OuterRef, F
 import hmac
+import re
 import hashlib
 import urllib.parse
 from django.urls import reverse_lazy
@@ -396,7 +397,20 @@ class FilterKeyDeleteView(DeleteView):
 
 
 class FilterKeyListView(ListView):
+
+
     model = FilterKey
     template_name = 'filter_key_list.html'
     success_url = reverse_lazy('filter_key_list')
+
+    def get_queryset(self):
+        # \w{8}-\w{4}-\w{4}-\w{4}-\w{12}
+        f = list( FilterKey.objects.all().values_list('name',flat=True) )
+        f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
+        print(f"F = {f}")
+        filterkeys = FilterKey.objects.all().exclude(name__in=f)
+
+        return filterkeys
+
+
 

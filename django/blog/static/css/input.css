@@ -40,6 +40,7 @@
     .OpenTA-text-input { @apply  px-2 me-2 text-blue-600 rounded-lg ;}
     .OpenTA-debug { @apply hidden text-xs text-red-800 ; }
     .OpenTA-filterkeys { @apply inline-block text-green-800 px-4 ; }
+    .OpenTA-left { @apply text-left px-2 ; }
 }
 
 option {
