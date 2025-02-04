@@ -35,15 +35,15 @@
 	<li class="OpenTA-text-size -mb-px mr-1"> 
 
 		<form method="post">
-			<label for="id_post_all" > <input type="radio" name="f" value="All" id="All" checked> All </input>
+			<label for="id_filterkey_all" > <input type="radio" name="option" value="All" id="All" checked> All </input>
 			</label>
 		{% for f in category.get_filterkeys %} 
 		{{ style }} 
 		{% if f.name %}
 		{% if f.get_posts %} 
-			<label for="id_post_{{f.pk}}">
-				<input type="radio" name="f" value="{{ f.pk}}" id="id_post_{{f.pk}}">  {{ f.title }} 
-				{% for p in f.get_posts %} <span class="border text-xs px-2"> {{ p.pk }}   </span> {% endfor %}
+			<label for="id_filterkey_{{f.pk}}">
+				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  {{ f.title }}  {{ f.get_posts }} 
+
 			</input> 
 			</label>
 		{% endif %}
@@ -57,6 +57,19 @@
         {% endfor %}
     </ul>
 
+      <script>
+        // Select all radio buttons with the name 'option'
+        const radioButtons = document.querySelectorAll('input[name="option"]');
+
+        // Add a 'change' event listener to each radio button
+        radioButtons.forEach((radio) => {
+            radio.addEventListener('change', () => {
+                if (radio.checked) {
+			console.log(`You selected: ${radio.id} ${radio.value}` );
+                }
+            });
+        });
+    </script>
 
 
 

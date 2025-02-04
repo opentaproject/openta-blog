@@ -50,7 +50,11 @@ class FilterKey(models.Model):
 
     def get_posts( self ):
         posts = self.post.all()
-        return posts
+        posts = posts.filter(category=self.category)
+        v = list( posts.values_list("pk",flat=True) )
+        #p = ",".join(v)
+        #print(f"P = {p}")
+        return  v
 
 
 
