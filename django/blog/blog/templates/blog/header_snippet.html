@@ -57,7 +57,31 @@
         {% endfor %}
     </ul>
 
-      <script>
+    <script>
+	function hide( a ) {
+		var posts =  document.getElementsByClassName('post');
+		if ( a == 'All' ){
+			var acopy = [];
+			for (var i = 0; i < posts.length; i++) {
+				posts[i].classList.remove('hidden') ; // Do something with each element
+				posts[i].classList.add('visible') ; // Do something with each element
+				}
+			} 
+		else  {
+		      var acopy = JSON.parse( a );
+			for (var i = 0; i < posts.length; i++) {
+				posts[i].classList.add('hidden') ; // Do something with each element
+         			posts[i].classList.replace('visible','hidden') ; // Do something with each element
+
+
+			for ( let i = 0 ; i < acopy.length ; i++ ){
+				const post = document.getElementById( 'post_' + acopy[i] );
+				post.classList.replace('hidden','visible');
+				console.log("I = ", i , acopy[i] , post )
+				}
+			}
+		     }
+		}
         // Select all radio buttons with the name 'option'
         const radioButtons = document.querySelectorAll('input[name="option"]');
 
@@ -65,6 +89,7 @@
         radioButtons.forEach((radio) => {
             radio.addEventListener('change', () => {
                 if (radio.checked) {
+			hide(  radio.value )
 			console.log(`You selected: ${radio.id} ${radio.value}` );
                 }
             });

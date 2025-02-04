@@ -24,7 +24,7 @@
     {% endif %}
 
     {% for post in posts %}
-    <div class="visible" id="post_{{ post.pk }}">
+    <div class="visible post" id="post_{{ post.pk }}">
         {% if post.pk == selected %}
           <span> PK={{ post.pk }} </span>
           <div class="OpenTA-post-selected-entry">
