@@ -403,12 +403,22 @@ class FilterKeyListView(ListView):
     template_name = 'filter_key_list.html'
     success_url = reverse_lazy('filter_key_list')
 
-    def get_queryset(self):
-        # \w{8}-\w{4}-\w{4}-\w{4}-\w{12}
-        f = list( FilterKey.objects.all().values_list('name',flat=True) )
+    #def __init__(self, *args, **kwargs) :
+    #    print(f"__INIT__ = {args} {kwargs} ")
+    #    super().__init__(*args,**kwargs)
+
+
+
+
+    def get_queryset(self, *args, **kwargs ):
+        print(f"REQUEST = {self.request.path}")
+        print(f"SUBDOMAIN = {self.request.session['subdomain']}")
+        category = Category.objects.get(name=self.request.session['subdomain'])
+        filterkeys =  FilterKey.objects.filter(category=category)
+        f = list( filterkeys.values_list('name',flat=True) )
         f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
         print(f"F = {f}")
-        filterkeys = FilterKey.objects.all().exclude(name__in=f)
+        filterkeys = filterkeys.exclude(name__in=f)
 
         return filterkeys
 

@@ -20,4 +20,5 @@ urlpatterns = [
     path('filter_key/<int:pk>/update/', views.FilterKeyUpdateView.as_view(), name='filter_key_update'),
     path('filter_key/<int:pk>/delete/', views.FilterKeyDeleteView.as_view(), name='filter_key_delete'),
     path('filter_key/list/', views.FilterKeyListView.as_view(), name='filter_key_list'),
+    path('filter_key/list/<subdomain>/', views.FilterKeyListView.as_view(), name='filter_key_list'),
 ]
