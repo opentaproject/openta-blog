@@ -35,16 +35,19 @@
 	<li class="OpenTA-text-size -mb-px mr-1"> 
 
 		<form method="post">
-			<label for="id_filterkey_all" > <input type="radio" name="option" value="All" id="All" checked> All </input>
+			<label for="id_filterkey_all" > <input type="radio" name="option" value="All" id="All" > All </input>
 			</label>
 		{% for f in category.get_filterkeys %} 
 		{{ style }} 
 		{% if f.name %}
 		{% if f.get_posts %} 
 			<label for="id_filterkey_{{f.pk}}">
-				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  {{ f.title }}  {{ f.get_posts }} 
+				{% if filter_key.pk == f.pk %}
+				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  {{ f.title }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
+				{% else %}
+				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  {{ f.title }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
 
-			</input> 
+				{% endif %}
 			</label>
 		{% endif %}
 		{% else %} <span> EMPTY </span>
@@ -58,7 +61,7 @@
     </ul>
 
     <script>
-	function hide( a ) {
+	function hideshow( a ) {
 		var posts =  document.getElementsByClassName('post');
 		if ( a == 'All' ){
 			var acopy = [];
@@ -89,7 +92,7 @@
         radioButtons.forEach((radio) => {
             radio.addEventListener('change', () => {
                 if (radio.checked) {
-			hide(  radio.value )
+			hideshow(  radio.value )
 			console.log(`You selected: ${radio.id} ${radio.value}` );
                 }
             });

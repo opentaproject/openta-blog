@@ -24,8 +24,17 @@
     {% endif %}
 
     {% for post in posts %}
-    <div class="visible post" id="post_{{ post.pk }}">
-        {% if post.pk == selected %}
+    {% if filter_key.get_posts %}
+    {% if post.pk in filter_key.get_posts  %}
+    	<div class="visible post" id="post_{{ post.pk }}">
+	{% else %}
+	<div class="hidden post" id="post_{{ post.pk }}">
+	{% endif %}
+    {% else %}
+    	<div class="visible post" id="post_{{ post.pk }}">
+
+    {% endif %}
+     {% if post.pk == selected %}
           <span> PK={{ post.pk }} </span>
           <div class="OpenTA-post-selected-entry">
             <div class=" {{ pauthorost.textclass }} flex justify-between w-full">
@@ -72,6 +81,5 @@
       </div>
     {% endfor %}
   </div>
-
 
 {% endblock posts %}
