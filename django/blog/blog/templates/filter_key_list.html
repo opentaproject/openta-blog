@@ -1,0 +1,10 @@
+<h1>FilterKey List</h1>
+<a href="{% url 'filter_key_create' %}">Create New Item</a>
+<ul>
+    {% for object in object_list %}
+        <li>
+            {{ object.name }} - <a href="{% url 'filter_key_update' object.pk %}">Edit</a>
+            - <a href="{% url 'filter_key_delete' object.pk %}">Delete</a>
+        </li>
+    {% endfor %}
+</ul>
