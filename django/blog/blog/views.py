@@ -378,7 +378,7 @@ def blog_delete_comment(request, pk ):
 
 class FilterKeyCreateView(CreateView):
     model = FilterKey
-    fields = ['name', 'title', 'category']  # List the fields you want to include in the form
+    fields = ['name', 'title', 'category','subdomain']  # List the fields you want to include in the form
     template_name = 'filter_key_form.html'
     success_url = reverse_lazy('filter_key_list')  # Redirect after successful creation
 
