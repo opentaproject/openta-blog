@@ -58,19 +58,18 @@ def blog_index(request, *args, **kwargs ) :
     name = str( request.session.get('filter_key','')  )
     server = str( request.session.get('server','')  )
     subdomain_name = request.session.get('subdomain','')
+    subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
     filter_title = request.session.get('filter_title','')
-
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
     if subdomain_name and not Category.objects.filter(name=subdomain_name) :
         new_category = Category.objects.create(name=subdomain_name,restricted=True)
         new_category.save() 
-    subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
     filter_title = request.session.get('filter_title','')
     if  not subdomain_name == '' and not filter_title == '' and not name == ''  :
         category = Category.objects.get(name=subdomain_name)
         print(f"CREATE_FILTERKEY1 NAME={subdomain_name} SUBD={subdomain} CAT={category} TIT={filter_title}"  )
-        filter_key , _  = FilterKey.objects.get_or_create(name=name,subdomain=subdomain,category=category,title=filter_title)
+        filter_key , _  = FilterKey.objects.get_or_create(name=name,category=category,title=filter_title)
     else :
         filter_key = None
         #filter_key.title = filter_title
@@ -231,7 +230,7 @@ def blog_add_post(request ):
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
     if category.name == subdomain.name :
         print(f"CREATE_FILTERKEY2")
-        filter_key , _ = FilterKey.objects.get_or_create(subdomain=subdomain,category=category, name=filter_key_name)
+        filter_key , _ = FilterKey.objects.get_or_create(category=category, name=filter_key_name)
         post.filter_key.add(filter_key)
     post.save()
     alias = post.post_author.alias
