@@ -86,8 +86,12 @@ def blog_index(request, *args, **kwargs ) :
             visitor.save()
         comments  = []
 
-        def get_categories_and_posts( visitor, subdomain_name, category_selected ):
+        def get_categories_and_posts( visitor, subdomain_name, category_selected , filter_key ):
             print(f"SUBDEF_CATEGORY_SELECTED = {category_selected}") 
+            print(f"SUBDOMAIN_NAME = {subdomain_name}")
+            print(f"FILTER_KEY = {filter_key}")
+            if subdomain_name != '' :
+                subdomain = Subdomain.objects.get(name=subdomain_name)
             category_all ,_ = Category.objects.get_or_create(name='All')
             category_unread , _  = Category.objects.get_or_create(name='Unread')
             ALL = category_all.pk
@@ -122,7 +126,7 @@ def blog_index(request, *args, **kwargs ) :
                 categories = ( closed | copen )
             else :
                 copen = Category.objects.all().filter(restricted=False,hidden=False)
-                closed = Category.objects.all().filter(restricted=True,name=subdomain_name,hidden=False)
+                closed = Category.objects.all().filter(restricted=True,subdomain=subdomain,hidden=False)
                 categories = ( closed | copen )
             #for c in categories :
             #    f = c.get_filterkeys()
@@ -131,7 +135,9 @@ def blog_index(request, *args, **kwargs ) :
             last_categories = categories.exclude(name__in=first_list).order_by('name')
             first_categories = categories.filter(name__in=first_list).order_by('name')
             categories = (first_categories | last_categories).distinct() 
-
+            if filter_key and subdomain_name != '' :
+                subdomain = Subdomain.objects.get(name=subdomain_name)
+                categories = categories.filter(subdomain=subdomain)
             cat = int( category_selected )
             #try :
             #    if False and not str( filter_key  ) == ''  :
@@ -143,8 +149,9 @@ def blog_index(request, *args, **kwargs ) :
             #except Exception as e :
             #    print(f"FILTER_KEY IS NOT DEFINED  {str(e)}")
             #    pass
+            print(f"RETURN CATEGORIES = {categories}")
             return ( categories , cat , posts )
-        categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected  )
+        categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected , filter_key  )
         print(f"CAT = {cat}")
         is_authenticated = request.session.get('is_authenticated',False)
         is_staff = request.session.get('is_staff',False)
@@ -377,7 +384,7 @@ def blog_delete_comment(request, pk ):
 
 class FilterKeyCreateView(CreateView):
     model = FilterKey
-    fields = ['name', 'title', 'category','subdomain']  # List the fields you want to include in the form
+    fields = ['name', 'title', 'category']  # List the fields you want to include in the form
     template_name = 'filter_key_form.html'
     success_url = reverse_lazy('filter_key_list')  # Redirect after successful creation
 
@@ -412,7 +419,8 @@ class FilterKeyListView(ListView):
     def get_queryset(self, *args, **kwargs ):
         print(f"REQUEST = {self.request.path}")
         print(f"SUBDOMAIN = {self.request.session['subdomain']}")
-        category = Category.objects.get(name=self.request.session['subdomain'])
+        subdomain = Subdomain.objects.get(name=self.request.session['subdomain'])
+        category = Category.objects.get(subdomain=subdomain)
         filterkeys =  FilterKey.objects.filter(category=category)
         f = list( filterkeys.values_list('name',flat=True) )
         f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES

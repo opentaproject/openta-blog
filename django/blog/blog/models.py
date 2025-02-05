@@ -27,23 +27,20 @@ class Category(models.Model):
 
     def get_filterkeys( self ):
         posts = Post.objects.all().filter(category=self)
-        #print(f"CATEGORY = {self.pk}")
-        #print(f"POSTS = {posts}")
         filter_keys_with_posts = list( FilterKey.objects.all().filter(id__in=posts.values('filter_key').distinct() ).values('title','name') )
         filter_keys = FilterKey.objects.all().filter(category=self)
-        #subdomain = posts.first().category
-        #print(f"SUBDOMAIN_IN_FILTERKEYS = {subdomain}")
-        #for f in filter_keys :
-        #    print(f"{f} {f.name}")
-        print(f"FILTER_KEYS = {filter_keys}")
         return filter_keys
+
+    def get_posts( self ):
+        posts = Post.objects.all().filter(category=self)
+        return posts
 
 
 class FilterKey(models.Model):
 
     name = models.CharField(max_length=120)
     title = models.TextField(blank=True, default='')
-    subdomain = models.ForeignKey(Subdomain, on_delete=models.CASCADE, null=True, blank=True,  related_name="filterkey")
+    #subdomain = models.ForeignKey(Subdomain, on_delete=models.CASCADE, null=True, blank=True,  related_name="filterkey")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True,  related_name="filterkey")
 
     def __str__(self):
