@@ -7,7 +7,7 @@ class FilterKeyAdmin(admin.ModelAdmin):
     pass
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['id','name','hidden','get_filterkeys']
+    list_display = ['id','name','subdomain','hidden','get_filterkeys']
     pass
 
 class PostAdmin(admin.ModelAdmin):

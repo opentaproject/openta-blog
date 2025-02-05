@@ -62,12 +62,12 @@ def blog_index(request, *args, **kwargs ) :
     filter_title = request.session.get('filter_title','')
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
-    if subdomain_name and not Category.objects.filter(name=subdomain_name) :
-        new_category = Category.objects.create(name=subdomain_name,restricted=True)
+    if subdomain_name and not Category.objects.filter(name=subdomain_name,subdomain=subdomain) :
+        new_category = Category.objects.create(name=subdomain_name,subdomain=subdomain,restricted=True)
         new_category.save() 
     filter_title = request.session.get('filter_title','')
     if  not subdomain_name == '' and not filter_title == '' and not name == ''  :
-        category = Category.objects.get(name=subdomain_name)
+        category = Category.objects.get(name=subdomain_name,subdomain=subdomain)
         print(f"CREATE_FILTERKEY1 NAME={subdomain_name} SUBD={subdomain} CAT={category} TIT={filter_title}"  )
         filter_key , _  = FilterKey.objects.get_or_create(name=name,category=category,title=filter_title)
     else :

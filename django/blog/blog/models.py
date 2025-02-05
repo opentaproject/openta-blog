@@ -18,6 +18,7 @@ class Category(models.Model):
     name = models.CharField(max_length=30)
     restricted = models.BooleanField(default=False) # ONLY SEEN BY THOSE IN SAME SUBDOMAIN
     hidden = models.BooleanField(default=False,) # ONLY SEEN BY STAFF
+    subdomain = models.ForeignKey(Subdomain, on_delete=models.CASCADE, null=True, blank=True,  related_name="category")
     class Meta:
         verbose_name_plural = "category"
 
@@ -43,7 +44,7 @@ class FilterKey(models.Model):
     name = models.CharField(max_length=120)
     title = models.TextField(blank=True, default='')
     subdomain = models.ForeignKey(Subdomain, on_delete=models.CASCADE, null=True, blank=True,  related_name="filterkey")
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True,  related_name="category")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True,  related_name="filterkey")
 
     def __str__(self):
         return self.name
