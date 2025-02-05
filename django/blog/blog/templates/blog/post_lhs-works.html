@@ -1,0 +1,77 @@
+{% block posts %}
+  {% load humanize %}
+  <div class="OpenTA-post-list OpenTA-text-size">
+    {% if is_authenticated %}
+      <div class="p-2 bg-gray-200">
+        <form method="post" action="{% url 'blog_add_post' %}">
+          {% csrf_token %}
+          <span class="flex">
+		<button class="OpenTA-new-button" type="submit">New post: </button>
+	   {% if  filter_key.title == ''  %}
+		<input class="OpenTA-text-size px-2 grow border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400" type="text" id="title" name="title" placeholder="title" required> </input> 
+	   {% else %}
+	    <input class="OpenTA-text-size px-2 grow border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400" type="text" id="title" name="title" placeholder="{{ filter_key.title }}" required> </input> 
+	   {% endif %}
+            <input type="hidden" id="visibility" name="visibility" value="{{ visibility }}">
+            <input type="hidden" id="author_type" name="author_type" value="{{ author_type}}">
+            <input type="hidden" id="post_author" name="post_author" value="{{ post_author.pk }}">
+            <input type="hidden" id="category" name="category" value="{{ category_selected }}">
+	    <input type="hidden" id="filter_key" name="filter_key" value="{{ filter_key.pk }}">
+	    <input type="hidden" id="alias" name="alias" value="{{ alias }}">
+          </span> 
+        </form>
+      </div>
+    {% endif %}
+
+    {% for post in posts %}
+      <div>
+        {% if post.pk == selected %}
+	<span> PK={{ post.pk }} </span>
+          <div class="OpenTA-post-selected-entry">
+            <div class=" {{ pauthorost.textclass }} flex justify-between w-full">
+              <span>
+                {% if not post.viewed %}     <i class="fa-solid fa-circle "></i> {% endif %}
+                <a class="" href="{% url 'blog_index'  post.pk %}">
+                  <button  id="check{{ post.pk }}"  class=""> <i class="{{ post.bgclass }} far fa-square-check lhs"></i></button>
+                  <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:30 | safe }} </span> </span>
+                </span>
+                <span class="OpenTA-post-last-modified"> {{ post.post_author.alias }} {{ post.last_modified | naturaltime }} </span>
+              </a>
+            </div>
+            <div class="OpenTA-text-size" > {{ post.body | striptags | truncatechars:80   | safe }} </div>
+          </div>
+
+        {% else %}
+	<span> PK={{ post.pk }} </span>
+          <div class="OpenTA-post-entry">
+            <div class=" {{ post.textclass }} flex justify-between w-full">
+              <span>
+                {% if not post.viewed %}     <i class="fa-solid fa-circle "></i> {% endif %}
+                <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}">
+
+                  <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <i class=" {{ post.bgclass }} far fa-square "></i>   </button>
+		  {% if selected_posts %}
+                  <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | truncatechars:30 | safe }} </span> </span>
+		  {% else %} 
+<span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | safe }} </span> </span>
+		 {% endif %}
+                </span>
+                <span class="OpenTA-post-last-modified"> {{ post.post_author.alias }} {{ post.last_modified | naturaltime }} </span>
+              </a>
+            </div>
+	    {% if selected_posts %}
+            <div class="OpenTA-text-size"> {{ post.body | truncatechars:80 | safe }} </div>
+	    {% else %}
+<div class="OpenTA-text-size"> {{ post.body | truncatechars:200 | safe }} </div>
+		{% endif %}
+          </div>
+        {% endif %}
+
+      </div>
+      </div>
+      </div>
+    {% endfor %}
+  </div>
+
+
+{% endblock posts %}

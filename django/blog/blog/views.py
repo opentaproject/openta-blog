@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 from oauthlib.oauth1 import RequestValidator
 from backend.oauth1 import load_session_variables, get_author_type, get_username
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from .forms import CategoryForm
 
 ANONYMOUS = 0
 STUDENT = 1
@@ -430,4 +431,39 @@ class FilterKeyListView(ListView):
         return filterkeys
 
 
+class CategoryCreateView(CreateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = 'category_form.html'
+    success_url = reverse_lazy('category_list') 
+
+    def get_form_kwargs(self):
+        print(f"GET_FORM_KWARGS")
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+class CategoryListView(ListView):
+
+
+    model = Category
+    template_name = 'category_list.html'
+    success_url = reverse_lazy('category_list')
+
+    def __init__(self, *args, **kwargs) :
+        print(f"__INIT__ = {args} {kwargs} ")
+        super().__init__(*args,**kwargs)
+
+class CategoryUpdateView(UpdateView):
+    model = Category
+    fields = '__all__'
+    template_name = 'category_form.html'
+    success_url = reverse_lazy('category_list')
+
+# Delete View
+class CategoryDeleteView(DeleteView):
+    model = Category
+    filed = '__all__'
+    template_name = 'category_confirm_delete.html'
+    success_url = reverse_lazy('category_list')
 

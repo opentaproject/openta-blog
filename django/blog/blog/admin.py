@@ -1,14 +1,14 @@
 from django.contrib import admin
 from blog.models import Category, Comment, Post, Visit, Visitor, Subdomain, FilterKey
+from django import forms
+from .forms import CategoryForm
+
 
 
 class FilterKeyAdmin(admin.ModelAdmin):
     list_display = ['id','category','title','name','get_posts']
     pass
 
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['id','name','subdomain','hidden','get_filterkeys','get_posts']
-    pass
 
 class PostAdmin(admin.ModelAdmin):
     list_display = ['title','visibility','last_modified','post_author','category']
@@ -29,6 +29,14 @@ class SubdomainAdmin(admin.ModelAdmin):
 
 class VisitorAdmin(admin.ModelAdmin):
     list_display = ['id','name','subdomain','last_visit','visitor_type']
+    pass
+
+
+
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ['id','name','subdomain','hidden','get_filterkeys','get_posts']
+    form = CategoryForm
     pass
 
 admin.site.register(Category, CategoryAdmin)

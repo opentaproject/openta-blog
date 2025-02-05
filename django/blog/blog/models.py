@@ -3,6 +3,7 @@ from django_ckeditor_5.fields import CKEditor5Field
 from django.contrib.auth.models import User
 from django.views.generic.edit import UpdateView, CreateView
 from django.shortcuts import render, get_object_or_404, redirect
+import re
 from django.urls import reverse_lazy
 from django.db.models import Count, Subquery, Sum, OuterRef, F
 
@@ -29,6 +30,11 @@ class Category(models.Model):
         posts = Post.objects.all().filter(category=self)
         filter_keys_with_posts = list( FilterKey.objects.all().filter(id__in=posts.values('filter_key').distinct() ).values('title','name') )
         filter_keys = FilterKey.objects.all().filter(category=self)
+        f = list( filter_keys.values_list('name',flat=True) )
+        f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
+        print(f"F = {f}")
+        filter_keys = filter_keys.exclude(name__in=f)
+
         return filter_keys
 
     def get_posts( self ):
@@ -148,24 +154,3 @@ class Comment(models.Model):
         post = self.post
         post.save() 
         super().save(*args,**kwargs)
-
-
-
-class CommentUpdateView(UpdateView):
-    model = Comment
-    fields = ['body', 'category','title']
-
-    def get_success_url(self)  :
-        url = f'/post/{self.post.pk}'
-        #print(f"REDIRECT TO {url}")
-        return redirect(url)
-
-class CommentCreateView(CreateView):
-    model = Comment
-    fields = ['body', 'category','title']
-
-    def get_success_url(self)  :
-        #print(f"CREATE_VIEW_SUCCESS_URL")
-        url = f'/post/{self.post.pk}'
-        #print(f"REDIRECT TO {url}")
-        return redirect(url)

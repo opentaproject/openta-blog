@@ -1,0 +1,23 @@
+<!--  blog/templates/blog/detail.html -->
+
+{% extends "base.html" %}
+{% block header %}
+    {{ form.media }} # Required for styling/js to make ckeditor5 work
+{% endblock %}
+
+
+{% block page_content %}
+
+
+<div class="OpenTA-filterkeys">
+	<table> <tr><th class="OpenTA-left" > Name </th> <th> Subdomain </th> <th> Edit </th> <th> Delete </th> </tr>
+
+    {% for object in object_list %}
+    <tr> <td class="px-4"> {{ object.name}}  </td><td class="px-4"> {{ object.subdomain}} </td><td>  <a class="OpenTA-filterkey-not-selected"  href="{% url 'category_update' object.pk %}">Edit</a> </td><td>
+	    <a class="OpenTA-filterkey-not-selected" href="{% url 'category_delete' object.pk %}">Delete</a> </td></tr>
+    {% endfor %}
+</table>
+<div class="py-4" > <a class="OpenTA-show-button " href="{% url 'category_create' %}">Create New Category </a> </div> 
+</div>
+
+{% endblock page_content %}

@@ -2,7 +2,7 @@
 
 from django import forms
 from django_ckeditor_5.widgets import CKEditor5Widget
-from .models import Comment, Post, FilterKey
+from .models import Comment, Post, FilterKey, Category
 import logging
 logger = logging.getLogger(__name__)
 from django.forms import TextInput, Textarea
@@ -121,3 +121,28 @@ class PostForm(forms.ModelForm):
               "body": CKEditor5Widget( attrs={"class": "django_ckeditor_5"}, config_name="extends"),
           }
           labels = {'post_author' : '' , 'author_type' : '' }
+
+
+class CategoryForm(forms.ModelForm):
+
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+    def __init__(self, *args, request=None,  **kwargs):
+        print(f"CATEGORY_FORM")
+        super().__init__(*args, **kwargs)
+        instance = self.instance
+        if not request == None :
+            self.request = request
+            self.fields['subdomain'].disabled = True
+            print(f"REQUEST = {request}")
+            print(f"SUBDOMAIN_REQWUEST = {request.session.get('subdomain',None)}")
+        print(f"INSTANCE = {instance}")
+        print(f"SUBDOMAIN = {instance.subdomain}")
+        #if self.instance and self.instance.parent:
+        #    self.fields['subdomain'].queryset = Subdomain.objects.filter(name=self.instance.parent)
+        #else:
+        #    self.fields['subdomain'].queryset = Subdomain.objects.none()
+
+

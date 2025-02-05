@@ -40,7 +40,6 @@
 		{% for f in category.get_filterkeys %} 
 		{{ style }} 
 		{% if f.name %}
-		{% if f.get_posts %} 
 			<label for="id_filterkey_{{f.pk}}">
 				{% if filter_key.pk == f.pk %}
 				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  {{ f.title }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
@@ -49,7 +48,6 @@
 
 				{% endif %}
 			</label>
-		{% endif %}
 		{% else %} <span> EMPTY </span>
 		{% endif %}
 		{% endfor %}
