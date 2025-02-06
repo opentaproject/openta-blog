@@ -63,7 +63,7 @@ def blog_index(request, *args, **kwargs ) :
     filter_title = request.session.get('filter_title','')
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
-    if subdomain_name and not Category.objects.filter(name=subdomain_name,subdomain=subdomain) :
+    if  len( Category.objects.filter(name=subdomain_name,subdomain=subdomain)  ) == 0 :
         new_category = Category.objects.create(name=subdomain_name,subdomain=subdomain,restricted=True)
         new_category.save() 
     filter_title = request.session.get('filter_title','')
@@ -93,6 +93,8 @@ def blog_index(request, *args, **kwargs ) :
             print(f"FILTER_KEY = {filter_key}")
             if subdomain_name != '' :
                 subdomain = Subdomain.objects.get(name=subdomain_name)
+            else :
+                subdomain = None
             category_all ,_ = Category.objects.get_or_create(name='All')
             category_unread , _  = Category.objects.get_or_create(name='Unread')
             ALL = category_all.pk
@@ -127,8 +129,11 @@ def blog_index(request, *args, **kwargs ) :
                 categories = ( closed | copen )
             else :
                 copen = Category.objects.all().filter(restricted=False,hidden=False)
-                closed = Category.objects.all().filter(restricted=True,subdomain=subdomain,hidden=False)
-                categories = ( closed | copen )
+                if subdomain :
+                    closed = Category.objects.all().filter(restricted=True,subdomain=subdomain,hidden=False)
+                    categories = ( closed | copen )
+                else :
+                    categories = copen
             #for c in categories :
             #    f = c.get_filterkeys()
             #    print(f" C={c} F = {f}")

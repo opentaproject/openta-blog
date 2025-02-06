@@ -149,7 +149,7 @@ class CategoryForm(forms.ModelForm):
         #self.fields['subdomain'].widget = forms.HiddenInput();
         self.fields['restricted'].initial  = True
         self.fields['restricted'].required = False 
-        self.fields['restricted'].disabled = True
+        #self.fields['restricted'].disabled = True
         self.fields['subdomain'].disabled = True
         print(f"INSTANCE = {instance}")
         print(f"SUBDOMAIN = {instance.subdomain}")

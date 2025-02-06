@@ -2,7 +2,7 @@ import hmac
 import hashlib
 import urllib.parse
 from django.conf import settings
-from blog.models import Category, Post
+from blog.models import Category, Post, Subdomain
 import time, base64
 import logging
 logger = logging.getLogger(__name__)
@@ -160,7 +160,12 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['is_authenticated'] = not username ==  ''
         request.session['subdomain'] = subdomain
         if not subdomain == ''  :
-            category_selected = Category.objects.get(name=subdomain).pk
+            subdomain_ , _ = Subdomain.objects.get_or_create( name=subdomain )
+            category_selected , new  = Category.objects.get_or_create(name=subdomain,subdomain=subdomain_)
+            if new :
+                category_selected.restricted = True
+                category_selected.save();
+            category_selected = category_selected.pk
         request.session['category_selected'] =  category_selected
         request.session['filter_key'] = data.get('filter_key',[''])[0]
         request.session['return_url'] = data.get('return_url',[''])[0];
