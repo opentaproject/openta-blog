@@ -78,12 +78,13 @@
 			for ( let i = 0 ; i < acopy.length ; i++ ){
 				const post = document.getElementById( 'post_' + acopy[i] );
 				post.classList.replace('hidden','visible');
-				console.log("I = ", i , acopy[i] , post )
 				}
 			}
 		     }
 		var rhs = document.getElementById("rhs");
-				rhs.classList.add('hidden') 
+		if ( rhs ) {
+			rhs.classList.add('hidden') 
+		}
 		}
         // Select all radio buttons with the name 'option'
         const radioButtons = document.querySelectorAll('input[name="option"]');
@@ -93,7 +94,6 @@
             radio.addEventListener('change', () => {
                 if (radio.checked) {
 			hideshow(  radio.value )
-			console.log(`You selected: ${radio.id} ${radio.value}` );
                 }
             });
         });

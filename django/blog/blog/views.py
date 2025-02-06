@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 from oauthlib.oauth1 import RequestValidator
 from backend.oauth1 import load_session_variables, get_author_type, get_username
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
-from .forms import CategoryForm
+from .forms import CategoryForm, FilterKeyForm
 
 ANONYMOUS = 0
 STUDENT = 1
@@ -378,14 +378,20 @@ def blog_delete_comment(request, pk ):
 
 class FilterKeyCreateView(CreateView):
     model = FilterKey
-    fields = ['name', 'title', 'category']  # List the fields you want to include in the form
+    form_class = FilterKeyForm
     template_name = 'filter_key_form.html'
     success_url = reverse_lazy('filter_key_list')  # Redirect after successful creation
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
 
 # Update View
 class FilterKeyUpdateView(UpdateView):
     model = FilterKey
-    fields = ['name', 'title', 'category']
+    form_class = FilterKeyForm
     template_name = 'filter_key_form.html'
     success_url = reverse_lazy('filter_key_list')
 

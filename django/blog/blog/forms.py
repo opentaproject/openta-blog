@@ -164,4 +164,17 @@ class CategoryForm(forms.ModelForm):
         #else:
         #    self.fields['subdomain'].queryset = Subdomain.objects.none()
 
+class FilterKeyForm(forms.ModelForm):
 
+    class Meta:
+        model = FilterKey
+        fields = '__all__'
+
+    def __init__(self, *args, request=None,  **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = self.instance
+        if not request == None :
+            self.request = request
+            subdomain_name = request.session.get('subdomain','')
+            subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
+        print(f"FILTER_KEY SUBDOMAIN = {subdomain}")
