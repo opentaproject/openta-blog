@@ -48,9 +48,8 @@ def blog_index(request, *args, **kwargs ) :
     uri = str(  request.build_absolute_uri()  )
     if not load_session_variables( request, args, kwargs ) :
         return HttpResponseForbidden("Session Variable Load failed")
-    print(f"SESSION = {request.session}")
-    for k in request.session.keys() :
-        print(f"K = {k} {request.session[k]} ")
+    #for k in request.session.keys() :
+    #    print(f"K = {k} {request.session[k]} ")
     if 'home' in uri :
         pass
         #del request.session['filter_title']  
@@ -69,7 +68,6 @@ def blog_index(request, *args, **kwargs ) :
     filter_title = request.session.get('filter_title','')
     if  not subdomain_name == '' and not filter_title == '' and not name == ''  :
         category = Category.objects.get(name=subdomain_name,subdomain=subdomain)
-        print(f"CREATE_FILTERKEY1 NAME={subdomain_name} SUBD={subdomain} CAT={category} TIT={filter_title}"  )
         filter_key , _  = FilterKey.objects.get_or_create(name=name,category=category,title=filter_title)
     else :
         filter_key = None
@@ -88,9 +86,6 @@ def blog_index(request, *args, **kwargs ) :
         comments  = []
 
         def get_categories_and_posts( visitor, subdomain_name, category_selected , filter_key ):
-            print(f"SUBDEF_CATEGORY_SELECTED = {category_selected}") 
-            print(f"SUBDOMAIN_NAME = {subdomain_name}")
-            print(f"FILTER_KEY = {filter_key}")
             if subdomain_name != '' :
                 subdomain = Subdomain.objects.get(name=subdomain_name)
             else :
@@ -99,7 +94,6 @@ def blog_index(request, *args, **kwargs ) :
             category_unread , _  = Category.objects.get_or_create(name='Unread')
             ALL = category_all.pk
             UNREAD = category_unread.pk
-            print(f"CATEGORY_SELECTED = {category_selected}")
             category_selected = int( category_selected )
             if  category_selected ==  ALL :
                 posts = Post.objects.all().order_by("-created_on").annotate(viewed=Count('comment') )
@@ -157,12 +151,8 @@ def blog_index(request, *args, **kwargs ) :
             #except Exception as e :
             #    print(f"FILTER_KEY IS NOT DEFINED  {str(e)}")
             #    pass
-            print(f"RETURN POSTS = {posts}")
-            print(f"SUBDOMAIN = {subdomain}")
-            print(f"RETURN CATEGORIES = {categories}")
             return ( categories , cat , posts )
         categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected , filter_key  )
-        print(f"CAT = {cat}")
         is_authenticated = request.session.get('is_authenticated',False)
         is_staff = request.session.get('is_staff',False)
         #if pk == None :
@@ -243,10 +233,8 @@ def blog_add_post(request ):
         category = Category.objects.get(pk=category_)
     except ObjectDoesNotExist as e :
         category = Category.objects.all()[0]
-    print(f"CREATE POST WITH CATEBORY {category}")
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
     if category.name == subdomain.name :
-        print(f"CREATE_FILTERKEY2")
         filter_key , _ = FilterKey.objects.get_or_create(category=category, name=filter_key_name)
         post.filter_key.add(filter_key)
     post.save()
@@ -266,7 +254,6 @@ def blog_add_post(request ):
             pass
     else :
         form = PostForm( is_staff=is_staff,alias=alias, instance=post,initial=initial)
-    print(f"RENDER BLOG_EDIT_POST alias = {alias}")
     r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_ADD_POST', 'initial' : initial } )
     return r
 
@@ -296,7 +283,6 @@ def blog_edit_post(request, pk ):
     subdomain = request.session.get('subdomain','')
     visitor = Visitor.objects.get(name=username,subdomain__name=subdomain)
     alias = visitor.alias
-    print(f"BLOG_EDIT_POST ALIAS = {alias}")
     post.post_author = visitor
     is_staff = request.session.get('is_staff',False)
     fk = [i['pk'] for i in list( post.filter_key.all().values('pk') ) ]
@@ -307,7 +293,6 @@ def blog_edit_post(request, pk ):
             post.delete();
             return HttpResponseRedirect(f'/')
 
-        print(f"BLOG_EDIT_POST_2 {alias} {fk} ")
         form = PostForm( request.POST,  is_staff=is_staff, alias=alias ,instance=post,initial=initial)
         #if form.is_valid() and not post.body == '' :
         if  not post.body == '' :
@@ -317,7 +302,6 @@ def blog_edit_post(request, pk ):
         else :
             pass
     else :
-        print(f"BLOG_EDIT_POST_3 {alias}")
         form = PostForm( is_staff=is_staff, alias=alias, instance=post,initial=initial)
         return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_EDIT_POST','initial' : initial } )
 
@@ -427,15 +411,11 @@ class FilterKeyListView(ListView):
 
 
     def get_queryset(self, *args, **kwargs ):
-        print(f"REQUEST = {self.request.path}")
-        print(f"SUBDOMAIN = {self.request.session['subdomain']}")
         subdomain = Subdomain.objects.get(name=self.request.session['subdomain'])
         categories = Category.objects.filter(subdomain=subdomain)
-        print(f"CATEGORIES IN QUERYSET = {categories}")
         filterkeys =  FilterKey.objects.filter(category__in=categories)
         f = list( filterkeys.values_list('name',flat=True) )
         f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
-        print(f"F = {f}")
         filterkeys = filterkeys.exclude(name__in=f)
 
         return filterkeys
@@ -448,7 +428,6 @@ class CategoryCreateView(CreateView):
     success_url = reverse_lazy('category_list') 
 
     def get_form_kwargs(self):
-        print(f"GET_FORM_KWARGS")
         kwargs = super().get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
@@ -461,14 +440,11 @@ class CategoryListView(ListView):
     success_url = reverse_lazy('category_list')
 
     def __init__(self, *args, **kwargs) :
-        print(f"LIST_VIEW __INIT__ = {args} {kwargs} ")
         super().__init__(*args,**kwargs)
-        print(f"SELF = {self} ")
 
     def get_queryset(self):
         queryset = super().get_queryset()
         path = self.request.path
-        print(f"PATH = {path}")
         subdomain_name = self.request.session.get('subdomain','')
         if not subdomain_name == '' :
             subdomain ,_ = Subdomain.objects.get_or_create(name=subdomain_name)

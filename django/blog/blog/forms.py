@@ -4,6 +4,7 @@ from django import forms
 from django_ckeditor_5.widgets import CKEditor5Widget
 from .models import Comment, Post, FilterKey, Category, Subdomain
 import logging
+import re
 logger = logging.getLogger(__name__)
 from django.forms import TextInput, Textarea
 
@@ -52,17 +53,15 @@ class PostForm(forms.ModelForm):
       def __init__(self,   *args, is_staff=None, alias='',  **kwargs ):
           #print(f"POST FORM kwargs = {kwargs}")
           #print(f"ALIAS IN __INIT__  = {alias}")
-          print(f"KWARGS = {kwargs}")
           instance = kwargs['instance']
           fk = [ i['pk'] for i in list( instance.filter_key.all().values('pk') ) ]
-          print(f"FK = {fk}")
           kwargs.setdefault('label_suffix', 'ABC') 
           kwargs['label_suffix'] = ''
           logger.error(f"POST_FORM ARGS = {args}")
           logger.error(f"POST_FORM KWARGS = {kwargs}")
           super().__init__(*args, **kwargs)
-          for k in self.fields.keys() :
-              print(f" K = {k} val = {self.fields[k]}")
+          #for k in self.fields.keys() :
+          #    print(f" K = {k} val = {self.fields[k]}")
           self.fields["body"].required = True
           self.fields["title"].required = True
           self.fields["alias"].required = False
@@ -83,10 +82,18 @@ class PostForm(forms.ModelForm):
           #self.fields["title"].widget.attrs.update({'class' : 'OpenTA-title',})
           #self.fields["alias"].widget.attrs.update({'class' : 'OpenTA-alias'})
           #print(f'FILTER_KEY_IN_FORM = { self.fields["filter_key"].choices }')
-          print(f"POST CATEGORY = {instance.category}")
-          self.fields["filter_key"].queryset = FilterKey.objects.filter(category=instance.category)
-          for choice in  self.fields["filter_key"].choices :
-              print(f"CHOICE = {choice}")
+          #self.fields["filter_key"].queryset = FilterKey.objects.filter(category=instance.category) # FIX THIS
+          category = instance.category
+          print(f"CATEGORY = {category}")
+          subdomain = category.subdomain
+          categories = Category.objects.filter(subdomain=subdomain)
+          filter_keys =  FilterKey.objects.filter(category__in=categories) 
+          f = list( filter_keys.values_list('name',flat=True) )
+          f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
+          filter_keys = filter_keys.exclude(name__in=f)
+          self.fields["filter_key"].queryset = filter_keys
+          print(f"CATEGORIES = {categories}")
+          print(f"SUBDOMAIN = {subdomain}")
           if True or not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput({'label' : '' } );
             self.fields['category'].widget = forms.HiddenInput();
@@ -99,7 +106,6 @@ class PostForm(forms.ModelForm):
 
       def clean(self):
           cleaned_data = super().clean()
-          print(f"CLEANED = {cleaned_data}")
           body = cleaned_data.get('body','')
           title = cleaned_data.get('title','')
           alias = cleaned_data.get('alias','')
@@ -135,15 +141,12 @@ class CategoryForm(forms.ModelForm):
         fields = '__all__'
 
     def __init__(self, *args, request=None,  **kwargs):
-        print(f"CATEGORY_FORM")
         super().__init__(*args, **kwargs)
         instance = self.instance
         if not request == None :
             self.request = request
             #self.fields['subdomain'].disabled = True
-            print(f"REQUEST = {request}")
             subdomain_name = request.session.get('subdomain','')
-            print(f"SUBDOMAIN_NAME = {subdomain_name}")
             subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
             #self.fields['subdomain'] = subdomain
             instance.subdomain = subdomain
@@ -156,8 +159,6 @@ class CategoryForm(forms.ModelForm):
         self.fields['restricted'].required = False 
         self.fields['restricted'].disabled = True
         self.fields['subdomain'].disabled = True
-        print(f"INSTANCE = {instance}")
-        print(f"SUBDOMAIN = {instance.subdomain}")
         #if self.instance and self.instance.parent:
         #    self.fields['subdomain'].queryset = Subdomain.objects.filter(name=self.instance.parent)
         #else:

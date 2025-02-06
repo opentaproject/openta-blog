@@ -42,9 +42,9 @@
 		{% if f.name %}
 			<label for="id_filterkey_{{f.pk}}">
 				{% if filter_key.pk == f.pk %}
-				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  {{ f.title }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
+				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  {{ f.title | truncatechars:10 }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
 				{% else %}
-				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  {{ f.title }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
+				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  {{ f.title| truncatechars:10  }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
 
 				{% endif %}
 			</label>
@@ -82,6 +82,8 @@
 				}
 			}
 		     }
+		var rhs = document.getElementById("rhs");
+				rhs.classList.add('hidden') 
 		}
         // Select all radio buttons with the name 'option'
         const radioButtons = document.querySelectorAll('input[name="option"]');
