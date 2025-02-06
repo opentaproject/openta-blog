@@ -99,6 +99,7 @@ def blog_index(request, *args, **kwargs ) :
             category_unread , _  = Category.objects.get_or_create(name='Unread')
             ALL = category_all.pk
             UNREAD = category_unread.pk
+            print(f"CATEGORY_SELECTED = {category_selected}")
             category_selected = int( category_selected )
             if  category_selected ==  ALL :
                 posts = Post.objects.all().order_by("-created_on").annotate(viewed=Count('comment') )
@@ -145,6 +146,7 @@ def blog_index(request, *args, **kwargs ) :
                 subdomain = Subdomain.objects.get(name=subdomain_name)
                 categories = categories.filter(subdomain=subdomain)
             cat = int( category_selected )
+            posts = posts.filter(category__in=categories)
             #try :
             #    if False and not str( filter_key  ) == ''  :
             #        #if posts.count() > 0 :
@@ -155,6 +157,8 @@ def blog_index(request, *args, **kwargs ) :
             #except Exception as e :
             #    print(f"FILTER_KEY IS NOT DEFINED  {str(e)}")
             #    pass
+            print(f"RETURN POSTS = {posts}")
+            print(f"SUBDOMAIN = {subdomain}")
             print(f"RETURN CATEGORIES = {categories}")
             return ( categories , cat , posts )
         categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected , filter_key  )
@@ -205,7 +209,7 @@ def blog_index(request, *args, **kwargs ) :
     except ProgrammingError as e:
         context = {
             "posts" : [],
-            "categoies" : [],
+            "categories" : [],
             "category_selected" : None
             }
         logger.error(f"ERROR = {type(e).__name__} {str(e)}")
@@ -459,6 +463,19 @@ class CategoryListView(ListView):
     def __init__(self, *args, **kwargs) :
         print(f"LIST_VIEW __INIT__ = {args} {kwargs} ")
         super().__init__(*args,**kwargs)
+        print(f"SELF = {self} ")
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        path = self.request.path
+        print(f"PATH = {path}")
+        subdomain_name = self.request.session.get('subdomain','')
+        if not subdomain_name == '' :
+            subdomain ,_ = Subdomain.objects.get_or_create(name=subdomain_name)
+            queryset = queryset.filter(subdomain=subdomain)
+        return queryset
+
+
 
 class CategoryUpdateView(UpdateView):
     model = Category

@@ -10,11 +10,15 @@
 
 
 <div class="OpenTA-filterkeys">
-	<table> <tr><th class="OpenTA-left" > Name </th> <th> Subdomain </th> <th> Edit </th> <th> Delete </th> </tr>
+	<table> <tr><th class="OpenTA-left" > Name </th> <th> Subdomain </th> <th> Restricted </th> <th> Edit </th> <th> Delete </th> </tr>
 
     {% for object in object_list %}
-    <tr> <td class="px-4"> {{ object.name}}  </td><td class="px-4"> {{ object.subdomain}} </td><td>  <a class="OpenTA-filterkey-not-selected"  href="{% url 'category_update' object.pk %}">Edit</a> </td><td>
-	    <a class="OpenTA-filterkey-not-selected" href="{% url 'category_delete' object.pk %}">Delete</a> </td></tr>
+    <tr> <td class="px-4"> {{ object.name}}  </td>
+    	<td class="px-4"> {{ object.subdomain}} </td>
+	<td class="px-4"> {{ object.restricted}} </td>
+	<td>  <a class="OpenTA-filterkey-not-selected"  href="{% url 'category_update' object.pk %}">Edit</a> </td>
+	<td> <a class="OpenTA-filterkey-not-selected" href="{% url 'category_delete' object.pk %}">Delete</a> </td>
+    </tr>
     {% endfor %}
 </table>
 <div class="py-4" > <a class="OpenTA-show-button " href="{% url 'category_create' %}">Create New Category </a> </div> 

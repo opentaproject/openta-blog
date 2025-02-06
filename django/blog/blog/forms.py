@@ -82,13 +82,18 @@ class PostForm(forms.ModelForm):
           self.fields["visibility"].widget = forms.RadioSelect(choices=self.OPTIONS);
           #self.fields["title"].widget.attrs.update({'class' : 'OpenTA-title',})
           #self.fields["alias"].widget.attrs.update({'class' : 'OpenTA-alias'})
+          #print(f'FILTER_KEY_IN_FORM = { self.fields["filter_key"].choices }')
+          print(f"POST CATEGORY = {instance.category}")
+          self.fields["filter_key"].queryset = FilterKey.objects.filter(category=instance.category)
+          for choice in  self.fields["filter_key"].choices :
+              print(f"CHOICE = {choice}")
           if True or not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput({'label' : '' } );
             self.fields['category'].widget = forms.HiddenInput();
             self.is_staff = is_staff
             self.fields["is_staff"].widget = forms.HiddenInput();
             self.fields["post_author"].widget = forms.HiddenInput();
-            self.fields["filter_key"].widget.attrs.update({'class' : 'px-2 pb-2 text-blue-400  ABCDEFG'} ,)
+            #self.fields["filter_key"].widget.attrs.update({'class' : 'px-2 pb-2 text-red-400  ABCDEFG'} ,)
             #self.fields["filter_key"].widget.attrs.update(attrs)
                 
 
@@ -149,7 +154,7 @@ class CategoryForm(forms.ModelForm):
         #self.fields['subdomain'].widget = forms.HiddenInput();
         self.fields['restricted'].initial  = True
         self.fields['restricted'].required = False 
-        #self.fields['restricted'].disabled = True
+        self.fields['restricted'].disabled = True
         self.fields['subdomain'].disabled = True
         print(f"INSTANCE = {instance}")
         print(f"SUBDOMAIN = {instance.subdomain}")
