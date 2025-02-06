@@ -10,11 +10,16 @@
 
 
 <div class="OpenTA-filterkeys">
-	<table> <tr><th class="OpenTA-left" > Title </th> <th> Name </th> <th> Edit </th> <th> Delete </th> </tr>
+	<table> <tr><th> pk </th> <th class="OpenTA-left" > Title </th> <th> Name </th> <th> category </th>  <th> Edit </th> <th> Delete </th> </tr>
 
     {% for object in object_list %}
-    <tr> <td class="px-4"> {{ object.title }}  </td><td class="px-4"> {{ object.name }} </td><td>  <a class="OpenTA-filterkey-not-selected"  href="{% url 'filter_key_update' object.pk %}">Edit</a> </td><td>
-	    <a class="OpenTA-filterkey-not-selected" href="{% url 'filter_key_delete' object.pk %}">Delete</a> </td></tr>
+    <tr> 
+ 	    <td class="px-4"> {{ object.pk }}  </td>    
+	    <td class="px-4"> {{ object.title }}  </td>    
+	    <td class="px-4"> {{ object.name }} </td>
+	    <td class="px-4"> {{ object.category }} </td>
+	    <td>  <a class="OpenTA-filterkey-not-selected"  href="{% url 'filter_key_update' object.pk %}">Edit</a> </td>
+	    <td> <a class="OpenTA-filterkey-not-selected" href="{% url 'filter_key_delete' object.pk %}">Delete</a> </td></tr>
     {% endfor %}
 </table>
 <div class="py-4" > <a class="OpenTA-show-button " href="{% url 'filter_key_create' %}">Create New FilterKey </a> </div> 

@@ -2,7 +2,7 @@
 
 from django import forms
 from django_ckeditor_5.widgets import CKEditor5Widget
-from .models import Comment, Post, FilterKey, Category
+from .models import Comment, Post, FilterKey, Category, Subdomain
 import logging
 logger = logging.getLogger(__name__)
 from django.forms import TextInput, Textarea
@@ -135,9 +135,22 @@ class CategoryForm(forms.ModelForm):
         instance = self.instance
         if not request == None :
             self.request = request
-            self.fields['subdomain'].disabled = True
+            #self.fields['subdomain'].disabled = True
             print(f"REQUEST = {request}")
-            print(f"SUBDOMAIN_REQWUEST = {request.session.get('subdomain',None)}")
+            subdomain_name = request.session.get('subdomain','')
+            print(f"SUBDOMAIN_NAME = {subdomain_name}")
+            subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
+            #self.fields['subdomain'] = subdomain
+            instance.subdomain = subdomain
+            self.fields['subdomain'].initial = subdomain
+            #self.fields['subdomain'].widget = forms.HiddenInput();
+        else :
+            self.fields['subdomain'].initial = instance.subdomain
+        #self.fields['subdomain'].widget = forms.HiddenInput();
+        self.fields['restricted'].initial  = True
+        self.fields['restricted'].required = False 
+        self.fields['restricted'].disabled = True
+        self.fields['subdomain'].disabled = True
         print(f"INSTANCE = {instance}")
         print(f"SUBDOMAIN = {instance.subdomain}")
         #if self.instance and self.instance.parent:

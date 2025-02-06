@@ -421,8 +421,9 @@ class FilterKeyListView(ListView):
         print(f"REQUEST = {self.request.path}")
         print(f"SUBDOMAIN = {self.request.session['subdomain']}")
         subdomain = Subdomain.objects.get(name=self.request.session['subdomain'])
-        category = Category.objects.get(subdomain=subdomain)
-        filterkeys =  FilterKey.objects.filter(category=category)
+        categories = Category.objects.filter(subdomain=subdomain)
+        print(f"CATEGORIES IN QUERYSET = {categories}")
+        filterkeys =  FilterKey.objects.filter(category__in=categories)
         f = list( filterkeys.values_list('name',flat=True) )
         f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
         print(f"F = {f}")
@@ -451,12 +452,12 @@ class CategoryListView(ListView):
     success_url = reverse_lazy('category_list')
 
     def __init__(self, *args, **kwargs) :
-        print(f"__INIT__ = {args} {kwargs} ")
+        print(f"LIST_VIEW __INIT__ = {args} {kwargs} ")
         super().__init__(*args,**kwargs)
 
 class CategoryUpdateView(UpdateView):
     model = Category
-    fields = '__all__'
+    form_class = CategoryForm
     template_name = 'category_form.html'
     success_url = reverse_lazy('category_list')
 
