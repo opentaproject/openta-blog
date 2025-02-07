@@ -18,6 +18,7 @@
             <input type="hidden" id="category" name="category" value="{{ category_selected }}">
             <input type="hidden" id="filter_key" name="filter_key" value="{{ filter_key.pk }}">
             <input type="hidden" id="alias" name="alias" value="{{ alias }}">
+	    <input type="hidden" id="filter_key_selected" name="filter_key_selected" value="">
           </span>
         </form>
       </div>
@@ -35,7 +36,6 @@
 
     {% endif %}
      {% if post.pk == selected %}
-          <span> PK={{ post.pk }} </span>
           <div class="OpenTA-post-selected-entry">
             <div class=" {{ pauthorost.textclass }} flex justify-between w-full">
               <span>
@@ -51,7 +51,6 @@
           </div>
 
         {% else %}
-          <span> PK={{ post.pk }} </span>
           <div class="OpenTA-post-entry">
             <div class=" {{ post.textclass }} flex justify-between w-full">
               <span>
