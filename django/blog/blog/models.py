@@ -33,7 +33,7 @@ class Category(models.Model):
         filter_keys = FilterKey.objects.all().filter(category=self)
         f = list( filter_keys.values_list('name',flat=True) )
         f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
-        if settings.HIDE_UUID
+        if settings.HIDE_UUID :
             filter_keys = filter_keys.exclude(name__in=f)
 
         return filter_keys

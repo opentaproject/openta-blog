@@ -1,6 +1,7 @@
 # blog/forms.py
 
 from django import forms
+from django.conf import settings
 from django_ckeditor_5.widgets import CKEditor5Widget
 from .models import Comment, Post, FilterKey, Category, Subdomain
 import logging
