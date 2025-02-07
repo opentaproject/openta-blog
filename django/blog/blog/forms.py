@@ -87,10 +87,12 @@ class PostForm(forms.ModelForm):
           print(f"CATEGORY = {category}")
           subdomain = category.subdomain
           categories = Category.objects.filter(subdomain=subdomain)
-          filter_keys =  FilterKey.objects.filter(category__in=categories) 
+          filter_keys = FilterKey.objects.all();
+          #filter_keys =  filter_keys.filter(category__in=categories) 
           f = list( filter_keys.values_list('name',flat=True) )
           f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
-          filter_keys = filter_keys.exclude(name__in=f)
+          if settings.HIDE_UUID :
+            filter_keys = filter_keys.exclude(name__in=f)
           self.fields["filter_key"].queryset = filter_keys
           print(f"CATEGORIES = {categories}")
           print(f"SUBDOMAIN = {subdomain}")

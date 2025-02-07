@@ -424,7 +424,8 @@ class FilterKeyListView(ListView):
         filterkeys =  FilterKey.objects.filter(category__in=categories)
         f = list( filterkeys.values_list('name',flat=True) )
         f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
-        filterkeys = filterkeys.exclude(name__in=f)
+        if settings.HIDE_UUID :
+            filterkeys = filterkeys.exclude(name__in=f)
 
         return filterkeys
 

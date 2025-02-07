@@ -359,3 +359,4 @@ LOGGING = {
     },
 }
 print(f"PGDATABAS {PGDATABASE}")
+HIDE_UUID = False
