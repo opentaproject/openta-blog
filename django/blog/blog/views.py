@@ -221,6 +221,8 @@ def blog_index(request, *args, **kwargs ) :
 def blog_add_post(request ):
     username = request.session.get('username',None)
     filter_key_name = request.session.get('filter_key','')
+    filter_key_selected = request.data.get('filter_key_selected',None)
+    print(f"FILTER_KEY_SELECTED = {filter_key_selected}")
     is_authenticated = request.session.get('is_authenticated',False)
     if not is_authenticated :
         raise PermissionDenied("You must be authenticated in to add a post")

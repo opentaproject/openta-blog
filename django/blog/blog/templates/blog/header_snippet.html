@@ -35,16 +35,18 @@
 	<li class="OpenTA-text-size -mb-px mr-1"> 
 
 		<form method="post">
-			<label for="id_filterkey_all" > <input type="radio" name="option" value="All" id="All" > All </input>
+			<label for="id_filterkey_all" > <input type="radio" name="option" value="All" id="All" > {{ posts | length }}  <span class="pr-4"> All </span>  </input>
 			</label>
 		{% for f in category.get_filterkeys %} 
 		{{ style }} 
 		{% if f.name %}
 			<label for="id_filterkey_{{f.pk}}">
 				{% if filter_key.pk == f.pk %}
-				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  {{ f.title | truncatechars:10 }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
+				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  <span class="pr-4"> {{ f.title | truncatechars:20 }} </span>   <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
 				{% else %}
-				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  {{ f.title| truncatechars:10  }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
+				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  <span class="pr-4" > 
+					{{ f.title| truncatechars:20  }}   	<span class=""> [ {{ f.get_posts | length }}  ] </span> 
+				</span> <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
 
 				{% endif %}
 			</label>
@@ -59,7 +61,7 @@
     </ul>
 
     <script>
-	function hideshow( a ) {
+	function hideshow( a , rid ) {
 		var posts =  document.getElementsByClassName('post');
 		if ( a == 'All' ){
 			var acopy = [];
@@ -81,11 +83,13 @@
 				}
 			}
 		     }
-		var rhs = document.getElementById("rhs");
-		if ( rhs ) {
-			rhs.classList.add('hidden') 
-		}
-		}
+		var rhs = document.getElementById("rhs"); if ( rhs ) { rhs.classList.add('hidden') } 
+		console.log("RID", rid )
+		var fk = document.getElementById("filter_key_selected"); if ( fk ) { fk.value = rid } 
+
+	}
+
+
         // Select all radio buttons with the name 'option'
         const radioButtons = document.querySelectorAll('input[name="option"]');
 
@@ -93,7 +97,7 @@
         radioButtons.forEach((radio) => {
             radio.addEventListener('change', () => {
                 if (radio.checked) {
-			hideshow(  radio.value )
+			hideshow(  radio.value , radio.id )
                 }
             });
         });
