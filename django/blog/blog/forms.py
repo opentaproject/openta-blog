@@ -73,7 +73,7 @@ class PostForm(forms.ModelForm):
           #self.fields["filter_key"].widget = forms.SelectMultiple();
           for k in [ 'author_type', 'post_author','body','category','is_staff'] :
               self.fields[k].label = ''
-          self.fields["filter_key"].initial = kwargs['initial']['filter_key']
+          #self.fields["filter_key"].initial = kwargs['initial']['filter_key']
           self.fields["title"].label = 'Title: '
           self.fields["visibility"].label = 'Visibility: '
           self.fields["alias"].label = 'Alias: '

@@ -247,16 +247,29 @@ def blog_add_post(request ):
         instance.alias = alias
         fk = [i['pk'] for i in list( post.filter_key.all().values('pk') ) ]
         initial = {'filter_key' : fk }
-        form = PostForm( request.POST, is_staff=is_staff, alias=alias, instance=instance,initial=initial)
+        print(f"FORM1 INSTANCE = {instance} INITIAL={initial}")
+        print(f"REQUEST = {request.POST}")
+        qm = request.POST.copy();
+        qm_selected = qm.get('filter_key_selected',None)
+        f = qm.getlist('filter_key')
+        if qm_selected :
+            k = int( qm_selected.split('_')[2] )
+            f.append(k)
+            print(f"K = {k}")
+        qm.setlist('filter_key', f )
+        print(f"QM = {qm}")
+        form = PostForm( qm , is_staff=is_staff, alias=alias, instance=instance )
         if form.is_valid() :
+            print(f"FORM IS VALID")
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/edit_post/{post.pk}')
         else :
             pass
     else :
-        form = PostForm( is_staff=is_staff,alias=alias, instance=post,initial=initial)
-    r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_ADD_POST', 'initial' : initial } )
+        print(f"FORM2 INSTANCE = {instance} ")
+        form = PostForm( is_staff=is_staff,alias=alias, instance=post)
+    r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_ADD_POST' } )
     return r
 
 
@@ -295,15 +308,18 @@ def blog_edit_post(request, pk ):
             post.delete();
             return HttpResponseRedirect(f'/')
 
+        print(f"FORM3 INSTANCE = {instance} INITIAL={initial}")
         form = PostForm( request.POST,  is_staff=is_staff, alias=alias ,instance=post,initial=initial)
         #if form.is_valid() and not post.body == '' :
         if  not post.body == '' :
+            print(f"FORM3 IS VALID INSTANCE   ")
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/post/{post.pk}')
         else :
             pass
     else :
+        print(f"FORM4 INSTANCE = {post} INITIAL={initial}")
         form = PostForm( is_staff=is_staff, alias=alias, instance=post,initial=initial)
         return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_EDIT_POST','initial' : initial } )
 
