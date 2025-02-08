@@ -35,18 +35,16 @@
 	<li class="OpenTA-text-size -mb-px mr-1"> 
 
 		<form method="post">
-			<label for="id_filterkey_all" > <input type="radio" name="option" value="All" id="All" > {{ posts | length }}  <span class="pr-4"> All </span>  </input>
+			<label for="id_filterkey_all" > <input type="checkbox" name="option" value="All" id="All" > All </input>
 			</label>
 		{% for f in category.get_filterkeys %} 
 		{{ style }} 
 		{% if f.name %}
 			<label for="id_filterkey_{{f.pk}}">
 				{% if filter_key.pk == f.pk %}
-				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  <span class="pr-4"> {{ f.title | truncatechars:20 }} </span>   <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
+				<input type="checkbox" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  {{ f.title | truncatechars:10 }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
 				{% else %}
-				<input type="radio" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  <span class="pr-4" > 
-					{{ f.title| truncatechars:20  }}   	<span class=""> [ {{ f.get_posts | length }}  ] </span> 
-				</span> <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
+				<input type="checkbox" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  {{ f.title| truncatechars:10  }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
 
 				{% endif %}
 			</label>
@@ -61,8 +59,13 @@
     </ul>
 
     <script>
-	function hideshow( a , rid ) {
+	function hideshow( a ) {
 		var posts =  document.getElementsByClassName('post');
+		for (var i = 0; i < posts.length; i++) {
+			posts[i].classList.remove('visible') ; // Do something with each element
+		        posts[i].classList.add('hidden') ; // Do something with each element
+		        }
+
 		if ( a == 'All' ){
 			var acopy = [];
 			for (var i = 0; i < posts.length; i++) {
@@ -70,35 +73,25 @@
 				posts[i].classList.add('visible') ; // Do something with each element
 				}
 			} 
-		else  {
-		      var acopy = JSON.parse( a );
-			for (var i = 0; i < posts.length; i++) {
-				posts[i].classList.add('hidden') ; // Do something with each element
-         			posts[i].classList.replace('visible','hidden') ; // Do something with each element
-
-
-			for ( let i = 0 ; i < acopy.length ; i++ ){
-				const post = document.getElementById( 'post_' + acopy[i] );
-				post.classList.replace('hidden','visible');
-				}
-			}
-		     }
-		var rhs = document.getElementById("rhs"); if ( rhs ) { rhs.classList.add('hidden') } 
-		console.log("RID", rid )
-		var fk = document.getElementById("filter_key_selected"); if ( fk ) { fk.value = rid } 
-
+		else {
+		     var acopy = JSON.parse( a );
+    		     const checkedboxes = document.querySelectorAll('input[name="option"]:checked');
+		     var ar = []
+		     for ( let i = 0 ; i < checkedboxes.length ; i++ ){ ar = ar.concat( JSON.parse(checkedboxes[i].value ) )  } 
+		     for ( let i = 0 ; i <  ar.length ; i++ ){ document.getElementById( 'post_' + String( ar[i] )   ).classList.replace('hidden','visible')  ; console.log('post_' +  String( ar[i] ) ) } 
+		     const postchecks = document.getElementById( 'post_' + acopy[i] );
+		     console.log("ar = ", ar )
+		}
+		var rhs = document.getElementById("rhs");
+		if ( rhs ) {
+			rhs.classList.add('hidden') 
+		}
 	}
-
-
         // Select all radio buttons with the name 'option'
-        const radioButtons = document.querySelectorAll('input[name="option"]');
-
-        // Add a 'change' event listener to each radio button
-        radioButtons.forEach((radio) => {
-            radio.addEventListener('change', () => {
-                if (radio.checked) {
-			hideshow(  radio.value , radio.id )
-                }
+        const checkboxButtons = document.querySelectorAll('input[name="option"]');
+        checkboxButtons.forEach((checkbox) => {
+            checkbox.addEventListener('change', () => {
+			hideshow(  checkbox.value )
             });
         });
     </script>
