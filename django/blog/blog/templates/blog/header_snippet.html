@@ -60,21 +60,24 @@
 
     <script>
 	function hideshow( a ) {
+		console.log("A =", a)
 		var posts =  document.getElementsByClassName('post');
-		for (var i = 0; i < posts.length; i++) {
-			posts[i].classList.remove('visible') ; // Do something with each element
-		        posts[i].classList.add('hidden') ; // Do something with each element
-		        }
-
-		if ( a == 'All' ){
-			var acopy = [];
+		var ck =  document.getElementById('All').checked;
+		if (ck ){
 			for (var i = 0; i < posts.length; i++) {
 				posts[i].classList.remove('hidden') ; // Do something with each element
-				posts[i].classList.add('visible') ; // Do something with each element
-				}
-			} 
-		else {
-		     var acopy = JSON.parse( a );
+		        	posts[i].classList.add('visible') ; // Do something with each element
+		        	}
+		} else {
+
+			for (var i = 0; i < posts.length; i++) {
+				posts[i].classList.remove('visible') ; // Do something with each element
+		        	posts[i].classList.add('hidden') ; // Do something with each element
+		        	}
+		}
+		
+		if ( ! ck  ){
+		     try { var acopy = JSON.parse( a ); } catch (error ){ var acopy = a }
     		     const checkedboxes = document.querySelectorAll('input[name="option"]:checked');
 		     var ar = []
 		     for ( let i = 0 ; i < checkedboxes.length ; i++ ){ ar = ar.concat( JSON.parse(checkedboxes[i].value ) )  } 
