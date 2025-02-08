@@ -221,8 +221,6 @@ def blog_index(request, *args, **kwargs ) :
 def blog_add_post(request ):
     username = request.session.get('username',None)
     filter_key_name = request.session.get('filter_key','')
-    filter_key_selected = request.data.get('filter_key_selected',None)
-    print(f"FILTER_KEY_SELECTED = {filter_key_selected}")
     is_authenticated = request.session.get('is_authenticated',False)
     if not is_authenticated :
         raise PermissionDenied("You must be authenticated in to add a post")
@@ -245,18 +243,16 @@ def blog_add_post(request ):
         is_staff = request.session.get('is_staff',False)
         instance = post
         instance.alias = alias
-        fk = [i['pk'] for i in list( post.filter_key.all().values('pk') ) ]
-        initial = {'filter_key' : fk }
         print(f"FORM1 INSTANCE = {instance} INITIAL={initial}")
         print(f"REQUEST = {request.POST}")
         qm = request.POST.copy();
         qm_selected = qm.get('filter_key_selected',None)
-        f = qm.getlist('filter_key')
         if qm_selected :
+            f = qm.getlist('filter_key')
             k = int( qm_selected.split('_')[2] )
             f.append(k)
             print(f"K = {k}")
-        qm.setlist('filter_key', f )
+            qm.setlist('filter_key', f )
         print(f"QM = {qm}")
         form = PostForm( qm , is_staff=is_staff, alias=alias, instance=instance )
         if form.is_valid() :
