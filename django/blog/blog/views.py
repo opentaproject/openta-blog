@@ -243,16 +243,22 @@ def blog_add_post(request ):
         is_staff = request.session.get('is_staff',False)
         instance = post
         instance.alias = alias
-        print(f"FORM1 INSTANCE = {instance} INITIAL={initial}")
+        print(f"FORM1 INSTANCE = {instance}")
         print(f"REQUEST = {request.POST}")
         qm = request.POST.copy();
         qm_selected = qm.get('filter_key_selected',None)
-        if qm_selected :
-            f = qm.getlist('filter_key')
-            k = int( qm_selected.split('_')[2] )
-            f.append(k)
-            print(f"K = {k}")
-            qm.setlist('filter_key', f )
+        print(f"QM = {qm}")
+        try :
+            if qm_selected :
+                print(f"QM_SELECTED = {qm_selected} { type( qm_selected)} ")
+                f = qm.getlist('filter_key')
+                k = [  int( i.split('_')[2])  for i in  qm_selected.split(',')  ]
+                print(f"K = {k}")
+                f = f + k 
+                print(f"F = {f}")
+                qm.setlist('filter_key', f )
+        except IndexError as e :
+            pass
         print(f"QM = {qm}")
         form = PostForm( qm , is_staff=is_staff, alias=alias, instance=instance )
         if form.is_valid() :

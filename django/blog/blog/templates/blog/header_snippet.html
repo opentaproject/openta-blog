@@ -62,29 +62,65 @@
 	function hideshow( a ) {
 		console.log("A =", a)
 		var posts =  document.getElementsByClassName('post');
-		var ck =  document.getElementById('All').checked;
-		if (ck ){
-			for (var i = 0; i < posts.length; i++) {
-				posts[i].classList.remove('hidden') ; // Do something with each element
-		        	posts[i].classList.add('visible') ; // Do something with each element
-		        	}
-		} else {
+		var ckall =  document.getElementById('All')
+		var ck = ckall.checked
+		for (var i = 0; i < posts.length; i++) {
+			posts[i].classList.remove('visible') ; // Do something with each element
+		        posts[i].classList.add('hidden') ; // Do something with each element
+		       	 }
 
-			for (var i = 0; i < posts.length; i++) {
-				posts[i].classList.remove('visible') ; // Do something with each element
-		        	posts[i].classList.add('hidden') ; // Do something with each element
-		        	}
+		if ( String(a) == 'All' ){
+		       const checkedboxes = document.querySelectorAll('input[name="option"]:checked');
+		       for ( let i = 0 ; i < checkedboxes.length ; i++ ){ 
+				checkedboxes[i].checked = false 
+			     }
+		        ckall.checked = ck
+			if (ck ){
+		     		for (var i = 0; i < posts.length; i++) {
+		       			posts[i].classList.remove('hidden') ; // Do something with each element
+		       			posts[i].classList.add('visible') ; // Do something with each element
+		       			}
+			} else {
+		    		for (var i = 0; i < posts.length; i++) {
+					posts[i].classList.remove('visible') ; // Do something with each element
+		       			posts[i].classList.add('hidden') ; // Do something with each element
+		       			}
+			}
+		} else {
+			if (ck ){ 
+		     		for (var i = 0; i < posts.length; i++) {
+		       			posts[i].classList.remove('hidden') ; // Do something with each element
+		       			posts[i].classList.add('visible') ; // Do something with each element
+		       			}
+			} else {
+		    		for (var i = 0; i < posts.length; i++) {
+					posts[i].classList.remove('visible') ; // Do something with each element
+		       		        posts[i].classList.add('hidden') ; // Do something with each element
+		         	}
+			}
+		 try { var acopy = JSON.parse( a ); } catch (error ){ var acopy = a }
+    		 const checkedboxes = document.querySelectorAll('input[name="option"]:checked');
+		 var ar = []
+		 var rid = []
+		 for ( let i = 0 ; i < checkedboxes.length ; i++ ){ 
+			 if( checkedboxes[i].value != 'All'  ){
+			 ar = ar.concat( JSON.parse(checkedboxes[i].value ) ); 
+			 rid = rid.concat( [ checkedboxes[i].id  ] )  
+			 }
+		 	}
+		  for (var i = 0; i < posts.length; i++) {
+			posts[i].classList.remove('visible') ; // Do something with each element
+		        posts[i].classList.add('hidden') ; // Do something with each element
+		       	 }
+
+		 for ( let i = 0 ; i <  ar.length ; i++ ){ document.getElementById( 'post_' + String( ar[i] )   ).classList.replace('hidden','visible')  ; console.log('post_' +  String( ar[i] ) ) } 
+		 const postchecks = document.getElementById( 'post_' + acopy[i] );
+		 console.log("ar = ", ar )
+		 console.log("rid = ", rid , rid.length)
+		 var fk = document.getElementById("filter_key_selected"); if ( fk ) { fk.value = rid } 
+		 ckall.checked = false;
 		}
-		
-		if ( ! ck  ){
-		     try { var acopy = JSON.parse( a ); } catch (error ){ var acopy = a }
-    		     const checkedboxes = document.querySelectorAll('input[name="option"]:checked');
-		     var ar = []
-		     for ( let i = 0 ; i < checkedboxes.length ; i++ ){ ar = ar.concat( JSON.parse(checkedboxes[i].value ) )  } 
-		     for ( let i = 0 ; i <  ar.length ; i++ ){ document.getElementById( 'post_' + String( ar[i] )   ).classList.replace('hidden','visible')  ; console.log('post_' +  String( ar[i] ) ) } 
-		     const postchecks = document.getElementById( 'post_' + acopy[i] );
-		     console.log("ar = ", ar )
-		}
+
 		var rhs = document.getElementById("rhs");
 		if ( rhs ) {
 			rhs.classList.add('hidden') 
