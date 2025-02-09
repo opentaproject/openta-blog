@@ -26,13 +26,13 @@
 
     {% for post in posts %}
     {% if filter_key.get_posts %}
-    {% if post.pk in filter_key.get_posts  %}
-    	<div class="visible post" id="post_{{ post.pk }}">
-	{% else %}
-	<div class="hidden post" id="post_{{ post.pk }}">
-	{% endif %}
+    	{% if post.pk in filter_key.get_posts  %}
+    		<div class="visible post" id="post_{{ post.pk }}">
+		{% else %}
+		<div class="hidden post" id="post_{{ post.pk }}">
+		{% endif %}
     {% else %}
-    	<div class="visible post" id="post_{{ post.pk }}">
+    	<div class="hidden post" id="post_{{ post.pk }}">
 
     {% endif %}
      {% if post.pk == selected %}

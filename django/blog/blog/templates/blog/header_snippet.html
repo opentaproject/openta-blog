@@ -59,15 +59,29 @@
     </ul>
 
     <script>
+	function make_hidden( posts ){ for (var i = 0; i < posts.length; i++) {
+                        posts[i].classList.remove('visible') ; // Do something with each element
+                        posts[i].classList.add('hidden') ; // Do something with each element
+                         }
+		return posts
+                }
+
+        function make_visible( posts ){ for (var i = 0; i < posts.length; i++) {
+                        posts[i].classList.remove('hidden') ; // Do something with each element
+                        posts[i].classList.add('visible') ; // Do something with each element
+                         }
+		return posts
+                }
 	function hideshow( a ) {
 		console.log("A =", a)
 		var posts =  document.getElementsByClassName('post');
 		var ckall =  document.getElementById('All')
 		var ck = ckall.checked
-		for (var i = 0; i < posts.length; i++) {
-			posts[i].classList.remove('visible') ; // Do something with each element
-		        posts[i].classList.add('hidden') ; // Do something with each element
-		       	 }
+		posts = make_hidden( posts )
+		//for (var i = 0; i < posts.length; i++) {
+	        //		posts[i].classList.remove('visible') ; // Do something with each element
+		//	        posts[i].classList.add('hidden') ; // Do something with each element
+		//	       	 }
 
 		if ( String(a) == 'All' ){
 		       const checkedboxes = document.querySelectorAll('input[name="option"]:checked');
@@ -76,27 +90,31 @@
 			     }
 		        ckall.checked = ck
 			if (ck ){
-		     		for (var i = 0; i < posts.length; i++) {
-		       			posts[i].classList.remove('hidden') ; // Do something with each element
-		       			posts[i].classList.add('visible') ; // Do something with each element
-		       			}
+				posts = make_visible( posts )
+		     		//for (var i = 0; i < posts.length; i++) {
+		       		//	posts[i].classList.remove('hidden') ; // Do something with each element
+		       		//	posts[i].classList.add('visible') ; // Do something with each element
+		       		//	}
 			} else {
-		    		for (var i = 0; i < posts.length; i++) {
-					posts[i].classList.remove('visible') ; // Do something with each element
-		       			posts[i].classList.add('hidden') ; // Do something with each element
-		       			}
+				posts = make_hidden( posts )
+		    		//for (var i = 0; i < posts.length; i++) {
+				//	posts[i].classList.remove('visible') ; // Do something with each element
+		       		//	posts[i].classList.add('hidden') ; // Do something with each element
+		       		//	}
 			}
 		} else {
 			if (ck ){ 
-		     		for (var i = 0; i < posts.length; i++) {
-		       			posts[i].classList.remove('hidden') ; // Do something with each element
-		       			posts[i].classList.add('visible') ; // Do something with each element
-		       			}
+				posts = make_visible( posts )
+		     		//for (var i = 0; i < posts.length; i++) {
+		       		//	posts[i].classList.remove('hidden') ; // Do something with each element
+		       		//	posts[i].classList.add('visible') ; // Do something with each element
+		       		//	}
 			} else {
-		    		for (var i = 0; i < posts.length; i++) {
-					posts[i].classList.remove('visible') ; // Do something with each element
-		       		        posts[i].classList.add('hidden') ; // Do something with each element
-		         	}
+				posts = make_hidden( posts )
+		    		//for (var i = 0; i < posts.length; i++) {
+				//	posts[i].classList.remove('visible') ; // Do something with each element
+		       		//       posts[i].classList.add('hidden') ; // Do something with each element
+		         	//}
 			}
 		 try { var acopy = JSON.parse( a ); } catch (error ){ var acopy = a }
     		 const checkedboxes = document.querySelectorAll('input[name="option"]:checked');
@@ -134,6 +152,20 @@
             });
         });
     </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nhidden  = document.getElementsByClassName('post hidden').length;
+        console.log('Number of posts with class "hidden":', nhidden );
+	if ( nhidden == 0 ){
+		console.log("ALL SHOWN ")
+		document.getElementById('All').checked = true
+	}
+	else {
+		console.log("SOME HIDDEN")
+
+	}
+    });
+</script>
 
 
 
