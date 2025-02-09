@@ -37,6 +37,14 @@ STAFF = 3
 PRIVATE = 1
 PUBLIC = 2 
 
+def get_visitor( request ):
+    subdomain_name = request.session.get('subdomain','')
+    username = request.session['username']
+    subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
+    visitor_type = get_author_type(request)
+    visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subdomain,visitor_type=visitor_type)
+    return visitor
+
 
 @api_view(["GET", "POST"])
 @csrf_exempt
@@ -80,7 +88,7 @@ def blog_index(request, *args, **kwargs ) :
     #    category_selected =  Category.objects.get(name=subdomain ).pk
     try :
         visitor_type = get_author_type(request)
-        visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subdomain,visitor_type=visitor_type)
+        visitor = get_visitor( request )
         if visitor.alias == ''  or '@' in visitor.alias :
             visitor.alias = visitor.name.split('@')[0];
             visitor.save()
@@ -232,7 +240,9 @@ def blog_add_post(request ):
         
     subdomain_name = request.session.get('subdomain','')
     subdomain,_ = Subdomain.objects.get_or_create(name=subdomain_name)
-    post_author = Visitor.objects.get(name=username,subdomain=subdomain)
+    visitor_type = get_author_type(request)
+    #post_author = Visitor.objects.get(name=username,subdomain=subdomain,visitor_type=visitor_type)
+    post_author = get_visitor( request )
     try :
         category_ = request.POST.get('category')[0]
         category = Category.objects.get(pk=category_)
@@ -303,7 +313,8 @@ def blog_edit_post(request, pk ):
     post = get_object_or_404(Post, pk=pk)
     username = request.session.get('username',None)
     subdomain = request.session.get('subdomain','')
-    visitor = Visitor.objects.get(name=username,subdomain__name=subdomain)
+    #visitor = Visitor.objects.get(name=username,subdomain__name=subdomain)
+    visitor = get_visitor( request )
     alias = visitor.alias
     post.post_author = visitor
     is_staff = request.session.get('is_staff',False)
@@ -340,7 +351,8 @@ def blog_leave_comment (request, pk):
     post_pk = pk
     username = get_username(request) 
     subdomain = request.session.get('subdomain','')
-    comment_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
+    #comment_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
+    comment_author = get_visitor( request)
     body = ''
     comment , _ = Comment.objects.get_or_create(comment_author=comment_author,post=post,body=body)
     if request.method == "POST":
@@ -364,7 +376,7 @@ def blog_edit_comment(request, pk ):
     comment = get_object_or_404(Comment, pk=pk)
     username = get_username(request)
     subdomain = request.session.get('subdomain','')
-    comment_author = Visitor.objects.get(name=username,subdomain__name=subdomain)
+    comment_author = get_visitor( request ) # Visitor.objects.get(name=username,subdomain__name=subdomain)
     action = request.POST.get('action','edit');
     post = comment.post
     if comment.body in [ '<p>&nbsp;</p>' ,'']  :
