@@ -111,12 +111,12 @@ class Post(models.Model):
     visibility = models.IntegerField(choices=Visibility , default=2 )
     author_type = models.IntegerField(choices=AuthorType, default=0 )
     #author = models.CharField(max_length=60)
-    post_author =  models.ForeignKey("Visitor", null=True, blank=True, related_name="post",on_delete=models.CASCADE)
+    post_author =  models.ForeignKey("Visitor", null=True, blank=True, related_name="post",on_delete=models.SET_NULL)
     title = models.CharField(max_length=255)
     body = CKEditor5Field('Post Body ', config_name='extends')
     created_on = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
-    category = models.ForeignKey("Category", null=True, blank=True, related_name="post",on_delete=models.CASCADE)
+    category = models.ForeignKey("Category", null=True, blank=True, related_name="post",on_delete=models.SET_NULL)
     filter_key = models.ManyToManyField(FilterKey,related_name="post")
 
     def save( self, *args, **kwargs):
@@ -158,7 +158,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     #author = models.CharField(max_length=60,default='',blank=True)
-    comment_author =  models.ForeignKey("Visitor", null=True, blank=True, related_name="comment_author",on_delete=models.CASCADE)
+    comment_author =  models.ForeignKey("Visitor", null=True, blank=True, related_name="comment_author",on_delete=models.SET_NULL)
     body =   CKEditor5Field('Comment Body', config_name='extends')
     created_on = models.DateTimeField(auto_now_add=True)
     post = models.ForeignKey("Post", on_delete=models.CASCADE,related_name="comment")
