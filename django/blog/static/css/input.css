@@ -56,3 +56,13 @@ label:has(input[type="radio"]:checked) {
   color: red;
   font-weight: bold;
 }
+
+.checkbox-group {
+    display: flex;
+    gap: 10px; /* Adjust spacing between checkboxes as needed */
+}
+
+.checkbox-group div {
+    display: flex;
+    gap: 5px;
+}

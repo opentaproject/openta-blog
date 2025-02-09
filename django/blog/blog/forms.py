@@ -55,7 +55,6 @@ class PostForm(forms.ModelForm):
           #print(f"POST FORM kwargs = {kwargs}")
           #print(f"ALIAS IN __INIT__  = {alias}")
           instance = kwargs['instance']
-          fk = [ i['pk'] for i in list( instance.filter_key.all().values('pk') ) ]
           kwargs.setdefault('label_suffix', 'ABC') 
           kwargs['label_suffix'] = ''
           logger.error(f"POST_FORM ARGS = {args}")
@@ -76,6 +75,7 @@ class PostForm(forms.ModelForm):
           #self.fields["filter_key"].initial = kwargs['initial']['filter_key']
           self.fields["title"].label = 'Title: '
           self.fields["visibility"].label = 'Visibility: '
+          self.fields["filter_key"].label = "Folders: "
           self.fields["alias"].label = 'Alias: '
           self.fields["title"].widget=forms.TextInput(attrs={'class': 'OpenTA-text-input' });
           self.fields["alias"].widget=forms.TextInput(attrs={'class': 'OpenTA-text-input',});
@@ -103,7 +103,7 @@ class PostForm(forms.ModelForm):
             self.is_staff = is_staff
             self.fields["is_staff"].widget = forms.HiddenInput();
             self.fields["post_author"].widget = forms.HiddenInput();
-            #self.fields["filter_key"].widget.attrs.update({'class' : 'px-2 pb-2 text-red-400  ABCDEFG'} ,)
+            #self.fields["filter_key"].widget.attrs.update({'class' : 'checkbox-inline' ,});
             #self.fields["filter_key"].widget.attrs.update(attrs)
                 
 
