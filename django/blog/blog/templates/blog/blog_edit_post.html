@@ -20,6 +20,7 @@
         <div id={{ post.pk }} class="OpenTA-post-form">
             <form method="post">
                 {% csrf_token %}
+
 		<div class="OpenTA-title"> {{ form.title.label_tag }}{{ form.title}} {{ form.title.errors }}  </div> 
 		<div class="OpenTA-alias"> {{ form.alias.label_tag }}{{ form.alias}} {{ form.alias.errors }} </div> 
 
@@ -30,14 +31,13 @@
 		</fieldset>
 		 </span> 
 		 </div>
+		<div class="py-2"> <div class="checkbox-group">  {{ form.filter_key}}  </div> </div> 
 
 
 		 <div class="OpenTA-is_staff"> {{ form.is_staff.label_tag }}{{ form.is_staff}} {{ form.is_staff.errors }} </div> 
 		 <div class="OpenTA-author_type"> {{ form.author_type.label_tag }}{{ form.author_type}} {{ form.author_type.errors }} </div> 
 		 <div class="OpenTA-post_author"> {{ form.post_author.label_tag }}{{ form.post_author}} {{ form.post_author.errors }} </div> 
 		 <div class="OpenTA-body"> {{ form.body.label_tag }}{{ form.body}} {{ form.body.errors }} </div> 
-		 <div class="OpenTA-text font-bold"> Choose or update the folders </div> 
-		 <div class="checkbox-group">  {{ form.filter_key}}  </div> 
 		 <div class="OpenTA-category"> {{ form.category.label_tag }}{{ form.category}} {{ form.category.errors }} </div>  
 		</table>
                 <button type="submit" class="OpenTA-delete-button">Submit</button>
