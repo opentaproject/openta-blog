@@ -20,6 +20,8 @@
 
             <div class="OpenTA-post-body" id="{{ post.pk}}"> {{ post.body  | safe }}
 
+
+
               <div>
                 <div class="mt-2 flex justify-between w-full">
                   <span>
@@ -27,12 +29,14 @@
                     <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if post.post_author.name == username or  is_staff %} Delete {% endif %} </a> </span>
                   </span>
 
-                  <span class="{{ post.textclass }}">   {{ post.post_author.alias }} {{ post.last_modified  | naturaltime }}
+<div class="OpenTA-left"> 
+	{% for f in post.get_filterkeys %}
+		<span class="OpenTA-filterkeys bg-blue-200"> {{ f }} </span>
+	{% endfor %}
+</div> 
 
-                  </span>
+                  <div class="{{ post.textclass }}">   {{ post.post_author.alias }} {{ post.last_modified  | naturaltime }} </dif>
                 </div>
-
-
 
               </div>
 

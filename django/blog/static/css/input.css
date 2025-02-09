@@ -21,7 +21,7 @@
     .OpenTA-navigation-bar { @apply  flex p-2  bg-white  px-4; }
     .OpenTA-subcategories { @apply  flex px-4  mb-2 bg-white  ; }
     .OpenTA-post-selected-entry { @apply  border border-gray-300 p-2 rounded-lg bg-yellow-100  shadow-md;}
-    .OpenTA-post-rhs-entry { @apply       bg-yellow-100 border border-gray-300 p-2 rounded-lg shadow-md;}
+    .OpenTA-post-rhs-entry { @apply       bg-white border-gray-300 p-2 rounded-lg shadow-md;}
     .OpenTA-post-entry { @apply           border border-gray-300 p-2 rounded-lg shadow-md;}
     .OpenTA-post-last-modified { @apply  font-light ;}
     .OpenTA-post-title { @apply  font-semibold;}
@@ -40,7 +40,7 @@
     .OpenTA-text-input { @apply  px-2 me-2 text-blue-600 rounded-lg ;}
     .OpenTA-debug { @apply hidden text-xs text-red-800 ; }
     .OpenTA-filterkeys { @apply inline-block px-4 ; }
-    .OpenTA-left { @apply text-left px-2 ; }
+    .OpenTA-left { @apply flex space-x-4 text-left px-2 ; }
 }
 
 option {

@@ -100,6 +100,7 @@ def blog_index(request, *args, **kwargs ) :
             else :
                 posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
             for post in posts :
+                print(f"POST FILTERKEYS = {post.get_filterkeys() }")
                 if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
                     post.delete()
             post_subquery = Post.objects.filter(id=OuterRef('id'),post_author=visitor).annotate(viewed=Count('post_author')).values('viewed')
@@ -310,7 +311,6 @@ def blog_edit_post(request, pk ):
             post.delete();
             return HttpResponseRedirect(f'/')
 
-        print(f"FORM3 INSTANCE = {instance} INITIAL={initial}")
         form = PostForm( request.POST,  is_staff=is_staff, alias=alias ,instance=post,initial=initial)
         #if form.is_valid() and not post.body == '' :
         if  not post.body == '' :

@@ -51,7 +51,7 @@ class FilterKey(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True,  related_name="filterkey")
 
     def __str__(self):
-        return f"{self.title}-[ {self.category}:{self.name} ]"
+        return f"{self.title}" # -[ {self.category}:{self.name} ]" # UID
 
     def get_posts( self ):
         posts = self.post.all()
@@ -117,6 +117,13 @@ class Post(models.Model):
 
     def save( self, *args, **kwargs):
       super().save(*args,**kwargs)
+
+    def get_filterkeys( self ):
+        filter_keys = self.filter_key
+        f = list( filter_keys.values_list('name',flat=True) )
+        #f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
+        return f
+
 
 
     def __str__(self):

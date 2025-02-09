@@ -180,4 +180,4 @@ class FilterKeyForm(forms.ModelForm):
             self.request = request
             subdomain_name = request.session.get('subdomain','')
             subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
-        print(f"FILTER_KEY SUBDOMAIN = {subdomain}")
+            print(f"FILTER_KEY SUBDOMAIN = {subdomain}")
