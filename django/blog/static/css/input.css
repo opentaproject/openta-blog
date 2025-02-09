@@ -38,7 +38,7 @@
     .OpenTA-alias { @apply  font-semibold ;}
     .OpenTA-delete-button { @apply  p-1 text-white bg-blue-400 font-medium rounded me-2 ;}
     .OpenTA-text-input { @apply  px-2 me-2 text-blue-600 rounded-lg ;}
-    .OpenTA-debug { @apply hidden text-xs text-red-800 ; }
+    .OpenTA-debug { @apply text-xs text-red-800 ; }
     .OpenTA-filterkeys { @apply inline-block px-4 ; }
     .OpenTA-left { @apply flex space-x-4 text-left px-2 ; }
 }
