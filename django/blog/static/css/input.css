@@ -5,7 +5,7 @@
 
 @layer components {
     .OpenTA-background { @apply  bg-white;}
-    .OpenTA-text-size { @apply  text-xs md:text-xs lg:text-sm;}
+    .OpenTA-text-size { @apply  text-xs md:text-xs lg:text-xs;}
     .OpenTA-category-not-selected { @apply  inline-block border border-white rounded hover:border-gray-200 hover:bg-gray-200 py-0 px-2;}
     .OpenTA-category-selected { @apply  inline-block border border-blue-500 rounded py-0  bg-blue-500 text-white px-2; }
     .OpenTA-filterkey-selected { @apply  inline-block border border-blue-500 rounded py-0 px-2 bg-blue-400 text-white px-2;}
@@ -24,11 +24,11 @@
     .OpenTA-post-rhs-entry { @apply       bg-white border-gray-300 p-2 rounded-lg shadow-md;}
     .OpenTA-post-entry { @apply           border border-gray-300 p-2 rounded-lg shadow-md;}
     .OpenTA-post-last-modified { @apply  font-light ;}
-    .OpenTA-post-title { @apply  font-semibold;}
+    .OpenTA-post-title { @apply  text-black font-semibold;}
     .OpenTA-show-button { @apply  hover:bg-blue-400 bg-blue-200;}
     .OpenTA-submit-button { @apply  hover:bg-blue-400 ;}
-    .OpenTA-rhs-sidebyside { @apply  w-3/4 align-top px-2;}
-    .OpenTA-lhs-sidebyside { @apply  w-1/4 align-top px-2;}
+    .OpenTA-rhs-sidebyside { @apply  w-2/3 align-top px-2;}
+    .OpenTA-lhs-sidebyside { @apply  w-1/3 align-top px-2;}
     .OpenTA-table-sidebyside { @apply  min-w-full border-collapse border border-blue-800;}
     .OpenTA-new-button { @apply  p-1 text-white bg-blue-400 font-medium rounded me-2 ;}
     .OpenTA-toggle { @apply  italic ; }
@@ -37,10 +37,14 @@
     .OpenTA-title { @apply  font-semibold ;}
     .OpenTA-alias { @apply  font-semibold ;}
     .OpenTA-delete-button { @apply  p-1 text-white bg-blue-400 font-medium rounded me-2 ;}
-    .OpenTA-text-input { @apply  px-2 me-2 text-blue-600 rounded-lg ;}
-    .OpenTA-debug { @apply text-xs text-red-800 ; }
+    .OpenTA-text-input { @apply  px-2 me-2 text-red-600 rounded-lg ;}
+    .OpenTA-debug { @apply hidden text-xs text-red-800 ; }
     .OpenTA-filterkeys { @apply inline-block px-4 ; }
     .OpenTA-left { @apply flex space-x-4 text-left px-2 ; }
+    .OpenTA-author-type-0 { @apply bg-blue-400 px-1 ; }
+    .OpenTA-author-type-1 { @apply bg-green-400 px-1  ; }
+    .OpenTA-author-type-2 { @apply bg-yellow-400 px-1 ; }
+    .OpenTA-author-type-3 { @apply bg-gray-400 px-1 ; }
 }
 
 option {

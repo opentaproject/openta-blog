@@ -42,9 +42,9 @@
 		{% if f.name %}
 			<label for="id_filterkey_{{f.pk}}">
 				{% if filter_key.pk == f.pk %}
-				<input type="checkbox" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  {{ f.title | truncatechars:10 }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
+				<input type="checkbox" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  {{ f.title | truncatechars:20 | safe }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
 				{% else %}
-				<input type="checkbox" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  {{ f.title| truncatechars:10  }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
+				<input type="checkbox" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  {{ f.title| truncatechars:20  | safe  }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input> 
 
 				{% endif %}
 			</label>

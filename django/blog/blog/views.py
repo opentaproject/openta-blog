@@ -79,7 +79,8 @@ def blog_index(request, *args, **kwargs ) :
     #if not filter_key.name   == '' :
     #    category_selected =  Category.objects.get(name=subdomain ).pk
     try :
-        visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subdomain,visitor_type=1)
+        visitor_type = get_author_type(request)
+        visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subdomain,visitor_type=visitor_type)
         if visitor.alias == ''  or '@' in visitor.alias :
             visitor.alias = visitor.name.split('@')[0];
             visitor.save()
@@ -168,6 +169,7 @@ def blog_index(request, *args, **kwargs ) :
             selected_posts = []
 
         for post in selected_posts :
+            print(f"COMMENTS = {post.answered_by()}")
             visit , _  = Visit.objects.update_or_create(visitor=visitor,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
@@ -175,6 +177,7 @@ def blog_index(request, *args, **kwargs ) :
         if request.user.is_staff :
             author_type = Post.AuthorType.STAFF
             author_type_display = 'Admin'
+        visitor_types = ['anon','student','teacher','staff']
         context = {
             "posts": posts,
             "categories":  categories,
@@ -196,6 +199,7 @@ def blog_index(request, *args, **kwargs ) :
             "alias" : visitor.alias,
             "server" : server,
             "dummy_field" : 'VIEWS_DUMMY_FIELD',
+            "visitor_types" : visitor_types,
         }
     except ProgrammingError as e:
         context = {
