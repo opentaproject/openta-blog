@@ -32,7 +32,11 @@
 		<div class="hidden post" id="post_{{ post.pk }}">
 		{% endif %}
     {% else %}
+       {% if filter_key %}
     	<div class="hidden post" id="post_{{ post.pk }}">
+	{% else %}
+<div class="visible post" id="post_{{ post.pk }}">
+	{% endif %}
 
     {% endif %}
      {% if post.pk == selected %}
