@@ -10,7 +10,7 @@
             {% if  filter_key.title == ''  %}
               <input class="OpenTA-text-size px-2 grow border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400" type="text" id="title" name="title" placeholder="title" required> </input>
             {% else %}
-              <input class="OpenTA-text-size px-2 grow border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400" type="text" id="title" name="title" placeholder="{{ filter_key.title }}" required> </input>
+	    <input class="OpenTA-text-size px-2 grow border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-400" type="text" id="title" name="title" value="{{ filter_key.title }}" required>  </input>
             {% endif %}
             <input type="hidden" id="visibility" name="visibility" value="{{ visibility }}">
             <input type="hidden" id="author_type" name="author_type" value="{{ author_type}}">
