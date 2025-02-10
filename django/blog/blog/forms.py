@@ -60,8 +60,8 @@ class PostForm(forms.ModelForm):
           logger.error(f"POST_FORM ARGS = {args}")
           logger.error(f"POST_FORM KWARGS = {kwargs}")
           super().__init__(*args, **kwargs)
-          #for k in self.fields.keys() :
-          #    print(f" K = {k} val = {self.fields[k]}")
+          for k in self.fields.keys() :
+              print(f" K = {k} val = {self.fields[k]}")
           self.fields["body"].required = True
           self.fields["title"].required = True
           self.fields["alias"].required = False
@@ -84,19 +84,28 @@ class PostForm(forms.ModelForm):
           #self.fields["alias"].widget.attrs.update({'class' : 'OpenTA-alias'})
           #print(f'FILTER_KEY_IN_FORM = { self.fields["filter_key"].choices }')
           #self.fields["filter_key"].queryset = FilterKey.objects.filter(category=instance.category) # FIX THIS
-          category = instance.category
-          print(f"CATEGORY = {category}")
-          subdomain = category.subdomain
-          categories = Category.objects.filter(subdomain=subdomain)
-          filter_keys = FilterKey.objects.all();
+          arglist = dict( *args )
+          print(f"ARGLIST = {arglist}")
+          categories = arglist.get('category')
+          #cnames  = []
+          #for k,v in categories :
+          #    print(f"K,V = {k} {v} ")
+          #    cnames.append(v)
+          print(f"INSTANCE = {instance}")
+          print(f"CATEGORY = {categories}")
+          #subdomain = category.subdomain
+          #categories = Category.objects.filter(subdomain=subdomain)
+          #print(f"CATEGORIES = {categories}")
+          filter_keys = FilterKey.objects.all()
           #filter_keys =  filter_keys.filter(category__in=categories) 
           f = list( filter_keys.values_list('name',flat=True) )
           f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
-          if settings.HIDE_UUID :
-            filter_keys = filter_keys.exclude(name__in=f)
+          filter_keys = filter_keys.exclude(name__in=f)
+          if categories :
+            filter_keys = filter_keys.filter(category__in=categories)
           self.fields["filter_key"].queryset = filter_keys
           print(f"CATEGORIES = {categories}")
-          print(f"SUBDOMAIN = {subdomain}")
+          #print(f"SUBDOMAIN = {subdomain}")
           if True or not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput({'label' : '' } );
             self.fields['category'].widget = forms.HiddenInput();

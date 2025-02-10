@@ -180,17 +180,25 @@ def blog_index(request, *args, **kwargs ) :
             print(f"COMMENTS = {post.answered_by()}")
             visit , _  = Visit.objects.update_or_create(visitor=visitor,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
+            fk = post.filter_key.exclude(name__iregex=r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}")
+            post.filter_key.set(fk)
+            #f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
+            #print(f"f = {f}")
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
         author_type_display = request.session.get('author_type_display','Anonymous')
         if request.user.is_staff :
             author_type = Post.AuthorType.STAFF
             author_type_display = 'Admin'
         visitor_types = ['anon','student','teacher','staff']
+        category_selected_name = Category.objects.get( pk=cat ).name
+        print("CATEGORY_SELECTED_NAME = ", category_selected_name )
         context = {
             "posts": posts,
             "categories":  categories,
             "subdomain" : subdomain_name, 
             "category_selected" : cat,
+            "category_selected_name" : category_selected_name,
+            "category_name_forbidden" : ['Unread','All'] , 
             "is_authenticated" : is_authenticated,
             "visibility" : Post.Visibility.PUBLIC , 
             "comment_author" : visitor,
