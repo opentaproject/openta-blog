@@ -57,6 +57,21 @@
       {% endif %}
         {% endfor %}
     </ul>
+    <script>
+        // Function to assign 'count' attribute to visible elements
+        function count_visible(posts) {
+	    var count = 0
+	    console.log("COUNT_VISIBLE")
+	    for (var i = 0; i < posts.length; i++) {
+		    if ( posts[i].classList.contains('visible' ) ){
+			    count ++ ;
+			    console.log("COUNT = ", count )
+		    }
+		}
+	    	return posts
+	}
+    </script>
+
 
     <script>
 	function make_hidden( posts ){ for (var i = 0; i < posts.length; i++) {
@@ -87,7 +102,7 @@
 		       const checkedboxes = document.querySelectorAll('input[name="option"]:checked');
 		       for ( let i = 0 ; i < checkedboxes.length ; i++ ){ 
 				checkedboxes[i].checked = false 
-			     }
+			     } document.getElementsByClassName('post hidden')
 		        ckall.checked = ck
 			if (ck ){
 				posts = make_visible( posts )
@@ -102,7 +117,8 @@
 		       		//	posts[i].classList.add('hidden') ; // Do something with each element
 		       		//	}
 			}
-		} else {
+		} else {var posts =  document.getElementsByClassName('post');
+
 			if (ck ){ 
 				posts = make_visible( posts )
 		     		//for (var i = 0; i < posts.length; i++) {
@@ -124,12 +140,13 @@
 			 if( checkedboxes[i].value != 'All'  ){
 			 ar = ar.concat( JSON.parse(checkedboxes[i].value ) ); 
 			 rid = rid.concat( [ checkedboxes[i].id  ] )  
-			 }
-		 	}
+			 } document.getElementsByClassName('post hidden')
+		 	} document.getElementsByClassName('post hidden')
 		  for (var i = 0; i < posts.length; i++) {
 			posts[i].classList.remove('visible') ; // Do something with each element
 		        posts[i].classList.add('hidden') ; // Do something with each element
-		       	 }
+		       	 }var posts =  document.getElementsByClassName('post');
+
 
 		 for ( let i = 0 ; i <  ar.length ; i++ ){ document.getElementById( 'post_' + String( ar[i] )   ).classList.replace('hidden','visible')  ; console.log('post_' +  String( ar[i] ) ) } 
 		 const postchecks = document.getElementById( 'post_' + acopy[i] );
@@ -138,11 +155,7 @@
 		 var fk = document.getElementById("filter_key_selected"); if ( fk ) { fk.value = rid } 
 		 ckall.checked = false;
 		}
-
-		//var rhs = document.getElementById("rhs");
-		//if ( rhs ) {
-	//		rhs.classList.add('hidden') 
-	//	}
+	 posts = count_visible(posts)
 	}
         // Select all radio buttons with the name 'option'
         const checkboxButtons = document.querySelectorAll('input[name="option"]');
@@ -164,6 +177,9 @@
 		console.log("SOME HIDDEN")
 
 	}
+	var posts =  document.getElementsByClassName('post');
+	posts = count_visible( posts )
+
     });
 </script>
 
