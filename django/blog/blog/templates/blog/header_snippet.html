@@ -130,7 +130,6 @@
             console.log("A =", a)
 	    var blockdivs =  document.getElementsByClassName('pblock');
             for ( var i =0 ; i < blockdivs.length ; i++ ){ blockdivs[i].remove() }
-
             var posts =  document.getElementsByClassName('post');
             var ckall =  document.getElementById('All')
             var ck = ckall.checked
@@ -176,6 +175,10 @@
                 var fk = document.getElementById("filter_key_selected"); if ( fk ) { fk.value = rid }
                 ckall.checked = false;
             }
+	    var blockdivs =  document.getElementsByClassName('pblock');
+            for ( var i =0 ; i < blockdivs.length ; i++ ){ blockdivs[i].remove() }
+
+
 	    setTimeout(() => { count_visible(); }, 0);
 	    return posts
         }
