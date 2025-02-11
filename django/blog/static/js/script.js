@@ -13,10 +13,17 @@
                 var c =  'pb_' + String( Math.trunc( b ) )
 		    if ( posts[i].checkVisibility() ) {
                     if ( count % bs == 0 || i == 0 ){
-			var db = document.createElement('div');
-			db.textContent = 'begin_' + c
-			db.classList.add('pblock')
-                        posts[i].before(db)
+			var checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox'
+			checkbox.classList.add('pblock')
+                        var label = document.createElement('label');
+                        label.innerHTML = 'begin_' + c
+                        label.classList.add('pblock')
+                        checkbox.id = c
+                        posts[i].prepend( label)
+                        label.prepend(checkbox)
+                      
+
 
 
                         isopen = true
