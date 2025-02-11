@@ -1,4 +1,16 @@
-        // Function to assign 'count' attribute to visible elements
+        
+       function add_listener(){
+          console.log("INITIALIZE_LISTENER")
+          const checkboxBlockButtons =  document.querySelectorAll('input[type="checkbox"][class="pblock"]')
+          console.log("BUTTONS = ", checkboxBlockButtons)
+            checkboxBlockButtons.forEach((checkbox) => {
+	        console.log("BUTT")
+                checkbox.addEventListener('change', () => {
+		    console.log("BLIP")
+                });
+	    });
+	  }
+
         function count_visible() {
 	    var posts =  document.getElementsByClassName('visible post');
             var blockdivs =  document.getElementsByClassName('pblock');
@@ -54,6 +66,7 @@
                         posts[isave].after(db)
 			console.log("FINALZIED ", 'end_' + c )
 	    }
+            setTimeout(() => { add_listener(); }, 0);
             return posts
         }
 
