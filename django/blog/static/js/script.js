@@ -1,15 +1,40 @@
         
-       function add_listener(){
-          console.log("INITIALIZE_LISTENER")
+	function add_option_listener() {
+          const checkboxButtons = document.querySelectorAll('input[name="option"]');
+          checkboxButtons.forEach((checkbox) => {
+              checkbox.addEventListener('change', () => {
+                 hideshow(  checkbox.value );
+             });
+	  });
+	}
+
+	function make_hidden_block( pb, selector ){ 
+	console.log("MAKE_HIDDEN_BLOCK PB" , pb, selector )
+	var elements = document.getElementsByClassName( "visible post " + pb  );
+        if ( selector ){
+	for (var i = 0; i < elements.length; i++) {
+            elements[i].classList.add('hidden') ; // Do something with each element
+	  }
+        } else {
+	for (var i = 0; i < elements.length; i++) {
+	    elements[i].classList.remove('hidden') ; // Do something with each element
+	  }
+
+
+        }
+        }
+
+
+        function add_listener(){
           const checkboxBlockButtons =  document.querySelectorAll('input[type="checkbox"][class="pblock"]')
-          console.log("BUTTONS = ", checkboxBlockButtons)
-            checkboxBlockButtons.forEach((checkbox) => {
-	        console.log("BUTT")
+          checkboxBlockButtons.forEach((checkbox) => {
                 checkbox.addEventListener('change', () => {
-		    console.log("BLIP")
+		    make_hidden_block( checkbox.id, checkbox.checked)
                 });
 	    });
 	  }
+
+
 
         function count_visible() {
 	    var posts =  document.getElementsByClassName('visible post');
@@ -23,8 +48,9 @@
             for (var i = 0; i < posts.length; i++) {
                 var b =   count  / bs ;
                 var c =  'pb_' + String( Math.trunc( b ) )
+                    posts[i].classList.add(c)
 		    if ( posts[i].checkVisibility() ) {
-                    if ( count % bs == 0 || i == 0 ){
+                      if ( count % bs == 0 || i == 0 ){
 			var checkbox = document.createElement('input');
                         checkbox.type = 'checkbox'
 			checkbox.classList.add('pblock')
@@ -32,7 +58,7 @@
                         label.innerHTML = 'begin_' + c
                         label.classList.add('pblock')
                         checkbox.id = c
-                        posts[i].prepend( label)
+                        posts[i].before( label)
                         label.prepend(checkbox)
                       
 
