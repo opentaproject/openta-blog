@@ -129,8 +129,7 @@ class Post(models.Model):
 
     def get_filterkeys( self ):
         filter_keys = self.filter_key
-        f = list( filter_keys.values_list('name',flat=True) )
-        #f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
+        f = list( filter_keys.values_list('title',flat=True) )
         return f
 
 

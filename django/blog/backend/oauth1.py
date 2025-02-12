@@ -153,7 +153,7 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['server'] = server
         username = data.get('custom_canvas_login_id', [''])[0]
         subdomain = data.get('resource_link_title', [''])[0]
-        request.session['author_type'] = author_type
+        #request.session['author_type'] = author_type
         request.session['username'] = username
         request.session['is_authenticated'] = not username ==  ''
         request.session['subdomain'] = subdomain
@@ -166,6 +166,7 @@ def load_session_variables( request , *args, **kwargs ):
             category_selected = category_selected.pk
         request.session['category_selected'] =  category_selected
         request.session['filter_key'] = data.get('filter_key',[''])[0]
+        request.session['filter_key_selected'] = data.get('filter_key',[''])[0]
         request.session['return_url'] = data.get('return_url',[''])[0];
         request.session['referer']   = data.get('referer',["REFERER_IN_LOAD_SESSION_VARIABLES_NOT_DEFINED"])[0]
         request.session['filter_title'] = data.get('filter_title',[''])[0]
@@ -198,6 +199,8 @@ def load_session_variables( request , *args, **kwargs ):
 
 
 def get_author_type( request ):
+    if 'author_type' in request.session :
+        return request.session['author_type']
     roles  =  request.POST.get('roles', request.POST.get('lti_roles', 'Anonymous') )
     t = Post.AuthorType.ANONYMOUS
     td = 'Anonymous'

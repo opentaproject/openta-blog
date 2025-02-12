@@ -1,6 +1,7 @@
 # blogs/views.py
 from django.db.models import Count, Subquery, Sum, OuterRef, F
 import hmac
+import json
 import re
 import hashlib
 import urllib.parse
@@ -54,8 +55,9 @@ def blog_index(request, *args, **kwargs ) :
     #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
     path =  request.build_absolute_uri() 
     uri = str(  request.build_absolute_uri()  )
-    if not load_session_variables( request, args, kwargs ) :
-        return HttpResponseForbidden("Session Variable Load failed")
+    if request.method == 'POST' :
+        if not load_session_variables( request, args, kwargs ) :
+            return HttpResponseForbidden("Session Variable Load failed")
     #for k in request.session.keys() :
     #    print(f"K = {k} {request.session[k]} ")
     if 'home' in uri :
@@ -109,7 +111,6 @@ def blog_index(request, *args, **kwargs ) :
             else :
                 posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
             for post in posts :
-                print(f"POST FILTERKEYS = {post.get_filterkeys() }")
                 if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
                     post.delete()
             post_subquery = Post.objects.filter(id=OuterRef('id'),post_author=visitor).annotate(viewed=Count('post_author')).values('viewed')
@@ -177,13 +178,11 @@ def blog_index(request, *args, **kwargs ) :
             selected_posts = []
 
         for post in selected_posts :
-            print(f"COMMENTS = {post.answered_by()}")
             visit , _  = Visit.objects.update_or_create(visitor=visitor,post=post)
             comments = Comment.objects.filter(post=post ).order_by('-created_on')
-            fk = post.filter_key.exclude(name__iregex=r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}")
-            post.filter_key.set(fk)
-            #f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
-            #print(f"f = {f}")
+            #if settings.HIDE_UUID :
+            #    fk = post.filter_key.exclude(name__iregex=r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}")
+            #    post.filter_key.set(fk)
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
         author_type_display = request.session.get('author_type_display','Anonymous')
         if request.user.is_staff :
@@ -191,7 +190,10 @@ def blog_index(request, *args, **kwargs ) :
             author_type_display = 'Admin'
         visitor_types = ['anon','student','teacher','staff']
         category_selected_name = Category.objects.get( pk=cat ).name
-        print("CATEGORY_SELECTED_NAME = ", category_selected_name )
+        print(f"FILTER_KEY = {filter_key}")
+        filterkeys = [ int( i.replace('id_filterkey_','') ) for i in json.loads( request.COOKIES.get('filterkeys','')  ) if i != 'All']
+        print(f"FILTERKEYS = {filterkeys}")
+
         context = {
             "posts": posts,
             "categories":  categories,
@@ -216,6 +218,7 @@ def blog_index(request, *args, **kwargs ) :
             "server" : server,
             "dummy_field" : 'VIEWS_DUMMY_FIELD',
             "visitor_types" : visitor_types,
+            "filterkeys" : filterkeys,
         }
     except ProgrammingError as e:
         context = {
@@ -266,35 +269,27 @@ def blog_add_post(request ):
         is_staff = request.session.get('is_staff',False)
         instance = post
         instance.alias = alias
-        print(f"FORM1 INSTANCE = {instance}")
-        print(f"REQUEST = {request.POST}")
         qm = request.POST.copy();
         qm_selected = qm.get('filter_key_selected',None)
-        print(f"QM = {qm}")
         try :
             if qm_selected :
-                print(f"QM_SELECTED = {qm_selected} { type( qm_selected)} ")
                 f = qm.getlist('filter_key')
                 k = [  int( i.split('_')[2])  for i in  qm_selected.split(',')  ]
-                print(f"K = {k}")
                 f = f + k 
-                print(f"F = {f}")
                 qm.setlist('filter_key', f )
         except IndexError as e :
             pass
-        print(f"QM = {qm}")
         form = PostForm( qm , is_staff=is_staff, alias=alias, instance=instance )
         if form.is_valid() :
-            print(f"FORM IS VALID")
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/edit_post/{post.pk}')
         else :
             pass
     else :
-        print(f"FORM2 INSTANCE = {instance} ")
         form = PostForm( is_staff=is_staff,alias=alias, instance=post)
     r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_ADD_POST' } )
+    print(f"R = {r.content}")
     return r
 
 
@@ -337,14 +332,12 @@ def blog_edit_post(request, pk ):
         form = PostForm( request.POST,  is_staff=is_staff, alias=alias ,instance=post,initial=initial)
         #if form.is_valid() and not post.body == '' :
         if  not post.body == '' :
-            print(f"FORM3 IS VALID INSTANCE   ")
             form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/post/{post.pk}')
         else :
             pass
     else :
-        print(f"FORM4 INSTANCE = {post} INITIAL={initial}")
         form = PostForm( is_staff=is_staff, alias=alias, instance=post,initial=initial)
         return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_EDIT_POST','initial' : initial } )
 
@@ -468,7 +461,7 @@ class FilterKeyListView(ListView):
         f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
         if settings.HIDE_UUID :
             filterkeys = filterkeys.exclude(name__in=f)
-
+        filterkeys = filterkeys.order_by('title')
         return filterkeys
 
 
@@ -516,4 +509,6 @@ class CategoryDeleteView(DeleteView):
     filed = '__all__'
     template_name = 'category_confirm_delete.html'
     success_url = reverse_lazy('category_list')
+
+
 

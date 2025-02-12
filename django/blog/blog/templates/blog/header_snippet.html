@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <script src="{% static 'js/script.js' %}"></script>
 
 {% block category %}
@@ -36,76 +37,57 @@
         {% for category in categories %}
             {% if category.pk == category_selected %}
                 <li class="OpenTA-text-size -mb-px mr-1">
-
                     <form method="post">
                         <label for="id_filterkey_all" > <input type="checkbox" name="option" value="All" id="All" > All </input>
                         </label>
-                        {% for f in category.get_filterkeys %}
+                        {% for f in category.get_filterkeys|dictsort:"title"  %}
                             {{ style }}
                             {% if f.name %}
                                 <label for="id_filterkey_{{f.pk}}">
-                                    {% if filter_key.pk == f.pk %}
+                                    {% if filter_key.pk == f.pk  or f.pk in filterkeys %}
                                         <input type="checkbox" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}" checked>  {{ f.title | truncatechars:20 | safe }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input>
                                     {% else %}
                                         <input type="checkbox" name="option" value="{{ f.get_posts }}" id="id_filterkey_{{f.pk}}">  {{ f.title| truncatechars:20  | safe  }}  <span class="OpenTA-debug"> {{ f.get_posts }} </span> </input>
 
                                     {% endif %}
                                 </label>
-                            {% else %} <span> EMPTY </span>
+                            {% else %} <span> </span>
                             {% endif %}
                         {% endfor %}
                     </form>
-
                 </li>
+		{% if author_type > 1 %}
+		<li class="flex">
+			<div class="ml-auto">
+			<a class="bg-blue-300 rounded-sm px-1" href="{% url 'filter_key_list' %}" >  New</a> 	
+			</div> 
+		</li>
+		{% endif %}
             {% endif %}
         {% endfor %}
     </ul>
     <script>
-
-       function cbtoggle( a ){
-	       console.log("CBTOGGLE A = ", a )
-       }
-
-	function nomake_hidden_block( pb, selector ){ 
-	console.log("MAKE_HIDDEN_BLOCK PB" , pb, selector )
-	var elements = document.getElementsByClassName( "visible post " + pb  );
-	for (var i = 0; i < elements.length; i++) {
-            elements[i].classList.add('hidden') ; // Do something with each element
-	    elements[i].classList.remove('visible') ; // Do something with each element
-	}
-
-
-        function noadd_listener(){
-          const checkboxBlockButtons =  document.querySelectorAll('input[type="checkbox"][class="pblock"]')
-          checkboxBlockButtons.forEach((checkbox) => {
-                checkbox.addEventListener('change', () => {
-		    make_hidden_block( checkbox.id, checkbox.checked)
-                });
-	    });
-	  }
-
-
-    </script> 
-
-    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const nhidden  = document.getElementsByClassName('post hidden').length;
-            console.log('Number of posts with class "hidden":', nhidden );
-            if ( nhidden == 0 ){
-                console.log("ALL SHOWN ")
+	    var filterkeys = document.cookie  // = "filterkeys=" + JSON.stringify( cpk ) + ";path=/"
+	    console.log("filterkeys", filterkeys )
+	    var dontcheckall =  filterkeys.includes('filterkeys') && !  filterkeys.includes('All') 
+	    console.log("DONTCHECKALL = ", dontcheckall )
+	     
+		if ( ! dontcheckall ){ 
+
                 document.getElementById('All').checked = true
-            }
+		 }
             else {
-                console.log("SOME HIDDEN")
+                // console.log("SOME HIDDEN")
 
             }
             var posts =  document.getElementsByClassName('post');
-	    console.log("ADD_LISTENER")
 	    setTimeout(() => { count_visible(); }, 0);
 	    setTimeout(() => { add_listener(); }, 0);
 	    setTimeout(() => { add_option_listener(); }, 0);
-
-        });
+	    setTimeout(() => { collapse_boxes(); } , 0 );
+            });
     </script>
 
 

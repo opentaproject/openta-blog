@@ -2,7 +2,7 @@
   {% load humanize %}
   <div class="OpenTA-post-list OpenTA-text-size">
     {% if is_authenticated %}
-      <div class="p-2 bg-gray-200">
+      <div class="p-2 bg-white">
    	{% if  not category_selected_name in category_name_forbidden %}
         <form method="post" action="{% url 'blog_add_post' %}">
           {% csrf_token %}
@@ -29,15 +29,15 @@
     {% for post in posts %}
     {% if filter_key.get_posts %}
     	{% if post.pk in filter_key.get_posts  %}
-    		<div class="visible post" id="post_{{ post.pk }}">
+	<div class="visible post" data-date-attr="{{ post.last_modified |  date:"Y-m-d"  }}" id="post_{{ post.pk }}">
 		{% else %}
-		<div class="hidden post" id="post_{{ post.pk }}">
+		<div class="hidden post" data-date-attr="{{ post.last_modified |  date:"Y-m-d"  }}" id="post_{{ post.pk }}">
 		{% endif %}
     {% else %}
        {% if filter_key %}
-    	<div class="hidden post" id="post_{{ post.pk }}">
+    	<div class="hidden post"  data-date-attr="{{ post.last_modified |  date:"Y-m-d"  }}"  id="post_{{ post.pk }}">
 	{% else %}
-<div class="visible post" id="post_{{ post.pk }}">
+<div class="visible post" data-date-attr="{{ post.last_modified | date:"Y-m-d"  }}"  id="post_{{ post.pk }}">
 	{% endif %}
 
     {% endif %}

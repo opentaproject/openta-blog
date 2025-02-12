@@ -59,9 +59,10 @@ class PostForm(forms.ModelForm):
           kwargs['label_suffix'] = ''
           logger.error(f"POST_FORM ARGS = {args}")
           logger.error(f"POST_FORM KWARGS = {kwargs}")
+
           super().__init__(*args, **kwargs)
-          for k in self.fields.keys() :
-              print(f" K = {k} val = {self.fields[k]}")
+          #for k in self.fields.keys() :
+          #    print(f" K = {k} val = {self.fields[k]}")
           self.fields["body"].required = True
           self.fields["title"].required = True
           self.fields["alias"].required = False
@@ -69,10 +70,8 @@ class PostForm(forms.ModelForm):
           self.fields["post_author"].required = True
           self.fields["is_staff"].required = False
           self.fields["filter_key"].required = False
-          #self.fields["filter_key"].widget = forms.SelectMultiple();
           for k in [ 'author_type', 'post_author','body','category','is_staff'] :
               self.fields[k].label = ''
-          #self.fields["filter_key"].initial = kwargs['initial']['filter_key']
           self.fields["title"].label = 'Title: '
           self.fields["visibility"].label = 'Visibility: '
           self.fields["filter_key"].label = "Folders: "
@@ -80,40 +79,38 @@ class PostForm(forms.ModelForm):
           self.fields["title"].widget=forms.TextInput(attrs={'class': 'OpenTA-text-input' });
           self.fields["alias"].widget=forms.TextInput(attrs={'class': 'OpenTA-text-input',});
           self.fields["visibility"].widget = forms.RadioSelect(choices=self.OPTIONS);
-          #self.fields["title"].widget.attrs.update({'class' : 'OpenTA-title',})
-          #self.fields["alias"].widget.attrs.update({'class' : 'OpenTA-alias'})
-          #print(f'FILTER_KEY_IN_FORM = { self.fields["filter_key"].choices }')
-          #self.fields["filter_key"].queryset = FilterKey.objects.filter(category=instance.category) # FIX THIS
           arglist = dict( *args )
-          print(f"ARGLIST = {arglist}")
           categories = arglist.get('category')
-          #cnames  = []
-          #for k,v in categories :
-          #    print(f"K,V = {k} {v} ")
-          #    cnames.append(v)
-          print(f"INSTANCE = {instance}")
-          print(f"CATEGORY = {categories}")
-          #subdomain = category.subdomain
-          #categories = Category.objects.filter(subdomain=subdomain)
-          #print(f"CATEGORIES = {categories}")
-          filter_keys = FilterKey.objects.all()
-          #filter_keys =  filter_keys.filter(category__in=categories) 
+          print(f"ARGLIST = {arglist}")
+          fk = [i for i in arglist.get('filter_key',[]) if i != '' ]
+          print(f"FK = {fk}")
+          chosen_filterkeys1 = FilterKey.objects.filter(pk__in=fk )
+          print(f"CHOSEN = {chosen_filterkeys1}")
+          if kwargs.get('initial',None ):
+              chosen_filterkeys2 = FilterKey.objects.filter(pk__in=kwargs.get('initial',[] ).get('filter_key',[]))
+          else :
+              chosen_filterkeys2 = None
+          if categories == None :
+            cat = instance.category
+            filter_keys = FilterKey.objects.filter(category=cat)
+          else :
+            filter_keys = FilterKey.objects.all()
+            filter_keys = filter_keys.filter(category__in=categories)
           f = list( filter_keys.values_list('name',flat=True) )
           f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ] # THIS EXCLUDES THE AUTOMATICALLY GENERATED KEYS OF EXERCISES
-          filter_keys = filter_keys.exclude(name__in=f)
-          if categories :
-            filter_keys = filter_keys.filter(category__in=categories)
-          self.fields["filter_key"].queryset = filter_keys
-          print(f"CATEGORIES = {categories}")
-          #print(f"SUBDOMAIN = {subdomain}")
+          if settings.HIDE_UUID :
+            filter_keys = filter_keys.exclude(name__in=f)
+          filter_keys = filter_keys | chosen_filterkeys1  
+          if  chosen_filterkeys2 :
+              filter_keys = filter_keys | chosen_filterkeys2
+
+          self.fields["filter_key"].queryset = filter_keys.order_by('title')
           if True or not is_staff :
             self.fields['author_type'].widget = forms.HiddenInput({'label' : '' } );
             self.fields['category'].widget = forms.HiddenInput();
             self.is_staff = is_staff
             self.fields["is_staff"].widget = forms.HiddenInput();
             self.fields["post_author"].widget = forms.HiddenInput();
-            #self.fields["filter_key"].widget.attrs.update({'class' : 'checkbox-inline' ,});
-            #self.fields["filter_key"].widget.attrs.update(attrs)
                 
 
       def clean(self):
@@ -157,24 +154,16 @@ class CategoryForm(forms.ModelForm):
         instance = self.instance
         if not request == None :
             self.request = request
-            #self.fields['subdomain'].disabled = True
             subdomain_name = request.session.get('subdomain','')
             subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
-            #self.fields['subdomain'] = subdomain
             instance.subdomain = subdomain
             self.fields['subdomain'].initial = subdomain
-            #self.fields['subdomain'].widget = forms.HiddenInput();
         else :
             self.fields['subdomain'].initial = instance.subdomain
-        #self.fields['subdomain'].widget = forms.HiddenInput();
         self.fields['restricted'].initial  = True
         self.fields['restricted'].required = False 
         self.fields['restricted'].disabled = True
         self.fields['subdomain'].disabled = True
-        #if self.instance and self.instance.parent:
-        #    self.fields['subdomain'].queryset = Subdomain.objects.filter(name=self.instance.parent)
-        #else:
-        #    self.fields['subdomain'].queryset = Subdomain.objects.none()
 
 class FilterKeyForm(forms.ModelForm):
 
@@ -184,9 +173,23 @@ class FilterKeyForm(forms.ModelForm):
 
     def __init__(self, *args, request=None,  **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['title'].required = False
+        self.fields['category'].required = False
+        try :
+            subdomain_name= request.session.get('subdomain')
+            self.fields['category'].initial = Category.objects.filter(name=subdomain_name)[0]
+        except Exception as err :
+            print(f"{ str(err)}")
+
         instance = self.instance
         if not request == None :
             self.request = request
-            subdomain_name = request.session.get('subdomain','')
-            subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
-            print(f"FILTER_KEY SUBDOMAIN = {subdomain}")
+        self.fields['category'].disabled = True
+        self.fields['title'].widget = forms.HiddenInput();
+
+    def clean(self,*args,**kwargs):
+        cleaned_data = super().clean()
+        cleaned_data['title'] = cleaned_data.get('name')
+        return cleaned_data
+
+ 
