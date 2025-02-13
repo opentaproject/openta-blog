@@ -74,9 +74,11 @@
 	    var dontcheckall =  filterkeys.includes('filterkeys') && !  filterkeys.includes('All') 
 	    console.log("DONTCHECKALL = ", dontcheckall )
 	     
-		if ( ! dontcheckall ){ 
-
-                document.getElementById('All').checked = true
+		if ( nhidden == 0 ){ 
+			var checkedboxes = document.querySelectorAll('input[name="option"]:checked');
+            		console.log("CHECKEDFILTER = ", checkedboxes )
+			for ( var i = 0 ; i < checkedboxes.length ; i++ ){ checkedboxes[i].checked = false }
+                	document.getElementById('All').checked = true
 		 }
             else {
                 // console.log("SOME HIDDEN")

@@ -103,7 +103,6 @@
  
 	    }
             setTimeout(() => { add_listener(); }, 0);
-            setTimeout(() => { collapse_boxes(); }, 0);
             return posts
         }
 

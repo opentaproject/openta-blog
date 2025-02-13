@@ -190,8 +190,11 @@ def blog_index(request, *args, **kwargs ) :
             author_type_display = 'Admin'
         visitor_types = ['anon','student','teacher','staff']
         category_selected_name = Category.objects.get( pk=cat ).name
-        print(f"FILTER_KEY = {filter_key}")
-        filterkeys = [ int( i.replace('id_filterkey_','') ) for i in json.loads( request.COOKIES.get('filterkeys','')  ) if i != 'All']
+        print(f"FILTER_KEY = {request.method} {filter_key}")
+        if request.method == 'POST' :
+            filterkeys = [];
+        else :
+            filterkeys = [ int( i.replace('id_filterkey_','') ) for i in json.loads( request.COOKIES.get('filterkeys','')  ) if i != 'All']
         print(f"FILTERKEYS = {filterkeys}")
 
         context = {
