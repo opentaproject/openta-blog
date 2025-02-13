@@ -55,9 +55,8 @@ def blog_index(request, *args, **kwargs ) :
     #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
     path =  request.build_absolute_uri() 
     uri = str(  request.build_absolute_uri()  )
-    if request.method == 'POST' :
-        if not load_session_variables( request, args, kwargs ) :
-            return HttpResponseForbidden("Session Variable Load failed")
+    if not load_session_variables( request, args, kwargs ) :
+        return HttpResponseForbidden("Session Variable Load failed")
     #for k in request.session.keys() :
     #    print(f"K = {k} {request.session[k]} ")
     if 'home' in uri :
