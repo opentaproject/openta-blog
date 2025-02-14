@@ -87,6 +87,10 @@ class Visitor(models.Model) :
         names = ['anonymous','student','teacher','staff']
         return names[ self.visitor_type ]
 
+    def sidecar_count(self):
+        subdomain = self.subdomain
+        
+
 
 
 class Visit(models.Model) :

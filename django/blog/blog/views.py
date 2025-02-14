@@ -4,7 +4,6 @@ import hmac
 import json
 import re
 import hashlib
-import urllib.parse
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -21,7 +20,6 @@ from django.http import HttpResponseForbidden
 from django.views.decorators.clickjacking import xframe_options_exempt
 import time, base64
 import logging
-import json
 from django.http import JsonResponse
 from oauthlib.oauth1 import RequestValidator
 logger = logging.getLogger(__name__)
@@ -45,6 +43,31 @@ def get_visitor( request ):
     visitor_type = get_author_type(request)
     visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subdomain,visitor_type=visitor_type)
     return visitor
+
+
+@api_view(["GET", "POST"])
+@csrf_exempt
+@xframe_options_exempt  
+def sidecar_count(request, *args, **kwargs ) :
+    print(f"SIDECAR_COUNT {request.POST}")
+
+    username = request.POST.get('username','')
+    subdomain = request.POST.get('subdomain','')
+    print(f"USERNAME = {username} sudomain={subdomain}")
+    visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain)
+    print(f"VISITOR = {visitor}")
+    pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
+    if len( pks ) == 0 :
+        sidecar_count = 0 
+    else :
+        cat = Category.objects.get( subdomain__name=subdomain,name=subdomain,restricted=True)
+        print(f"CAT = {cat}")
+        posts =  Post.objects.filter(category=cat).exclude(pk__in=pks)
+        print(f"POSTS = {posts}")
+        sidecar_count = len( posts )
+        print(f"SIDECAR_COUNT = {sidecar_count}")
+    data = {'sidecar_count' : sidecar_count }
+    return JsonResponse( data )
 
 
 @api_view(["GET", "POST"])

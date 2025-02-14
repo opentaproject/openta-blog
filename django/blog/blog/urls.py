@@ -7,6 +7,7 @@ urlpatterns = [
     path("", views.blog_index, name="blog_index"),
     path("blog/<category_selected>/", views.blog_index, name="blog_index"),
     path("blog/home/", views.blog_index, name="blog_index"),
+    path("sidecar_count/", views.sidecar_count , name="sidecar_count"),
     path("home/", views.blog_index, name="blog_index"),
     path("blog/<category_selected>/<filter_key>", views.blog_index, name="blog_index"),
     path("add_post/", views.blog_add_post, name="blog_add_post"),
