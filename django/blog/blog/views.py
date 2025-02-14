@@ -4,7 +4,6 @@ import hmac
 import json
 import re
 import hashlib
-import urllib.parse
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -21,7 +20,6 @@ from django.http import HttpResponseForbidden
 from django.views.decorators.clickjacking import xframe_options_exempt
 import time, base64
 import logging
-import json
 from django.http import JsonResponse
 from oauthlib.oauth1 import RequestValidator
 logger = logging.getLogger(__name__)
@@ -50,6 +48,47 @@ def get_visitor( request ):
 @api_view(["GET", "POST"])
 @csrf_exempt
 @xframe_options_exempt  
+def sidecar_count(request, *args, **kwargs ) :
+
+
+    username = request.POST.get('username','')
+    subdomain = request.POST.get('subdomain','')
+    subdomain_ = Subdomain.objects.get(name=subdomain)
+    exercises_with_posts = subdomain_.get_filterkeys_with_posts() 
+    exercise = str( request.POST.get('exercise') )
+    visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
+    pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
+    if len( pks ) == 0 :
+        unread = []
+        sidecar_count = 0 
+    else :
+        unread =  visitor[0].get_unread_filtertypes()
+        sidecar_count = len( unread )
+    if exercise == 'None' :
+        sidecar_count = len( unread)
+    else :
+        filterkeys = FilterKey.objects.filter(name=exercise)
+        #posts = list( Post.objects.all().filter(filter_key__in=filterkeys).values_list('pk',flat=True) )
+        posts = Post.objects.all().filter(filter_key__in=filterkeys)
+        visits = Visit.objects.all().filter(visitor__in=visitor,post__in=posts)
+        if visits:
+            first_visit =  visits.order_by('date').first().date
+            last_visit =   visits.order_by('date').last().date
+            new_posts =  posts.filter(last_modified__gt=last_visit)
+            pks = list( visits.values_list('post__pk',flat=True) )
+            unvisited_posts = posts.exclude(pk__in=pks)
+            posts = new_posts | unvisited_posts
+        #visitor = models.ForeignKey("Visitor", on_delete=models.CASCADE, related_name="visit_visitor")
+        #post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="visit_post")
+        #date =  models.DateTimeField(auto_now=True)
+        sidecar_count = len( posts)
+    data = {'sidecar_count' : sidecar_count ,'unread' : unread, 'exercises_with_posts' : exercises_with_posts  }
+    return JsonResponse( data )
+
+
+@api_view(["GET", "POST"])
+@csrf_exempt
+@xframe_options_exempt  
 def blog_index(request, *args, **kwargs ) :
     pk = kwargs.get('pk',None)
     #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
@@ -64,25 +103,29 @@ def blog_index(request, *args, **kwargs ) :
         #del request.session['filter_title']  
         #del request.session['category_selected'] 
     referer =  request.session.get('referer','')
-    name = str( request.session.get('filter_key','')  )
+    try :
+        fkey =  json.loads( request.session.get('filter_key','')  )
+        names = list( fkey.keys() )
+    except :
+        fkey = {};
+        names = []
     server = str( request.session.get('server','')  )
     subdomain_name = request.session.get('subdomain','')
     subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
-    filter_title = request.session.get('filter_title','')
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
     if  len( Category.objects.filter(name=subdomain_name,subdomain=subdomain)  ) == 0 :
         new_category = Category.objects.create(name=subdomain_name,subdomain=subdomain,restricted=True)
         new_category.save() 
-    filter_title = request.session.get('filter_title','')
-    if  not subdomain_name == '' and not filter_title == '' and not name == ''  :
-        category = Category.objects.get(name=subdomain_name,subdomain=subdomain)
-        filter_key , _  = FilterKey.objects.get_or_create(name=name,category=category,title=filter_title)
-    else :
-        filter_key = None
-        #filter_key.title = filter_title
-        #filter_key.name = subdomain_name
-        #filter_key.save()
+    #filter_title = request.session.get('filter_title','')
+    filter_key = None
+    for nam in names :
+        title = fkey[nam]
+        if  not subdomain_name == '' and not title == '' and not nam == ''  :
+            category = Category.objects.get(name=subdomain_name,subdomain=subdomain)
+            filter_key , _  = FilterKey.objects.get_or_create(name=nam.strip() ,category=category,title=title.strip() )
+        else :
+            filter_key = None
 
 
     #if not filter_key.name   == '' :
@@ -106,9 +149,9 @@ def blog_index(request, *args, **kwargs ) :
             UNREAD = category_unread.pk
             category_selected = int( category_selected )
             if  category_selected ==  ALL :
-                posts = Post.objects.all().order_by("-created_on").annotate(viewed=Count('comment') )
+                posts = Post.objects.all().order_by("-last_modified").annotate(viewed=Count('comment') )
             else :
-                posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
+                posts = Post.objects.all().order_by("-last_modified").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
             for post in posts :
                 if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
                     post.delete()
@@ -117,13 +160,27 @@ def blog_index(request, *args, **kwargs ) :
             #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
             visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
             if category_selected ==  ALL :
-                posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
+                posts = Post.objects.all().order_by("-last_modified").annotate(viewed=Subquery(visit_subquery)  )
             elif category_selected ==  UNREAD :
+                cat1 = Category.objects.filter( subdomain__name=subdomain,name=subdomain,restricted=True)
+                if get_author_type(request) > STUDENT :
+                    cat2 = Category.objects.filter( restricted=False)
+                    cat  = cat1 | cat2 
+                else :
+                    cat = cat1
+                posts =  Post.objects.filter(category__in=cat)
                 pks = Visit.objects.all().filter(visitor=visitor).values('post_id')
-                posts = Post.objects.exclude(pk__in=pks)
+                if pks :
+                    first_visit =  Visit.objects.all().filter(visitor=visitor).order_by('date').first()
+                    last_visit =  Visit.objects.all().filter(visitor=visitor).order_by('date').last()
+                    visit_date = last_visit.date
+                    new_posts =  posts.filter(last_modified__gt=last_visit.date)
+                    unvisited_posts = posts.exclude(pk__in=pks)
+                    posts = new_posts | unvisited_posts
+                #posts = posts.exclude(pk__in=pks,last_modified__lt=visit_date)
                 #posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
             else :
-                posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
+                posts = Post.objects.all().order_by("-last_modified").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
             if visitor.visitor_type in [ ANONYMOUS , STUDENT ] :
                 posts_visible = posts.filter(visibility=PUBLIC)
                 posts_own     = posts.filter(post_author=visitor)
@@ -165,6 +222,9 @@ def blog_index(request, *args, **kwargs ) :
         categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected , filter_key  )
         is_authenticated = request.session.get('is_authenticated',False)
         is_staff = request.session.get('is_staff',False)
+        is_teacher = visitor_type in [ TEACHER , STAFF ]
+
+
         #if pk == None :
         #    pk = request.session.get('last_post_pk', None )
         if posts :
@@ -178,24 +238,22 @@ def blog_index(request, *args, **kwargs ) :
 
         for post in selected_posts :
             visit , _  = Visit.objects.update_or_create(visitor=visitor,post=post)
-            comments = Comment.objects.filter(post=post ).order_by('-created_on')
+            comments = Comment.objects.filter(post=post ).order_by('created_on')
             #if settings.HIDE_UUID :
             #    fk = post.filter_key.exclude(name__iregex=r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}")
             #    post.filter_key.set(fk)
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
         author_type_display = request.session.get('author_type_display','Anonymous')
+        course_pk = request.session.get("course_pk")
         if request.user.is_staff :
             author_type = Post.AuthorType.STAFF
             author_type_display = 'Admin'
         visitor_types = ['anon','student','teacher','staff']
         category_selected_name = Category.objects.get( pk=cat ).name
-        print(f"FILTER_KEY = {request.method} {filter_key}")
         if request.method == 'POST'  or 'filterkeys' not in request.COOKIES :
             filterkeys = [];
         else :
             filterkeys = [ int( i.replace('id_filterkey_','') ) for i in json.loads( request.COOKIES.get('filterkeys','')  ) if i != 'All']
-        print(f"FILTERKEYS = {filterkeys}")
-
         context = {
             "posts": posts,
             "categories":  categories,
@@ -210,6 +268,7 @@ def blog_index(request, *args, **kwargs ) :
             "author_type" : author_type,
             "author_type_display" : author_type_display,
             "is_staff" : is_staff,
+            "is_teacher" : is_teacher,
             "username" : username,
             "selected" : pk,
             "selected_posts" : selected_posts,
@@ -221,6 +280,7 @@ def blog_index(request, *args, **kwargs ) :
             "dummy_field" : 'VIEWS_DUMMY_FIELD',
             "visitor_types" : visitor_types,
             "filterkeys" : filterkeys,
+            "course_pk" : course_pk,
         }
     except ProgrammingError as e:
         context = {
@@ -291,7 +351,6 @@ def blog_add_post(request ):
     else :
         form = PostForm( is_staff=is_staff,alias=alias, instance=post)
     r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_ADD_POST' } )
-    print(f"R = {r.content}")
     return r
 
 

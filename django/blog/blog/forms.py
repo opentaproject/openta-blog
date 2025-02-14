@@ -57,8 +57,6 @@ class PostForm(forms.ModelForm):
           instance = kwargs['instance']
           kwargs.setdefault('label_suffix', 'ABC') 
           kwargs['label_suffix'] = ''
-          logger.error(f"POST_FORM ARGS = {args}")
-          logger.error(f"POST_FORM KWARGS = {kwargs}")
 
           super().__init__(*args, **kwargs)
           #for k in self.fields.keys() :
@@ -81,11 +79,8 @@ class PostForm(forms.ModelForm):
           self.fields["visibility"].widget = forms.RadioSelect(choices=self.OPTIONS);
           arglist = dict( *args )
           categories = arglist.get('category')
-          print(f"ARGLIST = {arglist}")
           fk = [i for i in arglist.get('filter_key',[]) if i != '' ]
-          print(f"FK = {fk}")
           chosen_filterkeys1 = FilterKey.objects.filter(pk__in=fk )
-          print(f"CHOSEN = {chosen_filterkeys1}")
           if kwargs.get('initial',None ):
               chosen_filterkeys2 = FilterKey.objects.filter(pk__in=kwargs.get('initial',[] ).get('filter_key',[]))
           else :
@@ -179,7 +174,7 @@ class FilterKeyForm(forms.ModelForm):
             subdomain_name= request.session.get('subdomain')
             self.fields['category'].initial = Category.objects.filter(name=subdomain_name)[0]
         except Exception as err :
-            print(f"{ str(err)}")
+            logger.error(f"{ str(err)}")
 
         instance = self.instance
         if not request == None :

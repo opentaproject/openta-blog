@@ -11,12 +11,17 @@
 
 
                 {% if category.pk == category_selected %}
-                    <a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }}   </a>
+		{% if filter_key %} 
+		<a class="hidden OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} </a> 
+		<span class="OpenTA-category-selected"> Posts for <span class="text-bold"> {{ filter_key.title}} </span>  </span> 
+		{% else %}
+			<a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }}</a>
+		{% endif %}
 
                     </li>
                 {% else %}
                     <li class="mr-1">
-                        <a class="OpenTA-category-not-selected" href="/blog/{{ category.pk }}/">{{ category }}</a>
+			    <a class="OpenTA-category-not-selected" href="/blog/{{ category.pk }}/">{{ category }}  </a>
                     </li>
                 {% endif %}
         {% endfor %}
@@ -70,18 +75,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             const nhidden  = document.getElementsByClassName('post hidden').length;
 	    var filterkeys = document.cookie  // = "filterkeys=" + JSON.stringify( cpk ) + ";path=/"
-	    console.log("filterkeys", filterkeys )
 	    var dontcheckall =  filterkeys.includes('filterkeys') && !  filterkeys.includes('All') 
-	    console.log("DONTCHECKALL = ", dontcheckall )
 	     
 		if ( nhidden == 0 ){ 
 			var checkedboxes = document.querySelectorAll('input[name="option"]:checked');
-            		console.log("CHECKEDFILTER = ", checkedboxes )
 			for ( var i = 0 ; i < checkedboxes.length ; i++ ){ checkedboxes[i].checked = false }
                 	document.getElementById('All').checked = true
 		 }
             else {
-                // console.log("SOME HIDDEN")
 
             }
             var posts =  document.getElementsByClassName('post');

@@ -15,6 +15,15 @@ class Subdomain( models.Model) :
     def __str__(self):
         return self.name
 
+    def get_filterkeys_with_posts(self):
+        category = Category.objects.get(name=self.name)
+        posts = Post.objects.all().filter(category=category)
+        f = list( FilterKey.objects.all().filter(id__in=posts.values('filter_key')\
+            .distinct() ).values_list('name',flat=True) )
+        f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ]
+        return  f
+ 
+
 
 class Category(models.Model):
     name = models.CharField(max_length=30)
@@ -87,6 +96,24 @@ class Visitor(models.Model) :
         names = ['anonymous','student','teacher','staff']
         return names[ self.visitor_type ]
 
+    def get_unread_filtertypes(self):
+        pks = Visit.objects.all().filter(visitor=self).values('post_id')
+        if pks :
+            posts = Post.objects.filter( pk__in=pks )
+            first_visit =  Visit.objects.all().filter(visitor=self).order_by('date').first()
+            last_visit =  Visit.objects.all().filter(visitor=self).order_by('date').last()
+            visit_date = last_visit.date
+            new_posts =  posts.filter(last_modified__gt=last_visit.date)
+            unvisited_posts = posts.exclude(pk__in=pks)
+            posts = new_posts | unvisited_posts
+            fk = list( posts.values_list('filter_key__name', flat=True) )
+        else : 
+            fk = []
+        return  fk
+
+
+        
+
 
 
 class Visit(models.Model) :
@@ -123,9 +150,9 @@ class Post(models.Model):
         super().save(*args,**kwargs)
 
     def answered_by(self):
-        f = ['A','S','I','Admin']
+        f = ['','s','i','a']
         answered_by = [ f"<span class='OpenTA-author-type-{i}'> {f[i]} </span>"  for i in list( set( list( self.comment.all().values_list('comment_author__visitor_type',flat=True) )  ) ) ]
-        return ','.join(answered_by)
+        return ''.join(answered_by)
 
     def get_filterkeys( self ):
         filter_keys = self.filter_key
@@ -147,8 +174,14 @@ class Post(models.Model):
         return v
 
     def bgclass(self ):
-        colors = ['bg-green-200','bg-gray-400','bg-blue-400','bg-bule-400']
+        colors = ['px-2 bg-white','px-2 bg-green-400','px-2 bg-yellow-400','px-2 red-400']
         return colors[ self.author_type ]
+
+    def tx(self):
+        c = ['','s','i','a']
+        return c[ self.author_type]
+
+
 
     def textclass(self ):
         colors = ['text-green-800','text-gray-600','text-blue-600','text-blue-600']
@@ -169,3 +202,14 @@ class Comment(models.Model):
         post = self.post
         post.save() 
         super().save(*args,**kwargs)
+
+
+    def bgclass(self ):
+        colors = ['px-2 bg-white','px-2 bg-green-400','px-2 bg-yellow-400','px-2 red-400']
+        return colors[ self.comment_author.visitor_type]
+
+    def tx(self):
+        c = ['','s','i','a']
+        return c[ self.comment_author.visitor_type ]
+
+
