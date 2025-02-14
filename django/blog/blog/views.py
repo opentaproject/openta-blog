@@ -190,7 +190,7 @@ def blog_index(request, *args, **kwargs ) :
         visitor_types = ['anon','student','teacher','staff']
         category_selected_name = Category.objects.get( pk=cat ).name
         print(f"FILTER_KEY = {request.method} {filter_key}")
-        if request.method == 'POST' :
+        if request.method == 'POST'  or 'filterkeys' not in request.COOKIES :
             filterkeys = [];
         else :
             filterkeys = [ int( i.replace('id_filterkey_','') ) for i in json.loads( request.COOKIES.get('filterkeys','')  ) if i != 'All']
