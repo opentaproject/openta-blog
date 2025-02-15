@@ -53,35 +53,61 @@ def sidecar_count(request, *args, **kwargs ) :
 
     username = request.POST.get('username','')
     subdomain = request.POST.get('subdomain','')
-    exercise = request.POST.get('exercise')
-    print(f"USERNAME = {username} sudomain={subdomain}, exercise={exercise}")
+    exercise = str( request.POST.get('exercise') )
+    print(f"USERNAME = {username} sudomain={subdomain}, exercise={exercise} { type( exercise)} ")
     visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
-    print(f"VISITOR = {visitor}")
-    pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
-    if len( pks ) == 0 :
-        sidecar_count = 0 
-    else :
-        cat1 = Category.objects.filter( subdomain__name=subdomain,name=subdomain,restricted=True)
-        if get_author_type(request) > STUDENT :
-            cat2 = Category.objects.filter( restricted=False)
-            cat = cat1 
+    if exercise == 'None' :
+        print(f"VISITOR = {visitor}")
+        pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
+        if len( pks ) == 0 :
+            sidecar_count = 0 
         else :
-            cat = cat1
-        print(f"CAT = {cat}")
-        posts =  Post.objects.filter(category__in=cat)
-        first_visit =  Visit.objects.all().filter(visitor__in=visitor).order_by('date').first()
-        last_visit =  Visit.objects.all().filter(visitor__in=visitor).order_by('date').last()
-        print(f"FIRST_VISIT={first_visit.date}  ")
-        print(f"LAST_VISIT={last_visit.date}  ")
-        visit_date = last_visit.date
-        #visit_date = visitor.values('last_visit')[0].get('last_visit')
-        print(f"VISIT_DATE = {visit_date}")
-        new_posts =  posts.filter(last_modified__gt=visit_date)
-        unvisited_posts = posts.exclude(pk__in=pks)
-        posts = new_posts | unvisited_posts
-        sidecar_count = len( posts )
-        print(f"SIDECAR_COUNT = {sidecar_count}")
+            cat1 = Category.objects.filter( subdomain__name=subdomain,name=subdomain,restricted=True)
+            if get_author_type(request) > STUDENT :
+                cat2 = Category.objects.filter( restricted=False)
+                cat = cat1 
+            else :
+                cat = cat1
+            print(f"CAT = {cat}")
+            posts =  Post.objects.filter(category__in=cat)
+            first_visit =  Visit.objects.all().filter(visitor__in=visitor).order_by('date').first()
+            last_visit =  Visit.objects.all().filter(visitor__in=visitor).order_by('date').last()
+            print(f"FIRST_VISIT={first_visit.date}  ")
+            print(f"LAST_VISIT={last_visit.date}  ")
+            visit_date = last_visit.date
+            #visit_date = visitor.values('last_visit')[0].get('last_visit')
+            print(f"VISIT_DATE = {visit_date}")
+            new_posts =  posts.filter(last_modified__gt=visit_date)
+            unvisited_posts = posts.exclude(pk__in=pks)
+            posts = new_posts | unvisited_posts
+            sidecar_count = len( posts )
+            print(f"SIDECAR_COUNT = {sidecar_count}")
+    else :
+        filterkeys = FilterKey.objects.filter(name=exercise)
+        print(f"FILTERKEYS = {filterkeys}")
+        #posts = list( Post.objects.all().filter(filter_key__in=filterkeys).values_list('pk',flat=True) )
+        posts = Post.objects.all().filter(filter_key__in=filterkeys)
+        print(f"POSTS = {posts}")
+        visits = Visit.objects.all().filter(visitor__in=visitor,post__in=posts)
+        print(f"VISITS = {visits}")
+        if visits:
+            first_visit =  visits.order_by('date').first().date
+            last_visit =   visits.order_by('date').last().date
+            new_posts =  posts.filter(last_modified__gt=last_visit)
+            print(f"FIRST = {first_visit}")
+            print(f"LAST = {last_visit}")
+            pks = list( visits.values_list('post__pk',flat=True) )
+            unvisited_posts = posts.exclude(pk__in=pks)
+            posts = new_posts | unvisited_posts
+        else :
+            posts = []
+        print(f" POSTS = {len( posts)}")
+        #visitor = models.ForeignKey("Visitor", on_delete=models.CASCADE, related_name="visit_visitor")
+        #post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="visit_post")
+        #date =  models.DateTimeField(auto_now=True)
+        sidecar_count = len( posts)
     data = {'sidecar_count' : sidecar_count }
+    print(f"DATA = {data}")
     return JsonResponse( data )
 
 
