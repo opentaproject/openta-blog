@@ -54,16 +54,27 @@ def sidecar_count(request, *args, **kwargs ) :
     username = request.POST.get('username','')
     subdomain = request.POST.get('subdomain','')
     print(f"USERNAME = {username} sudomain={subdomain}")
-    visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain)
+    visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
     print(f"VISITOR = {visitor}")
     pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
     if len( pks ) == 0 :
         sidecar_count = 0 
     else :
-        cat = Category.objects.get( subdomain__name=subdomain,name=subdomain,restricted=True)
+        cat1 = Category.objects.filter( subdomain__name=subdomain,name=subdomain,restricted=True)
+        cat2 = Category.objects.filter( restricted=False)
+        cat = cat1 | cat2 
         print(f"CAT = {cat}")
-        posts =  Post.objects.filter(category=cat).exclude(pk__in=pks)
-        print(f"POSTS = {posts}")
+        posts =  Post.objects.filter(category__in=cat)
+        first_visit =  Visit.objects.all().filter(visitor__in=visitor).order_by('date').first()
+        last_visit =  Visit.objects.all().filter(visitor__in=visitor).order_by('date').last()
+        print(f"FIRST_VISIT={first_visit.date}  ")
+        print(f"LAST_VISIT={last_visit.date}  ")
+        visit_date = last_visit.date
+        #visit_date = visitor.values('last_visit')[0].get('last_visit')
+        print(f"VISIT_DATE = {visit_date}")
+        new_posts =  posts.filter(last_modified__gt=visit_date)
+        unvisited_posts = posts.exclude(pk__in=pks)
+        posts = new_posts | unvisited_posts
         sidecar_count = len( posts )
         print(f"SIDECAR_COUNT = {sidecar_count}")
     data = {'sidecar_count' : sidecar_count }
@@ -143,7 +154,18 @@ def blog_index(request, *args, **kwargs ) :
                 posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
             elif category_selected ==  UNREAD :
                 pks = Visit.objects.all().filter(visitor=visitor).values('post_id')
-                posts = Post.objects.exclude(pk__in=pks)
+                first_visit =  Visit.objects.all().filter(visitor=visitor).order_by('date').first()
+                last_visit =  Visit.objects.all().filter(visitor=visitor).order_by('date').last()
+                print(f"FIRST_VISIT={first_visit.date}  ")
+                print(f"LAST_VISIT={last_visit.date}  ")
+                visit_date = last_visit.date
+                print(f"VISIT_DATE = {visit_date}")
+                new_posts =  posts.filter(last_modified__gt=last_visit.date)
+                unvisited_posts = posts.exclude(pk__in=pks)
+                print(f"UNVISITED = {unvisited_posts}")
+                print(f"NEW_POSTS = {new_posts}")
+                posts = new_posts | unvisited_posts
+                #posts = posts.exclude(pk__in=pks,last_modified__lt=visit_date)
                 #posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
             else :
                 posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
