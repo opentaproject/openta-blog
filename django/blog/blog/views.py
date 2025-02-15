@@ -53,7 +53,8 @@ def sidecar_count(request, *args, **kwargs ) :
 
     username = request.POST.get('username','')
     subdomain = request.POST.get('subdomain','')
-    print(f"USERNAME = {username} sudomain={subdomain}")
+    exercise = request.POST.get('exercise')
+    print(f"USERNAME = {username} sudomain={subdomain}, exercise={exercise}")
     visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
     print(f"VISITOR = {visitor}")
     pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
