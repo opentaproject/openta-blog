@@ -61,8 +61,11 @@ def sidecar_count(request, *args, **kwargs ) :
         sidecar_count = 0 
     else :
         cat1 = Category.objects.filter( subdomain__name=subdomain,name=subdomain,restricted=True)
-        cat2 = Category.objects.filter( restricted=False)
-        cat = cat1 | cat2 
+        if get_author_type(request) > STUDENT :
+            cat2 = Category.objects.filter( restricted=False)
+            cat = cat1 
+        else :
+            cat = cat1
         print(f"CAT = {cat}")
         posts =  Post.objects.filter(category__in=cat)
         first_visit =  Visit.objects.all().filter(visitor__in=visitor).order_by('date').first()
@@ -153,6 +156,13 @@ def blog_index(request, *args, **kwargs ) :
             if category_selected ==  ALL :
                 posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
             elif category_selected ==  UNREAD :
+                cat1 = Category.objects.filter( subdomain__name=subdomain,name=subdomain,restricted=True)
+                if get_author_type(request) > STUDENT :
+                    cat2 = Category.objects.filter( restricted=False)
+                    cat  = cat1 | cat2 
+                else :
+                    cat = cat1
+                posts =  Post.objects.filter(category__in=cat)
                 pks = Visit.objects.all().filter(visitor=visitor).values('post_id')
                 first_visit =  Visit.objects.all().filter(visitor=visitor).order_by('date').first()
                 last_visit =  Visit.objects.all().filter(visitor=visitor).order_by('date').last()
