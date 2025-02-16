@@ -11,7 +11,7 @@
     .OpenTA-filterkey-selected { @apply  inline-block border border-blue-500 rounded py-0 px-2 bg-blue-400 text-white px-2;}
     .OpenTA-filterkey-not-selected { @apply  inline-block border border-blue-500 rounded py-0  bg-white  px-2;}
     .OpenTA-body { @apply  bg-[#ffffff] p-4 font-sans antialiased;}
-    .OpenTA-comment-body { @apply  p-2 border border-gray-200 py-1 rounded-lg shadow-md;}
+    .OpenTA-comment-body { @apply  p-2 border border-gray-200 py-1 rounded-lg shadow-md inline-block;}
     .OpenTA-post-list { @apply  h-full border border-gray-300 rounded-lg shadow-md ;}
     .OpenTA-comment-entry { @apply  border-2 mt-2 p-2 border-gray-200 rounded-lg;}
     .OpenTA-comment-list { @apply  p-0 rounded-lg  shadow-md ;}

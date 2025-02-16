@@ -50,10 +50,17 @@
                 <div class="OpenTA-comment-entry">
                   {% if comment.comment_author != "" %}
                   {% else %}
-                    <p> On {{ comment.created_on.date }} <b>{{ comment.comment_author.name }} </b> wrote: </p>
+                    <p> On {{ comment.created_on.date }} <b>{{ comment.comment_author.alias }} </b> wrote: </p>
                   {% endif %}
 
-		  <div class="OpenTA-comment-body">  
+		  <div class="OpenTA-comment-body">   
+<div class="mt-2 flex justify-between w-full">
+			      <span class="{{ comment.bgclass }}">  {{ comment.tx}} </span>  
+			      {{ comment.comment_author.alias}}      {{ comment.created_on | naturaltime }}    
+		      </span>
+</div>
+
+
 			  {{ comment.body | safe }}   </div>
                   <div>
                     <div class="mt-2 flex justify-between w-full">
@@ -65,9 +72,6 @@
                         &nbsp;
                       {% endif %}
 
-                      <span class=""> 
-<span class="{{ comment.bgclass }}">  {{ comment.tx}} </span>  
-			      {{ comment.comment_author.name }}      {{ comment.created_on | naturaltime }}    </span>
                     </div>
                   </div>
                 </div>
