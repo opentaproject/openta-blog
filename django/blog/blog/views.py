@@ -99,8 +99,6 @@ def sidecar_count(request, *args, **kwargs ) :
             pks = list( visits.values_list('post__pk',flat=True) )
             unvisited_posts = posts.exclude(pk__in=pks)
             posts = new_posts | unvisited_posts
-        else :
-            posts = []
         print(f" POSTS = {len( posts)}")
         #visitor = models.ForeignKey("Visitor", on_delete=models.CASCADE, related_name="visit_visitor")
         #post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="visit_post")
@@ -133,6 +131,7 @@ def blog_index(request, *args, **kwargs ) :
     subdomain_name = request.session.get('subdomain','')
     subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
     filter_title = request.session.get('filter_title','')
+    print(f"FILTER_TITLE = {filter_title}")
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
     if  len( Category.objects.filter(name=subdomain_name,subdomain=subdomain)  ) == 0 :
@@ -170,9 +169,9 @@ def blog_index(request, *args, **kwargs ) :
             UNREAD = category_unread.pk
             category_selected = int( category_selected )
             if  category_selected ==  ALL :
-                posts = Post.objects.all().order_by("-created_on").annotate(viewed=Count('comment') )
+                posts = Post.objects.all().order_by("-last_modified").annotate(viewed=Count('comment') )
             else :
-                posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
+                posts = Post.objects.all().order_by("-last_modified").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
             for post in posts :
                 if post.body == '' : ## THERE SHOULD BE BETTER WAY TO ENFORCE NONEMPTY BODY
                     post.delete()
@@ -181,7 +180,7 @@ def blog_index(request, *args, **kwargs ) :
             #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
             visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
             if category_selected ==  ALL :
-                posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
+                posts = Post.objects.all().order_by("-last_modified").annotate(viewed=Subquery(visit_subquery)  )
             elif category_selected ==  UNREAD :
                 cat1 = Category.objects.filter( subdomain__name=subdomain,name=subdomain,restricted=True)
                 if get_author_type(request) > STUDENT :
@@ -205,7 +204,7 @@ def blog_index(request, *args, **kwargs ) :
                 #posts = posts.exclude(pk__in=pks,last_modified__lt=visit_date)
                 #posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
             else :
-                posts = Post.objects.all().order_by("-created_on").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
+                posts = Post.objects.all().order_by("-last_modified").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
             if visitor.visitor_type in [ ANONYMOUS , STUDENT ] :
                 posts_visible = posts.filter(visibility=PUBLIC)
                 posts_own     = posts.filter(post_author=visitor)
@@ -277,7 +276,7 @@ def blog_index(request, *args, **kwargs ) :
         else :
             filterkeys = [ int( i.replace('id_filterkey_','') ) for i in json.loads( request.COOKIES.get('filterkeys','')  ) if i != 'All']
         print(f"FILTERKEYS = {filterkeys}")
-
+        print(f"FILTERKEY = ", filter_key )
         context = {
             "posts": posts,
             "categories":  categories,

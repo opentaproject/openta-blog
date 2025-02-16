@@ -11,12 +11,16 @@
 
 
                 {% if category.pk == category_selected %}
-                    <a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }}   </a>
+		{% if filter_key %} 
+		<a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} </a> <span class="OpenTA-category-selected"> only posts for <span class="text-bold"> {{ filter_key.title}} </span> shown </span> 
+		{% else %}
+			<a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }}</a>
+		{% endif %}
 
                     </li>
                 {% else %}
                     <li class="mr-1">
-                        <a class="OpenTA-category-not-selected" href="/blog/{{ category.pk }}/">{{ category }}</a>
+			    <a class="OpenTA-category-not-selected" href="/blog/{{ category.pk }}/">{{ category }}  </a>
                     </li>
                 {% endif %}
         {% endfor %}
