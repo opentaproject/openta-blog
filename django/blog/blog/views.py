@@ -190,17 +190,18 @@ def blog_index(request, *args, **kwargs ) :
                     cat = cat1
                 posts =  Post.objects.filter(category__in=cat)
                 pks = Visit.objects.all().filter(visitor=visitor).values('post_id')
-                first_visit =  Visit.objects.all().filter(visitor=visitor).order_by('date').first()
-                last_visit =  Visit.objects.all().filter(visitor=visitor).order_by('date').last()
-                print(f"FIRST_VISIT={first_visit.date}  ")
-                print(f"LAST_VISIT={last_visit.date}  ")
-                visit_date = last_visit.date
-                print(f"VISIT_DATE = {visit_date}")
-                new_posts =  posts.filter(last_modified__gt=last_visit.date)
-                unvisited_posts = posts.exclude(pk__in=pks)
-                print(f"UNVISITED = {unvisited_posts}")
-                print(f"NEW_POSTS = {new_posts}")
-                posts = new_posts | unvisited_posts
+                if pks :
+                    first_visit =  Visit.objects.all().filter(visitor=visitor).order_by('date').first()
+                    last_visit =  Visit.objects.all().filter(visitor=visitor).order_by('date').last()
+                    print(f"FIRST_VISIT={first_visit.date}  ")
+                    print(f"LAST_VISIT={last_visit.date}  ")
+                    visit_date = last_visit.date
+                    print(f"VISIT_DATE = {visit_date}")
+                    new_posts =  posts.filter(last_modified__gt=last_visit.date)
+                    unvisited_posts = posts.exclude(pk__in=pks)
+                    print(f"UNVISITED = {unvisited_posts}")
+                    print(f"NEW_POSTS = {new_posts}")
+                    posts = new_posts | unvisited_posts
                 #posts = posts.exclude(pk__in=pks,last_modified__lt=visit_date)
                 #posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
             else :
@@ -259,7 +260,7 @@ def blog_index(request, *args, **kwargs ) :
 
         for post in selected_posts :
             visit , _  = Visit.objects.update_or_create(visitor=visitor,post=post)
-            comments = Comment.objects.filter(post=post ).order_by('-created_on')
+            comments = Comment.objects.filter(post=post ).order_by('created_on')
             #if settings.HIDE_UUID :
             #    fk = post.filter_key.exclude(name__iregex=r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}")
             #    post.filter_key.set(fk)

@@ -11,16 +11,16 @@
     .OpenTA-filterkey-selected { @apply  inline-block border border-blue-500 rounded py-0 px-2 bg-blue-400 text-white px-2;}
     .OpenTA-filterkey-not-selected { @apply  inline-block border border-blue-500 rounded py-0  bg-white  px-2;}
     .OpenTA-body { @apply  bg-[#ffffff] p-4 font-sans antialiased;}
-    .OpenTA-comment-body { @apply  border-b border-gray-300 py-1 rounded-lg shadow-md;}
+    .OpenTA-comment-body { @apply  p-2 border border-gray-200 py-1 rounded-lg shadow-md;}
     .OpenTA-post-list { @apply  h-full border border-gray-300 rounded-lg shadow-md ;}
-    .OpenTA-comment-entry { @apply  border-2 mt-2 p-2 border-gray-400 rounded-lg;}
+    .OpenTA-comment-entry { @apply  border-2 mt-2 p-2 border-gray-200 rounded-lg;}
     .OpenTA-comment-list { @apply  p-0 rounded-lg  shadow-md ;}
     .OpenTA-hide-button { @apply   hover:bg-blue-400;}
     .OpenTA-leave-comment-form { @apply  px-0 ;}
     .OpenTA-leave-comment-link { @apply  px-0 ;}
     .OpenTA-navigation-bar { @apply  flex p-2  bg-white  px-4; }
     .OpenTA-subcategories { @apply  flex px-4  mb-2 bg-white  ; }
-    .OpenTA-post-selected-entry { @apply  border border-gray-300 p-2 rounded-lg bg-yellow-100  shadow-md;}
+    .OpenTA-post-selected-entry { @apply  border border-gray-300 p-2 rounded-lg bg-[#fdfdfa] shadow-md;}
     .OpenTA-post-rhs-entry { @apply       bg-white border-gray-300 p-2 rounded-lg shadow-md;}
     .OpenTA-post-entry { @apply           border border-gray-300 p-2 rounded ;}
     .OpenTA-post-last-modified { @apply  font-light ;}
