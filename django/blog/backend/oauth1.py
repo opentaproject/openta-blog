@@ -1,6 +1,8 @@
 import hmac
+import html
 import hashlib
 import urllib.parse
+import json
 from django.conf import settings
 from blog.models import Category, Post, Subdomain
 import time, base64
@@ -165,7 +167,8 @@ def load_session_variables( request , *args, **kwargs ):
                 category_selected.save();
             category_selected = category_selected.pk
         request.session['category_selected'] =  category_selected
-        request.session['filter_key'] = data.get('filter_key',[''])[0]
+        fkey =  html.unescape(  data.get('filter_key',[''])[0]   )
+        request.session['filter_key'] = fkey
         request.session['filter_key_selected'] = data.get('filter_key',[''])[0]
         request.session['return_url'] = data.get('return_url',[''])[0];
         request.session['referer']   = data.get('referer',["REFERER_IN_LOAD_SESSION_VARIABLES_NOT_DEFINED"])[0]

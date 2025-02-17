@@ -126,30 +126,37 @@ def blog_index(request, *args, **kwargs ) :
         #del request.session['filter_title']  
         #del request.session['category_selected'] 
     referer =  request.session.get('referer','')
-    name = str( request.session.get('filter_key','')  )
+    try :
+        fkey =  json.loads( request.session.get('filter_key','')  )
+        names = list( fkey.keys() )
+    except :
+        fkey = {};
+        names = []
+    print(f"NAMES = {names}")
     server = str( request.session.get('server','')  )
     subdomain_name = request.session.get('subdomain','')
     subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
-    filter_title = request.session.get('filter_title','')
-    print(f"FILTER_TITLE = {filter_title}")
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
     if  len( Category.objects.filter(name=subdomain_name,subdomain=subdomain)  ) == 0 :
         new_category = Category.objects.create(name=subdomain_name,subdomain=subdomain,restricted=True)
         new_category.save() 
-    filter_title = request.session.get('filter_title','')
-    if  not subdomain_name == '' and not filter_title == '' and not name == ''  :
-        category = Category.objects.get(name=subdomain_name,subdomain=subdomain)
-        filter_key , _  = FilterKey.objects.get_or_create(name=name,category=category,title=filter_title)
-    else :
-        filter_key = None
-        #filter_key.title = filter_title
-        #filter_key.name = subdomain_name
-        #filter_key.save()
+    #filter_title = request.session.get('filter_title','')
+    filter_key = None
+    for nam in names :
+        title = fkey[nam]
+        print(f"SUBDOMAIN_NAME { subdomain_name} NAME = {nam} title ={title}")
+        if  not subdomain_name == '' and not title == '' and not nam == ''  :
+            print(f"CREATE3_FILTERKEY")
+            category = Category.objects.get(name=subdomain_name,subdomain=subdomain)
+            filter_key , _  = FilterKey.objects.get_or_create(name=nam.strip() ,category=category,title=title.strip() )
+        else :
+            filter_key = None
 
 
     #if not filter_key.name   == '' :
     #    category_selected =  Category.objects.get(name=subdomain ).pk
+    print(f"FILTERKEY3 = {filter_key}")
     try :
         visitor_type = get_author_type(request)
         visitor = get_visitor( request )
