@@ -25,8 +25,8 @@
               <div>
                 <div class="mt-2 flex justify-between w-full">
                   <span>
-                    <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_edit_post' post.pk %}">  {% if post.post_author.name == username or  is_staff %} Edit {% endif %} </a> </span>
-                    <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if post.post_author.name == username or  is_staff %} Delete {% endif %} </a> </span>
+                    <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_edit_post' post.pk %}">  {% if post.post_author.name == username or  is_staff or is_teacher %} Edit {% endif %} </a> </span>
+                    <span class="OpenTA-post-title">  <a class="OpenTA-edit-post-link" href="{% url 'blog_delete_post' post.pk %}">  {% if post.post_author.name == username or  is_staff or is_teacher %} Delete {% endif %} </a> </span>
                   </span>
 
                   <div class="OpenTA-left">

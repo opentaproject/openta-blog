@@ -247,6 +247,10 @@ def blog_index(request, *args, **kwargs ) :
         categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected , filter_key  )
         is_authenticated = request.session.get('is_authenticated',False)
         is_staff = request.session.get('is_staff',False)
+        is_teacher = visitor_type in [ TEACHER , STAFF ]
+        print(f"IS_TEACHER = {is_teacher}")
+
+
         #if pk == None :
         #    pk = request.session.get('last_post_pk', None )
         if posts :
@@ -292,6 +296,7 @@ def blog_index(request, *args, **kwargs ) :
             "author_type" : author_type,
             "author_type_display" : author_type_display,
             "is_staff" : is_staff,
+            "is_teacher" : is_teacher,
             "username" : username,
             "selected" : pk,
             "selected_posts" : selected_posts,

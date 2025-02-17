@@ -302,6 +302,7 @@ CKEDITOR_5_CONFIGS = {
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "any"
 CKEDITOR_5_FILE_STORAGE = "backend.util.CustomStorage" # optional
 #CKEDITOR_5_CONFIGS  = 'extended'
+CKEDITOR_ALLOW_NONIMAGE_FILES = True
 AUTHENTICATION_BACKENDS = [
   'django.contrib.auth.backends.ModelBackend',
   'lti_provider.auth.LTIBackend',
