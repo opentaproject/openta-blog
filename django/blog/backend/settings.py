@@ -305,7 +305,8 @@ CKEDITOR_5_FILE_STORAGE = "backend.util.CustomStorage" # optional
 #CKEDITOR_5_CONFIGS  = 'extended'
 CKEDITOR_ALLOW_NONIMAGE_FILES = True
 CKEDITOR_5_ALLOW_ALL_FILE_TYPES = True
-CKEDITOR_5_UPLOAD_FILE_TYPES = ['jpeg', 'pdf', 'png','csv','xlsx','doc','docx','zip','tex','py'] # optional
+CKEDITOR_5_UPLOAD_FILE_TYPES = ['jpeg', 'pdf', 'png','csv','xlsx','doc','docx','zip','tex','py','tgz','xmind'] # optional
+CKEDITOR_5_MAX_FILE_SIZE = 50
 AUTHENTICATION_BACKENDS = [
   'django.contrib.auth.backends.ModelBackend',
   'lti_provider.auth.LTIBackend',
