@@ -238,7 +238,7 @@ customColorPalette = [
 CKEDITOR_5_CONFIGS = {
   'default': {
       'toolbar': ['heading', '|', 'bold', 'italic', 'link',
-                  'bulletedList', 'numberedList', 'blockQuote', 'imageUpload', ],
+                  'bulletedList', 'numberedList', 'blockQuote', 'fileUpload', ],
 
   },
   'extends': {
@@ -251,7 +251,7 @@ CKEDITOR_5_CONFIGS = {
       ],
       'toolbar': ['heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough',
       'code','subscript', 'superscript', 'highlight', '|', 'codeBlock', 'sourceEditing', 'insertImage',
-                  'bulletedList', 'numberedList', 'todoList', '|',  'blockQuote', 'imageUpload', '|',
+                  'bulletedList', 'numberedList', 'todoList', '|',  'blockQuote', 'fileUpload', '|',
                   'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'mediaEmbed', 'removeFormat',
                   'insertTable',],
       'image': {
@@ -301,8 +301,11 @@ CKEDITOR_5_CONFIGS = {
 #CKEDITOR_5_FILE_UPLOAD_PATH = f"/subdomain_data/{SUBDOMAIN}/media/"  # Possible values: "staff", "authenticated", "any"
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = "any"
 CKEDITOR_5_FILE_STORAGE = "backend.util.CustomStorage" # optional
+
 #CKEDITOR_5_CONFIGS  = 'extended'
 CKEDITOR_ALLOW_NONIMAGE_FILES = True
+CKEDITOR_5_ALLOW_ALL_FILE_TYPES = True
+CKEDITOR_5_UPLOAD_FILE_TYPES = ['jpeg', 'pdf', 'png','csv','xlsx','doc','docx','zip','tex','py'] # optional
 AUTHENTICATION_BACKENDS = [
   'django.contrib.auth.backends.ModelBackend',
   'lti_provider.auth.LTIBackend',
