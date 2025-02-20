@@ -87,8 +87,23 @@ class Visitor(models.Model) :
         names = ['anonymous','student','teacher','staff']
         return names[ self.visitor_type ]
 
-    def sidecar_count(self):
-        subdomain = self.subdomain
+    def get_unread_filtertypes(self):
+        pks = Visit.objects.all().filter(visitor=self).values('post_id')
+        if pks :
+            posts = Post.objects.filter( pk__in=pks )
+            first_visit =  Visit.objects.all().filter(visitor=self).order_by('date').first()
+            last_visit =  Visit.objects.all().filter(visitor=self).order_by('date').last()
+            visit_date = last_visit.date
+            new_posts =  posts.filter(last_modified__gt=last_visit.date)
+            unvisited_posts = posts.exclude(pk__in=pks)
+            posts = new_posts | unvisited_posts
+            fk = list( posts.values_list('filter_key__name', flat=True) )
+            print(f"FK = {fk}")
+        else : 
+            fk = []
+        return  fk
+
+
         
 
 
