@@ -50,8 +50,12 @@ def get_visitor( request ):
 @xframe_options_exempt  
 def sidecar_count(request, *args, **kwargs ) :
 
+
     username = request.POST.get('username','')
     subdomain = request.POST.get('subdomain','')
+    subdomain_ = Subdomain.objects.get(name=subdomain)
+    exercises_with_posts = subdomain_.get_filterkeys_with_posts() 
+    print(f"F = {exercises_with_posts}")
     exercise = str( request.POST.get('exercise') )
     visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
     pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
@@ -78,7 +82,7 @@ def sidecar_count(request, *args, **kwargs ) :
         #post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="visit_post")
         #date =  models.DateTimeField(auto_now=True)
         sidecar_count = len( posts)
-    data = {'sidecar_count' : sidecar_count ,'unread' : unread}
+    data = {'sidecar_count' : sidecar_count ,'unread' : unread, 'exercises_with_posts' : exercises_with_posts  }
     print(f"DATA_OUT = {data}")
     return JsonResponse( data )
 

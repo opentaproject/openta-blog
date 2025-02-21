@@ -15,6 +15,17 @@ class Subdomain( models.Model) :
     def __str__(self):
         return self.name
 
+    def get_filterkeys_with_posts(self):
+        category = Category.objects.get(name=self.name)
+        posts = Post.objects.all().filter(category=category)
+        f = list( FilterKey.objects.all().filter(id__in=posts.values('filter_key')\
+            .distinct() ).values_list('name',flat=True) )
+        print(f"FILTER_KEYS_WITH_POSTS = {f}")
+        f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ]
+        print(f"F = {f}")
+        return  f
+ 
+
 
 class Category(models.Model):
     name = models.CharField(max_length=30)
