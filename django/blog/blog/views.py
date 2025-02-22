@@ -55,15 +55,14 @@ def sidecar_count(request, *args, **kwargs ) :
     subdomain = request.POST.get('subdomain','')
     subdomain_ = Subdomain.objects.get(name=subdomain)
     exercises_with_posts = subdomain_.get_filterkeys_with_posts() 
-    print(f"F = {exercises_with_posts}")
     exercise = str( request.POST.get('exercise') )
     visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
     pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
     if len( pks ) == 0 :
+        unread = []
         sidecar_count = 0 
     else :
         unread =  visitor[0].get_unread_filtertypes()
-        print(f"UNREAD1 = {unread}")
         sidecar_count = len( unread )
     if exercise == 'None' :
         sidecar_count = len( unread)
@@ -84,7 +83,6 @@ def sidecar_count(request, *args, **kwargs ) :
         #date =  models.DateTimeField(auto_now=True)
         sidecar_count = len( posts)
     data = {'sidecar_count' : sidecar_count ,'unread' : unread, 'exercises_with_posts' : exercises_with_posts  }
-    print(f"DATA_OUT = {data}")
     return JsonResponse( data )
 
 

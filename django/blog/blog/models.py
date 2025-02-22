@@ -20,9 +20,7 @@ class Subdomain( models.Model) :
         posts = Post.objects.all().filter(category=category)
         f = list( FilterKey.objects.all().filter(id__in=posts.values('filter_key')\
             .distinct() ).values_list('name',flat=True) )
-        print(f"FILTER_KEYS_WITH_POSTS = {f}")
         f = [i for i in f if re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",i) ]
-        print(f"F = {f}")
         return  f
  
 
@@ -109,7 +107,6 @@ class Visitor(models.Model) :
             unvisited_posts = posts.exclude(pk__in=pks)
             posts = new_posts | unvisited_posts
             fk = list( posts.values_list('filter_key__name', flat=True) )
-            print(f"FK = {fk}")
         else : 
             fk = []
         return  fk
