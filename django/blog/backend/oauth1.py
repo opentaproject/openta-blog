@@ -146,16 +146,14 @@ def load_session_variables( request , *args, **kwargs ):
         category_selected = Category.objects.get(name='Unread').pk
     if not pk == None :
         category_selected = Post.objects.get(pk=pk).category.pk;
-    #for key in request.session.keys() :
-    #    logger.error(f" {key} {request.session[key]}")
     if request.method == 'POST' :
         author_type = get_author_type( request )
+        course_pk = data.get('course_pk',None)
         data = dict( request.POST )
         server = data.get('server',['NONE'] )[0]
         request.session['server'] = server
         username = data.get('custom_canvas_login_id', [''])[0]
         subdomain = data.get('resource_link_title', [''])[0]
-        #request.session['author_type'] = author_type
         request.session['username'] = username
         request.session['is_authenticated'] = not username ==  ''
         request.session['subdomain'] = subdomain
@@ -168,6 +166,7 @@ def load_session_variables( request , *args, **kwargs ):
             category_selected = category_selected.pk
         request.session['category_selected'] =  category_selected
         fkey =  html.unescape(  data.get('filter_key',[''])[0]   )
+        request.session['course_pk'] = course_pk
         request.session['filter_key'] = fkey
         request.session['filter_key_selected'] = data.get('filter_key',[''])[0]
         request.session['return_url'] = data.get('return_url',[''])[0];

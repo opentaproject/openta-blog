@@ -12,7 +12,6 @@
     
     <!-- <script src="https://cdn.tailwindcss.com"></script> --!>
 
-
   <script>
 MathJax = {
   tex: {
@@ -38,14 +37,11 @@ MathJax = {
 	<div class="OpenTA-debug"> BASE   {{ dummy_field }} </div> 
 <div class="OpenTA-body OpenTA-text-size">
 	<a  class="OpenTA-text-size hover:bg-blue-200 hover:font-bold px-4" href="/home" >
-<img class="inline w-8 h-4 md:w-12 md:h-6 lg:w-12 lg:h-6 " src="{% static '/images/s.ico' %}" alt="">
-	OpenTA-sidecar </a> 
+<img class="inline w-8 h-4 md:w-12 md:h-6 lg:w-12 lg:h-6 " src="{% static '/images/s.ico' %}" alt=""> OpenTA-sidecar </a> 
 {% if is_authenticated %}  
 {% if referer %}
 {% if filter_key.title %}
-<!-- a class="hover:font-bold hover:bg-blue-200" href="{{ referer }}/1/single/{{filter_key.name }} ">  <img class="inline w-4 h-4 md:w-6 md:h-6 lg:w-6 lg:h-6 " src="{% static '/images/openta.ico' %}" alt=""> {{ username }}:{{ subdomain }}  {{ author_type_display }}  </a --!>
-<!-- a class="hover:font-bold hover:bg-blue-200" href="https://{{subdomain}}.opentaserver.com/1/single/{{filter_key.name }} ">  <img class="inline w-4 h-4 md:w-6 md:h-6 lg:w-6 lg:h-6 " src="{% static '/images/openta.ico' %}" alt=""> SETTINGS_OPENTA_SERVER  ={{ referer }}SUBDOMAIN={{ subdomain }}  FILTER_KEY={{ filter_key.name }}  </a --!>
-	<a class="hover:font-bold hover:bg-blue-200" href="{{ server }}/1/single/{{filter_key.name }} ">  <img class="inline w-4 h-4 md:w-6 md:h-6 lg:w-6 lg:h-6 " src="{% static '/images/openta.ico' %}" alt="">  Back to {{ subdomain }}:{{ filter_key.title }}  </a>
+<a class="hover:font-bold hover:bg-blue-200" href="{{ server }}/{{ course_pk }}/{{filter_key.name }} ">  <img class="inline w-4 h-4 md:w-6 md:h-6 lg:w-6 lg:h-6 " src="{% static '/images/openta.ico' %}" alt="">  Back to {{ subdomain }}:{{ filter_key.title }}  </a>
 
 {% else %}
 	<a class="hover:font-bold hover:bg-blue-200" href="{{ referer }} ">  <img class="inline w-4 h-4 md:w-6 md:h-6 lg:w-6 lg:h-6 " src="{% static '/images/openta.ico' %}" alt="">

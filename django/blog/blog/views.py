@@ -244,6 +244,7 @@ def blog_index(request, *args, **kwargs ) :
             #    post.filter_key.set(fk)
         author_type = request.session.get('author_type', Post.AuthorType.ANONYMOUS )
         author_type_display = request.session.get('author_type_display','Anonymous')
+        course_pk = request.session.get("course_pk")
         if request.user.is_staff :
             author_type = Post.AuthorType.STAFF
             author_type_display = 'Admin'
@@ -279,6 +280,7 @@ def blog_index(request, *args, **kwargs ) :
             "dummy_field" : 'VIEWS_DUMMY_FIELD',
             "visitor_types" : visitor_types,
             "filterkeys" : filterkeys,
+            "course_pk" : course_pk,
         }
     except ProgrammingError as e:
         context = {

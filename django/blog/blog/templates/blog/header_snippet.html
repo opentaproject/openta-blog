@@ -12,7 +12,8 @@
 
                 {% if category.pk == category_selected %}
 		{% if filter_key %} 
-		<a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} </a> <span class="OpenTA-category-selected"> only posts for <span class="text-bold"> {{ filter_key.title}} </span> shown </span> 
+		<a class="hidden OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} </a> 
+		<span class="OpenTA-category-selected"> Posts for <span class="text-bold"> {{ filter_key.title}} </span>  </span> 
 		{% else %}
 			<a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }}</a>
 		{% endif %}

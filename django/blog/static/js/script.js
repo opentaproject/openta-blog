@@ -1,4 +1,3 @@
-        
 	function add_option_listener() {
           const checkboxButtons = document.querySelectorAll('input[name="option"]');
           checkboxButtons.forEach((checkbox) => {
