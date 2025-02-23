@@ -57,7 +57,7 @@ def toggle_resolved(request, *args, **kwargs ) :
     pk = kwargs.get('pk')
     post = Post.objects.get(pk=pk)
     post.resolved = not post.resolved
-    post.save()
+    post.save(update_fields=['resolved'])
     if post.resolved  :
         #ret = '<i class="fas fa-toggle-on fa-2x"> </i> '
         ret = 'Resolved'

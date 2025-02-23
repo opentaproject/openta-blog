@@ -17,10 +17,10 @@
     .OpenTA-comment-list { @apply  p-0 rounded-lg  shadow-md ;}
     .OpenTA-hide-button { @apply   hover:bg-blue-400;}
     .OpenTA-leave-comment-form { @apply  px-0 ;}
-    .OpenTA-leave-comment-link { @apply  px-0 bg-blue-200 rounded-sm p-1  ;}
+    .OpenTA-leave-comment-link { @apply  px-0 bg-white rounded-sm p-1  ;}
     .OpenTA-navigation-bar { @apply  flex p-2  bg-white  px-4; }
     .OpenTA-subcategories { @apply  flex px-4  mb-2 bg-white  ; }
-    .OpenTA-post-selected-entry { @apply  border border-gray-300 p-2 rounded-lg bg-[#fdfdfa] shadow-md;}
+    .OpenTA-post-selected-entry { @apply  border border-gray-300 p-2 rounded-lg bg-[#f0f0c0] shadow-md;}
     .OpenTA-post-rhs-entry { @apply       bg-white border-gray-300 p-2 rounded-lg shadow-md;}
     .OpenTA-post-entry { @apply           border border-gray-300 p-2 rounded ;}
     .OpenTA-post-last-modified { @apply  font-light ;}
@@ -51,6 +51,7 @@
     .OpenTA-button-group-middle { @apply px-4  bg-blue-200 text-sm font-medium text-gray-900 border-t border-b border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700; }
     .OpenTA-button-group-label { @apply px-4  bg-blue-200 text-sm font-medium text-gray-900 border-t border-b border-gray-200  ; } 
     .OpenTA-button-group-right { @apply px-4  bg-blue-200 text-sm font-medium text-gray-900 border border-gray-200 rounded-r-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 ; }
+    .OpenTA-not-resolved-warning { @apply text-red-600  transform scale-50 font-bold text-xs ; }
 	}
 option {
     font-size: 10px;

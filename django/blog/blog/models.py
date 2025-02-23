@@ -148,7 +148,13 @@ class Post(models.Model):
     resolved =  models.BooleanField(default=False) 
 
     def save( self, *args, **kwargs):
-        super().save(*args,**kwargs)
+        print(f"SAVE KWARGS = {kwargs}")
+    #    if 'update_fields' in kwargs and kwargs['update_fields'] == ['resolved']:
+    #        self._meta.get_field('last_modified').auto_now = False
+    #        super().save(*args, **kwargs)
+    #        self._meta.get_field('last_modified').auto_now = True
+    #    else:
+        super().save(*args, **kwargs)
 
     def answered_by(self):
         f = ['','s','i','a']
