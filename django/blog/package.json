@@ -3,6 +3,7 @@
     "@tailwindcss/cli": "^4.0.1",
     "lodash": "^4.17.21",
     "oath": "^1.0.0",
+    "package.json": "^2.0.1",
     "require": "^0.4.4"
   },
   "devDependencies": {

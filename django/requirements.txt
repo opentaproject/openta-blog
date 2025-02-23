@@ -2,11 +2,11 @@ asgiref==3.8.1
 certifi==2024.8.30
 charset-normalizer==3.4.0
 click==8.1.8
-crispy-bootstrap4==2024.10
-crispy-tailwind==1.0.3
+#crispy-bootstrap4==2024.10
+#crispy-tailwind==1.0.3
 Django==5.1.2
 django-ckeditor-5==0.2.15
-django-crispy-forms==2.3
+#django-crispy-forms==2.3
 django-filebrowser==4.0.3
 django-grappelli==3.0.9
 django-js-asset==2.2.0

@@ -5,6 +5,7 @@ from . import views
 
 urlpatterns = [
     path("", views.blog_index, name="blog_index"),
+    path("toggle_resolved/<val>/<pk>/", views.toggle_resolved, name="toggle_resolved"),
     path("blog/<category_selected>/", views.blog_index, name="blog_index"),
     path("blog/home/", views.blog_index, name="blog_index"),
     path("sidecar_count/", views.sidecar_count , name="sidecar_count"),

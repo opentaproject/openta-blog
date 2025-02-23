@@ -12,9 +12,28 @@
           <div class=" OpenTA-post-body mt-2 flex justify-between w-full">
 
 
-		  <span class="{{ post.bgclass }}"> {{ post.tx }} </span> <span class="OpenTA-post-title"> {{ post.title }} 	 </span>
-            <span>  <a class="OpenTA-leave-comment-link" href="{% url 'blog_leave_comment' post.pk %}">  {% if is_authenticated %} Leave a comment {% endif %} </a>
-              <span class="p-1 rounded-l bg-gray-400"> {{ post.tot_visits }}  Views </span>
+		  <span class="{{ post.bgclass }}"> {{ post.tx }} </span> <span class="OpenTA-post-title"> {{ post.title }} 	 </span> 
+
+		  <div class="inline-flex transform scale-75" role="group">
+			  <button type="button" class="OpenTA-button-group-left">
+ <a class="" href="{% url 'blog_leave_comment' post.pk %}">  {% if is_authenticated %}  Leave a comment  {% endif %} </a>
+  			</button>
+			<button type="button" class="OpenTA-button-group-middle">
+				 <span class="scale-75" id="#response-container"></span> 
+		  <a href='{% url "toggle_resolved"  val=post.resolved pk=post.pk %}' hx-get='{% url "toggle_resolved" val=post.resolved pk=post.pk %}' > 
+ 		  {% if post.resolved  or post.resolved == 'True' %} 
+		  Resolved
+		  {% else %} 
+		  Unresolved
+		  {% endif %} 
+		  </a> 
+
+  			</button>
+			<button type="button" class="OpenTA-button-group-right">
+				 {{ post.tot_visits }}  Views
+  			</button>
+			</div>
+
 
             </div>
 

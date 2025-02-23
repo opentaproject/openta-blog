@@ -10,7 +10,7 @@ from django.views.generic.list import ListView
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from blog.models import Post, Comment, Category,Visit,Visitor,Subdomain, FilterKey
 from django.db import ProgrammingError
 from blog.forms import CommentForm, PostForm
@@ -43,6 +43,29 @@ def get_visitor( request ):
     visitor_type = get_author_type(request)
     visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subdomain,visitor_type=visitor_type)
     return visitor
+
+
+@api_view(["GET", "POST"])
+#@csrf_exempt
+#@xframe_options_exempt  
+def toggle_resolved(request, *args, **kwargs ) :
+    print(f"REQUEST = {request.method}")
+    print(f"GET = { request.GET }")
+    print(f"ARGS = {args}")
+    print(f"KWARGS = {kwargs}")
+    val = kwargs.get('val') == 'True'
+    pk = kwargs.get('pk')
+    post = Post.objects.get(pk=pk)
+    post.resolved = not post.resolved
+    post.save()
+    if post.resolved  :
+        #ret = '<i class="fas fa-toggle-on fa-2x"> </i> '
+        ret = 'Resolved'
+    else :
+        ret = 'Unresolved' # '<i class="fas fa-toggle-off fa-2x"> </i> '
+    return HttpResponse(ret)
+
+
 
 
 @api_view(["GET", "POST"])

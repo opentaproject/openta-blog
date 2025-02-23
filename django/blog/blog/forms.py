@@ -61,6 +61,7 @@ class PostForm(forms.ModelForm):
           super().__init__(*args, **kwargs)
           #for k in self.fields.keys() :
           #    print(f" K = {k} val = {self.fields[k]}")
+          self.fields["resolved"].required = False
           self.fields["body"].required = True
           self.fields["title"].required = True
           self.fields["alias"].required = False
@@ -125,7 +126,7 @@ class PostForm(forms.ModelForm):
 
       class Meta:
           model = Post
-          fields = ['author_type','visibility','post_author','title','body','category' ,'filter_key','alias']
+          fields = ['author_type','visibility','post_author','title','body','category' ,'filter_key','alias','resolved']
           #fields = '__all__'
           error_messages = {}
           for f in fields :

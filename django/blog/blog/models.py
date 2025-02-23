@@ -145,6 +145,7 @@ class Post(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
     category = models.ForeignKey("Category", null=True, blank=True, related_name="post",on_delete=models.SET_NULL)
     filter_key = models.ManyToManyField(FilterKey,related_name="post")
+    resolved =  models.BooleanField(default=False) 
 
     def save( self, *args, **kwargs):
         super().save(*args,**kwargs)
