@@ -13,7 +13,7 @@
                 {% if category.pk == category_selected %}
 		{% if filter_key %} 
 		<a class="hidden OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }} </a> 
-		<span class="OpenTA-category-selected"> Posts for <span class="text-bold"> {{ filter_key.title}} </span>  </span> 
+		<span class="text-sm "> Read or create posts for exercise <span class="font-bold italic"> {{ filter_key.title }} </span>  Start the new title with the exercise title <span class="font-bold italic"> {{ filter_key.title}} </span> You can choose folders in the next step.  </span> 
 		{% else %}
 			<a class="OpenTA-category-selected" href="/blog/{{ category.pk }}/">{{ category }}</a>
 		{% endif %}
@@ -41,6 +41,7 @@
     <ul class="OpenTA-subcategories">
         {% for category in categories %}
             {% if category.pk == category_selected %}
+	      {% if not filter_key.name %}
                 <li class="OpenTA-text-size -mb-px mr-1">
                     <form method="post">
                         <label for="id_filterkey_all" > <input type="checkbox" name="option" value="All" id="All" > All </input>
@@ -67,6 +68,7 @@
 			<a class="bg-blue-300 rounded-sm px-1" href="{% url 'filter_key_list' %}" >  New</a> 	
 			</div> 
 		</li>
+		{% endif %}
 		{% endif %}
             {% endif %}
         {% endfor %}

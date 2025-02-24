@@ -81,11 +81,12 @@ def sidecar_count(request, *args, **kwargs ) :
     exercise = str( request.POST.get('exercise') )
     visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
     pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
-    if len( pks ) == 0 :
+    if False and len( pks ) == 0 :
         unread = []
         sidecar_count = 0 
     else :
         unread =  visitor[0].get_unread_filtertypes()
+        print(f"UNREAD = {unread}")
         sidecar_count = len( unread )
     if exercise == 'None' :
         sidecar_count = len( unread)
@@ -101,11 +102,14 @@ def sidecar_count(request, *args, **kwargs ) :
             pks = list( visits.values_list('post__pk',flat=True) )
             unvisited_posts = posts.exclude(pk__in=pks)
             posts = new_posts | unvisited_posts
+        else :
+            unread = exercises_with_posts
         #visitor = models.ForeignKey("Visitor", on_delete=models.CASCADE, related_name="visit_visitor")
         #post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="visit_post")
         #date =  models.DateTimeField(auto_now=True)
         sidecar_count = len( posts)
     data = {'sidecar_count' : sidecar_count ,'unread' : unread, 'exercises_with_posts' : exercises_with_posts  }
+    print(f"SIDECAR_COUNT {username} {subdomain} { exercise } { data }")
     return JsonResponse( data )
 
 
@@ -168,11 +172,15 @@ def blog_index(request, *args, **kwargs ) :
                 subdomain = None
             category_all ,_ = Category.objects.get_or_create(name='All')
             category_unread , _  = Category.objects.get_or_create(name='Unread')
+            category_unresolved, _  = Category.objects.get_or_create(name='Unresolved')
             ALL = category_all.pk
             UNREAD = category_unread.pk
             category_selected = int( category_selected )
+            UNRESOLVED = category_unresolved.pk
             if  category_selected ==  ALL :
                 posts = Post.objects.all().order_by("-last_modified").annotate(viewed=Count('comment') )
+            if category_selected == UNRESOLVED :
+                posts = Post.objects.filter(resolved=False).order_by("-last_modified").annotate(viewed=Count('comment') )
             else :
                 posts = Post.objects.all().order_by("-last_modified").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
             for post in posts :
@@ -202,6 +210,8 @@ def blog_index(request, *args, **kwargs ) :
                     posts = new_posts | unvisited_posts
                 #posts = posts.exclude(pk__in=pks,last_modified__lt=visit_date)
                 #posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
+            elif category_selected == UNRESOLVED:
+                posts = Post.objects.filter(resolved=False).order_by("-last_modified").annotate(viewed=Subquery(visit_subquery)  )
             else :
                 posts = Post.objects.all().order_by("-last_modified").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
             if visitor.visitor_type in [ ANONYMOUS , STUDENT ] :
@@ -231,16 +241,8 @@ def blog_index(request, *args, **kwargs ) :
                 categories = categories.filter(subdomain=subdomain)
             cat = int( category_selected )
             posts = posts.filter(category__in=categories)
-            #try :
-            #    if False and not str( filter_key  ) == ''  :
-            #        #if posts.count() > 0 :
-            #        #    posts = posts.filter(filter_key=filter_key)
-            #        cats = Category.objects.all().filter(name=subdomain_name)
-            #        category_selected = int( cats[0].pk )
-            #        cat = int( category_selected )
-            #except Exception as e :
-            #    print(f"FILTER_KEY IS NOT DEFINED  {str(e)}")
-            #    pass
+            if  filter_key and re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}" , str( filter_key.name) ) : # and posts.count() > 0 :
+                posts = posts.filter(filter_key=filter_key)
             return ( categories , cat , posts )
         categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected , filter_key  )
         is_authenticated = request.session.get('is_authenticated',False)

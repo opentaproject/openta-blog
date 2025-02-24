@@ -11,7 +11,7 @@ class FilterKeyAdmin(admin.ModelAdmin):
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['title','visibility','last_modified','post_author','category']
+    list_display = ['pk','title','visibility','last_modified','post_author','category']
     readonly_fields = ['created_on', 'last_modified']  # Replace with your field names
     pass
 
@@ -28,7 +28,7 @@ class SubdomainAdmin(admin.ModelAdmin):
     pass
 
 class VisitorAdmin(admin.ModelAdmin):
-    list_display = ['id','name','subdomain','last_visit','visitor_type']
+    list_display = ['id','name','alias','subdomain','last_visit','visitor_type']
     pass
 
 

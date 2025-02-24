@@ -8,6 +8,13 @@ import re
 from django.urls import reverse_lazy
 from django.db.models import Count, Subquery, Sum, OuterRef, F
 
+PRIVATE = 1 # ONLY SEEN BY TEACHER,STAFF AND OWNER
+PUBLIC = 2  # SEEN BY EVERYONE 
+ANONYMOUS = 0 # ANYONE ; CANNOT ADD POST
+STUDENT = 1   # COMES VIA LTI  AS STUDENT
+TEACHER = 2   # COMES VIA LTI  WITH ESCALATED ROLE
+STAFF = 3     # 
+
 
 class Subdomain( models.Model) :
     name = models.CharField(max_length=60)
@@ -98,17 +105,18 @@ class Visitor(models.Model) :
 
     def get_unread_filtertypes(self):
         pks = Visit.objects.all().filter(visitor=self).values('post_id')
+        subdomain = self.subdomain
+        categories = Category.objects.filter(name=subdomain) | Category.objects.filter(restricted=False)
+        posts = Post.objects.filter(category__in=categories)
         if pks :
-            posts = Post.objects.filter( pk__in=pks )
+            posts = posts.filter( pk__in=pks )
             first_visit =  Visit.objects.all().filter(visitor=self).order_by('date').first()
             last_visit =  Visit.objects.all().filter(visitor=self).order_by('date').last()
             visit_date = last_visit.date
             new_posts =  posts.filter(last_modified__gt=last_visit.date)
             unvisited_posts = posts.exclude(pk__in=pks)
             posts = new_posts | unvisited_posts
-            fk = list( posts.values_list('filter_key__name', flat=True) )
-        else : 
-            fk = []
+        fk = list( posts.values_list('filter_key__name', flat=True) )
         return  fk
 
 
@@ -181,12 +189,14 @@ class Post(models.Model):
         return v
 
     def bgclass(self ):
+        k = self.post_author.visitor_type
         colors = ['px-2 bg-white','px-2 bg-green-400','px-2 bg-yellow-400','px-2 red-400']
-        return colors[ self.author_type ]
+        return colors[ k ]
 
     def tx(self):
+        k = self.post_author.visitor_type
         c = ['','s','i','a']
-        return c[ self.author_type]
+        return c[k]
 
 
 

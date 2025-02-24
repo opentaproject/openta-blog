@@ -31,7 +31,8 @@
 		</fieldset>
 		 </span> 
 		 </div>
-		<div class="py-2"> <div class="checkbox-group">  {{ form.filter_key}}  </div> </div> 
+		 <div class="py-2"> <div class="checkbox-group"> 
+		 <span class="font-bold"> {{form.filter_key.label_tag}} : </span> <div>  {{ form.filter_key}}  </div> </div> </div> 
 
 
 		 <div class="OpenTA-is_staff"> {{ form.is_staff.label_tag }}{{ form.is_staff}} {{ form.is_staff.errors }} </div> 

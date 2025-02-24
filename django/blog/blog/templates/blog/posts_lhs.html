@@ -47,9 +47,9 @@
             <span>
               {% if not post.viewed %}     <i class="text-red-600 fa-solid fa-circle "></i> {% endif %}
               <a class="" href="{% url 'blog_index'  post.pk %}">
-		      <button  id="check{{ post.pk }}"  class=""> <div class="{{ post.bgclass }}"> {{ post.tx }}  </div></button>
-{% if  post.visibility  == 1 %} <span class="text-red-600 font-bold"> Private post </span> {% endif %}
-{% if not post.resolved %} <span class="OpenTA-not-resolved-warning"> Unresolved </span> {% endif %}
+                <button  id="check{{ post.pk }}"  class=""> <div class="{{ post.bgclass }}"> {{ post.tx }}  </div></button>
+                {% if  post.visibility  == 1 %} <span class="text-red-600 font-bold"> Private post </span> {% endif %}
+                {% if not post.resolved %} <span class="OpenTA-not-resolved-warning"> Unresolved </span> {% endif %}
                 <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title | safe }} </span> </span>
               </span>
               <span class="OpenTA-post-last-modified"> {{ post.answered_by | safe }} {{ post.last_modified | date:"Y-m-d"  }} </span>
@@ -59,15 +59,19 @@
         </div>
 
       {% else %}
+      {% if post.resolved %}
         <div class="OpenTA-post-entry">
+      {% else %}
+	<div class="OpenTA-unresolved">
+      {% endif %}
           <div class="flex justify-between w-full">
             <span>
               {% if not post.viewed %}     <i class="text-red-600 fa-solid fa-circle "></i> {% endif %}
               <a class="OpenTA-leave-comment-link" href="{% url 'blog_index'  post.pk %}">
 
-		      <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <span class=" px-1 {{ post.bgclass }}"> {{ post.tx}} </span>   </button>
-	{% if  post.visibility  == 1 %} <span class="text-red-600 font-bold"> Private post </span> {% endif %}
-{% if not post.resolved %} <span class="OpenTA-not-resolved-warning"> Unresolved </span> {% endif %}
+                <button  id="check{{ post.pk }}"  class="OpenTA-hide-button"> <span class=" px-1 {{ post.bgclass }}"> {{ post.tx}} </span>   </button>
+                {% if  post.visibility  == 1 %} <span class="text-red-600 font-bold"> Private post </span> {% endif %}
+                {% if not post.resolved %} <span class="OpenTA-not-resolved-warning"> Unresolved </span> {% endif %}
                 {% if selected_posts %}
                   <span id="tog{{ post.pk}}" class="selected-post" > <span class="OpenTA-post-title"> {{ post.title  | safe }} </span> </span>
                 {% else %}
@@ -78,9 +82,9 @@
             </a>
           </div>
           {% if selected_posts %}
-            <div class="OpenTA-text-size">  {{ post.body | truncatechars:120 | safe }} </div>
+            <div class="OpenTA-text-size">  {{ post.body | striptags | truncatechars:120 | safe }} </div>
           {% else %}
-            <div class="OpenTA-text-size">  {{ post.body | truncatechars:120 | safe }} </div>
+            <div class="OpenTA-text-size">  {{ post.body | striptags | truncatechars:120 | safe }} </div>
           {% endif %}
         </div>
       {% endif %}

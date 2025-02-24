@@ -1,0 +1,17 @@
+<div class="inline-flex transform scale-100" role="group">
+  <button type="button" class="OpenTA-button-group-left">
+    <a class="" href="{% url 'blog_leave_comment' post.pk %}">  {% if is_authenticated %}  Leave a comment  {% endif %} </a>
+  </button>
+  <button type="button" class="OpenTA-button-group-middle">
+    <span class="scale-75" id="#response-container"></span>
+    <a href='{% url "toggle_resolved"  val=post.resolved pk=post.pk %}' hx-get='{% url "toggle_resolved" val=post.resolved pk=post.pk %}' >
+      {% if post.resolved  or post.resolved == 'True' %}
+        Resolved
+      {% else %}
+        <span class="text-red-600"> Unresolved </span>
+      {% endif %}
+    </a>
+
+  </button>
+ <button type="button" class="OpenTA-button-group-right"> {{ post.tot_visits }}  Views </button>
+</div>

@@ -73,7 +73,7 @@ class PostForm(forms.ModelForm):
               self.fields[k].label = ''
           self.fields["title"].label = 'Title: '
           self.fields["visibility"].label = 'Visibility: '
-          self.fields["filter_key"].label = "Folders: "
+          self.fields["filter_key"].label = "Folders for the post: "
           self.fields["alias"].label = 'Alias: '
           self.fields["title"].widget=forms.TextInput(attrs={'class': 'OpenTA-text-input' });
           self.fields["alias"].widget=forms.TextInput(attrs={'class': 'OpenTA-text-input',});
