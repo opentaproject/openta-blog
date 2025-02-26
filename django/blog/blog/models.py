@@ -103,6 +103,13 @@ class Visitor(models.Model) :
         names = ['anonymous','student','teacher','staff']
         return names[ self.visitor_type ]
 
+    def get_resolvable_posts(self):
+        my_posts =  Post.objects.filter(post_author=self)
+        p = list( Comment.objects.filter(comment_author=self).values_list('post',flat=True) )
+        my_commented_posts = Post.objects.filter(pk__in=p )
+        resolvable = my_posts | my_commented_posts
+        return resolvable
+
     def get_unread_filtertypes(self):
         pks = Visit.objects.all().filter(visitor=self).values('post_id')
         subdomain = self.subdomain
@@ -145,7 +152,6 @@ class Post(models.Model):
         STAFF = 3     # IS LEGITIMATE STAFF OF SIDECAR; HAS NOTHING TO DO WITH ROLE ON OPENTA
     visibility = models.IntegerField(choices=Visibility , default=2 )
     author_type = models.IntegerField(choices=AuthorType, default=0 )
-    #author = models.CharField(max_length=60)
     post_author =  models.ForeignKey("Visitor", null=True, blank=True, related_name="post",on_delete=models.SET_NULL)
     title = models.CharField(max_length=255)
     body = CKEditor5Field('Post Body ', config_name='extends')

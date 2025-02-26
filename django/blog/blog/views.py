@@ -49,10 +49,6 @@ def get_visitor( request ):
 #@csrf_exempt
 #@xframe_options_exempt  
 def toggle_resolved(request, *args, **kwargs ) :
-    print(f"REQUEST = {request.method}")
-    print(f"GET = { request.GET }")
-    print(f"ARGS = {args}")
-    print(f"KWARGS = {kwargs}")
     val = kwargs.get('val') == 'True'
     pk = kwargs.get('pk')
     post = Post.objects.get(pk=pk)
@@ -86,7 +82,6 @@ def sidecar_count(request, *args, **kwargs ) :
         sidecar_count = 0 
     else :
         unread =  visitor[0].get_unread_filtertypes()
-        print(f"UNREAD = {unread}")
         sidecar_count = len( unread )
     if exercise == 'None' :
         sidecar_count = len( unread)
@@ -123,8 +118,6 @@ def blog_index(request, *args, **kwargs ) :
     uri = str(  request.build_absolute_uri()  )
     if not load_session_variables( request, args, kwargs ) :
         return HttpResponseForbidden("Session Variable Load failed")
-    #for k in request.session.keys() :
-    #    print(f"K = {k} {request.session[k]} ")
     if 'home' in uri :
         pass
         #del request.session['filter_title']  
@@ -144,7 +137,6 @@ def blog_index(request, *args, **kwargs ) :
     if  len( Category.objects.filter(name=subdomain_name,subdomain=subdomain)  ) == 0 :
         new_category = Category.objects.create(name=subdomain_name,subdomain=subdomain,restricted=True)
         new_category.save() 
-    #filter_title = request.session.get('filter_title','')
     filter_key = None
     for nam in names :
         title = fkey[nam]
@@ -155,8 +147,6 @@ def blog_index(request, *args, **kwargs ) :
             filter_key = None
 
 
-    #if not filter_key.name   == '' :
-    #    category_selected =  Category.objects.get(name=subdomain ).pk
     try :
         visitor_type = get_author_type(request)
         visitor = get_visitor( request )
@@ -173,14 +163,18 @@ def blog_index(request, *args, **kwargs ) :
             category_all ,_ = Category.objects.get_or_create(name='All')
             category_unread , _  = Category.objects.get_or_create(name='Unread')
             category_unresolved, _  = Category.objects.get_or_create(name='Unresolved')
+            category_mine, _  = Category.objects.get_or_create(name='Mine')
             ALL = category_all.pk
+            MINE = category_mine.pk
             UNREAD = category_unread.pk
             category_selected = int( category_selected )
             UNRESOLVED = category_unresolved.pk
             if  category_selected ==  ALL :
                 posts = Post.objects.all().order_by("-last_modified").annotate(viewed=Count('comment') )
-            if category_selected == UNRESOLVED :
+            elif category_selected == UNRESOLVED :
                 posts = Post.objects.filter(resolved=False).order_by("-last_modified").annotate(viewed=Count('comment') )
+            elif category_selected == MINE:
+                posts = visitor.get_resolvable_posts().order_by("-last_modified").annotate(viewed=Count('comment') )
             else :
                 posts = Post.objects.all().order_by("-last_modified").filter(category__pk=category_selected).annotate(viewed=Count('comment') )
             for post in posts :
@@ -188,7 +182,6 @@ def blog_index(request, *args, **kwargs ) :
                     post.delete()
             post_subquery = Post.objects.filter(id=OuterRef('id'),post_author=visitor).annotate(viewed=Count('post_author')).values('viewed')
             used_categories = Category.objects.filter( id__in= Post.objects.values('category').distinct() )
-            #visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
             visit_subquery = Visit.objects.filter(post=OuterRef('id'),visitor=visitor,  post__last_modified__lt=F('date') ).annotate(viewed=Count('visitor') ).values('viewed')
             if category_selected ==  ALL :
                 posts = Post.objects.all().order_by("-last_modified").annotate(viewed=Subquery(visit_subquery)  )
@@ -208,10 +201,10 @@ def blog_index(request, *args, **kwargs ) :
                     new_posts =  posts.filter(last_modified__gt=last_visit.date)
                     unvisited_posts = posts.exclude(pk__in=pks)
                     posts = new_posts | unvisited_posts
-                #posts = posts.exclude(pk__in=pks,last_modified__lt=visit_date)
-                #posts = Post.objects.all().order_by("-created_on").annotate(viewed=Subquery(visit_subquery)  )
             elif category_selected == UNRESOLVED:
                 posts = Post.objects.filter(resolved=False).order_by("-last_modified").annotate(viewed=Subquery(visit_subquery)  )
+            elif category_selected == MINE :
+                posts = visitor.get_resolvable_posts().order_by("-last_modified").annotate(viewed=Subquery(visit_subquery)  )
             else :
                 posts = Post.objects.all().order_by("-last_modified").filter(category__pk=category_selected).annotate(viewed=Subquery(visit_subquery)  )
             if visitor.visitor_type in [ ANONYMOUS , STUDENT ] :
@@ -243,8 +236,17 @@ def blog_index(request, *args, **kwargs ) :
             posts = posts.filter(category__in=categories)
             if  filter_key and re.match(r"^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}" , str( filter_key.name) ) : # and posts.count() > 0 :
                 posts = posts.filter(filter_key=filter_key)
-            return ( categories , cat , posts )
-        categories, cat,  posts = get_categories_and_posts( visitor, subdomain_name, category_selected , filter_key  )
+            is_teacher = visitor_type in [ TEACHER , STAFF ]
+            if is_teacher :
+                resolvable = list( posts.values_list('pk',flat=True) );
+            elif visitor_type == STUDENT :
+                p = visitor.get_resolvable_posts() 
+                resolvable = list( p.values_list('pk',flat=True) );
+
+            else :
+                resolvable = []
+            return ( categories , cat , posts , resolvable)
+        categories, cat,  posts , resolvable = get_categories_and_posts( visitor, subdomain_name, category_selected , filter_key  )
         is_authenticated = request.session.get('is_authenticated',False)
         is_staff = request.session.get('is_staff',False)
         is_teacher = visitor_type in [ TEACHER , STAFF ]
@@ -306,6 +308,7 @@ def blog_index(request, *args, **kwargs ) :
             "visitor_types" : visitor_types,
             "filterkeys" : filterkeys,
             "course_pk" : course_pk,
+            "resolvable" : resolvable,
         }
     except ProgrammingError as e:
         context = {

@@ -42,7 +42,7 @@ MathJax = {
 {% if is_authenticated %}  
 {% if referer %}
 {% if filter_key.title %}
-<a class="hover:font-bold hover:bg-blue-200" href="{{ server }}/{{ course_pk }}/{{filter_key.name }} ">  <img class="inline w-4 h-4 md:w-6 md:h-6 lg:w-6 lg:h-6 " src="{% static '/images/openta.ico' %}" alt="">  Back to {{ subdomain }}:{{ filter_key.title }}  </a>
+<a class="hover:font-bold hover:bg-blue-200" href="{{ server }}/{{ course_pk }}/{{filter_key.name }}/ ">  <img class="inline w-4 h-4 md:w-6 md:h-6 lg:w-6 lg:h-6 " src="{% static '/images/openta.ico' %}" alt="">  Back to {{ subdomain }}:{{ filter_key.title }}  </a>
 
 {% else %}
 	<a class="hover:font-bold hover:bg-blue-200" href="{{ referer }} ">  <img class="inline w-4 h-4 md:w-6 md:h-6 lg:w-6 lg:h-6 " src="{% static '/images/openta.ico' %}" alt="">
