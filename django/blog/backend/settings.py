@@ -1,4 +1,5 @@
 import os
+import sys
 from django.core.management import call_command
 
 """
@@ -186,6 +187,9 @@ create_database_if_not_exists(db_name, host,user, password , superuser, superuse
 MEDIA_ROOT = f'/subdomain-data/{SUBDOMAIN}/media'
 MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
+RUNNING_DEVSERVER = 'runserver' in sys.argv
+if RUNNING_DEVSERVER :
+    STATIC_URL = '/deploystatic/'
 
 FILEBROWSER_ROOT = MEDIA_ROOT  # os.path.join(MEDIA_ROOT, 'uploads')
 FILEBROWSER_DIRECTORY = ''
