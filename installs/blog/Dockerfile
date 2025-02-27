@@ -23,7 +23,7 @@ WORKDIR /srv/openta-blog
 RUN pip install -r django/requirements.txt
 WORKDIR /srv/openta-blog/django/blog
 RUN pip install gunicorn
-RUN npm install --force @tailwindcss/cli 
+#RUN npm install --force @tailwindcss/cli 
 #RUN npm audit fix
 #RUN ["npx","@tailwindcss/cli -i static/css/input.css -o static/css/output.css "]
 #RUN python manage.py collectstatic

@@ -23,7 +23,7 @@ class Subdomain( models.Model) :
         return self.name
 
     def get_filterkeys_with_posts(self):
-        category = Category.objects.get(name=self.name)
+        category ,_ = Category.objects.get_or_create(name=self.name, restricted=True,hidden=False, subdomain=self  )
         posts = Post.objects.all().filter(category=category)
         f = list( FilterKey.objects.all().filter(id__in=posts.values('filter_key')\
             .distinct() ).values_list('name',flat=True) )

@@ -69,15 +69,17 @@ def toggle_resolved(request, *args, **kwargs ) :
 @xframe_options_exempt  
 def sidecar_count(request, *args, **kwargs ) :
 
+    print(f"REQUEST METHOD {request.method}")
+    print(f"POST DATA = { request.POST}")
 
     username = request.POST.get('username','')
     subdomain = request.POST.get('subdomain','')
-    subdomain_ = Subdomain.objects.get(name=subdomain)
+    subdomain_ ,_ = Subdomain.objects.get_or_create(name=subdomain)
     exercises_with_posts = subdomain_.get_filterkeys_with_posts() 
     exercise = str( request.POST.get('exercise') )
     visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
     pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
-    if False and len( pks ) == 0 :
+    if len( pks ) == 0 :
         unread = []
         sidecar_count = 0 
     else :

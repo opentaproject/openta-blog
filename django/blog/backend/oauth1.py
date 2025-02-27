@@ -142,8 +142,9 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['is_staff'] = request.user.is_staff
         request.session['is_authenticated'] = True
     if category_selected == None :
-        category_selected = Category.objects.all()[0].pk
-        category_selected = Category.objects.get(name='Unread').pk
+        #category_selected = Category.objects.all()[0].pk
+        cat , _  =  Category.objects.get_or_create(name='Unread')
+        category_selected = cat.pk
     if not pk == None :
         category_selected = Post.objects.get(pk=pk).category.pk;
     if request.method == 'POST' :
