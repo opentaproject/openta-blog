@@ -34,7 +34,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
     'https://www.openta.se',
-    'http://ffm516-2023.localhost:8000',
+    'http://ffm516-2023.opentaserver.com',
+    'https://ffm516-2023.opentaserver.com',
     'http://*.localhost:8080',
     'https://instructure.com',
     'http://127.0.0.1:8000',

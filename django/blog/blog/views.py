@@ -65,10 +65,10 @@ def toggle_resolved(request, *args, **kwargs ) :
 
 
 @api_view(["GET", "POST"])
-@csrf_exempt
+#@csrf_exempt
 @xframe_options_exempt  
 def sidecar_count(request, *args, **kwargs ) :
-
+    print(f"SIDECAR_COUNT {request.POST}")
 
     username = request.POST.get('username','')
     subdomain = request.POST.get('subdomain','')
@@ -276,7 +276,10 @@ def blog_index(request, *args, **kwargs ) :
             author_type = Post.AuthorType.STAFF
             author_type_display = 'Admin'
         visitor_types = ['anon','student','teacher','staff']
-        category_selected_name = Category.objects.get( pk=cat ).name
+        try :
+            category_selected_name = Category.objects.get( pk=cat ).name
+        except :
+            category_selected_name = 'All'
         if request.method == 'POST'  or 'filterkeys' not in request.COOKIES :
             filterkeys = [];
         else :
