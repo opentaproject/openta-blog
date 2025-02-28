@@ -545,7 +545,7 @@ class FilterKeyListView(ListView):
 
 
     def get_queryset(self, *args, **kwargs ):
-        subdomain = Subdomain.objects.get(name=self.request.session['subdomain'])
+        subdomain = Subdomain.objects.get(name=self.request.session.get('subdomain',''))
         categories = Category.objects.filter(subdomain=subdomain)
         filterkeys =  FilterKey.objects.filter(category__in=categories)
         f = list( filterkeys.values_list('name',flat=True) )
