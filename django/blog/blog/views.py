@@ -188,9 +188,9 @@ def blog_index(request, *args, **kwargs ) :
             if category_selected ==  ALL :
                 posts = Post.objects.all().order_by("-last_modified").annotate(viewed=Subquery(visit_subquery)  )
             elif category_selected ==  UNREAD :
-                cat1 = Category.objects.filter( subdomain__name=subdomain,name=subdomain,restricted=True)
-                if get_author_type(request) > STUDENT :
-                    cat2 = Category.objects.filter( restricted=False)
+                cat1 = Category.objects.filter( restricted=False)
+                if get_author_type(request) >= STUDENT :
+                    cat2 = Category.objects.filter( subdomain__name=subdomain,name=subdomain,restricted=True)
                     cat  = cat1 | cat2 
                 else :
                     cat = cat1
