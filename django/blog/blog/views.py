@@ -81,7 +81,6 @@ def sidecar_count(request, *args, **kwargs ) :
     #    unread = []
     #    sidecar_count = 0 
     unread =  visitor[0].get_unread_filtertypes()
-    print(f"UNREAD = {unread}")
     sidecar_count = len( unread )
     if exercise == 'None' :
         sidecar_count = len( unread)
@@ -104,7 +103,7 @@ def sidecar_count(request, *args, **kwargs ) :
         #date =  models.DateTimeField(auto_now=True)
         sidecar_count = len( posts)
     data = {'sidecar_count' : sidecar_count ,'unread' : unread, 'exercises_with_posts' : exercises_with_posts  }
-    print(f"SIDECAR_COUNT {username} {subdomain} { exercise } { data }")
+    #print(f"SIDECAR_COUNT {username} {subdomain} { exercise } { data }")
     return JsonResponse( data )
 
 
@@ -435,7 +434,6 @@ def blog_edit_post(request, pk ):
         r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_EDIT_POST','initial' : initial } )
 
         v,_ = Visit.objects.get_or_create(visitor=visitor, post=post)
-        print(f"SAVE THE VISIT {v}")
         return r
 
 
