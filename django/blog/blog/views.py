@@ -69,8 +69,6 @@ def toggle_resolved(request, *args, **kwargs ) :
 @xframe_options_exempt  
 def sidecar_count(request, *args, **kwargs ) :
 
-    print(f"REQUEST METHOD {request.method}")
-    print(f"POST DATA = { request.POST}")
 
     username = request.POST.get('username','')
     subdomain = request.POST.get('subdomain','')
@@ -79,12 +77,12 @@ def sidecar_count(request, *args, **kwargs ) :
     exercise = str( request.POST.get('exercise') )
     visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
     pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
-    if len( pks ) == 0 :
-        unread = []
-        sidecar_count = 0 
-    else :
-        unread =  visitor[0].get_unread_filtertypes()
-        sidecar_count = len( unread )
+    #if False and len( pks ) == 0 :
+    #    unread = []
+    #    sidecar_count = 0 
+    unread =  visitor[0].get_unread_filtertypes()
+    print(f"UNREAD = {unread}")
+    sidecar_count = len( unread )
     if exercise == 'None' :
         sidecar_count = len( unread)
     else :
@@ -137,6 +135,7 @@ def blog_index(request, *args, **kwargs ) :
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
     if  len( Category.objects.filter(name=subdomain_name,subdomain=subdomain)  ) == 0 :
+        print(f"SUBDOMAIN_NAME = {subdomain_name}")
         new_category = Category.objects.create(name=subdomain_name,subdomain=subdomain,restricted=True)
         new_category.save() 
     filter_key = None
@@ -336,7 +335,7 @@ def blog_index(request, *args, **kwargs ) :
 #@xframe_options_exempt  # N
 def blog_add_post(request ):
     username = request.session.get('username',None)
-    filter_key_name = request.session.get('filter_key','')
+    filter_keys = json.loads( request.session.get('filter_key',{'':''} ) )
     is_authenticated = request.session.get('is_authenticated',False)
     if not is_authenticated :
         raise PermissionDenied("You must be authenticated in to add a post")
@@ -353,8 +352,12 @@ def blog_add_post(request ):
         category = Category.objects.all()[0]
     post, _  = Post.objects.get_or_create(title='',body='',post_author=post_author, category=category)
     if category.name == subdomain.name :
-        filter_key , _ = FilterKey.objects.get_or_create(category=category, name=filter_key_name)
-        post.filter_key.add(filter_key)
+        for k in filter_keys :
+            filter_key_name = k;
+            filter_key_title = filter_keys[k]
+            if not filter_key_name == ''  :
+                filter_key , _ = FilterKey.objects.get_or_create(category=category, name=filter_key_name,title=filter_key_title)
+                post.filter_key.add(filter_key)
     post.save()
     alias = post.post_author.alias
     if request.method == "POST":
@@ -414,7 +417,6 @@ def blog_edit_post(request, pk ):
     is_staff = request.session.get('is_staff',False)
     fk = [i['pk'] for i in list( post.filter_key.all().values('pk') ) ]
     initial = {'filter_key' : fk }
-
     if request.method == "POST":
         if action == 'delete' :
             post.delete();
@@ -430,7 +432,11 @@ def blog_edit_post(request, pk ):
             pass
     else :
         form = PostForm( is_staff=is_staff, alias=alias, instance=post,initial=initial)
-        return render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_EDIT_POST','initial' : initial } )
+        r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_EDIT_POST','initial' : initial } )
+
+        v,_ = Visit.objects.get_or_create(visitor=visitor, post=post)
+        print(f"SAVE THE VISIT {v}")
+        return r
 
 
 

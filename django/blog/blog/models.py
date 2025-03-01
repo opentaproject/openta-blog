@@ -116,7 +116,6 @@ class Visitor(models.Model) :
         categories = Category.objects.filter(name=subdomain) | Category.objects.filter(restricted=False)
         posts = Post.objects.filter(category__in=categories)
         if pks :
-            posts = posts.filter( pk__in=pks )
             first_visit =  Visit.objects.all().filter(visitor=self).order_by('date').first()
             last_visit =  Visit.objects.all().filter(visitor=self).order_by('date').last()
             visit_date = last_visit.date
@@ -161,14 +160,14 @@ class Post(models.Model):
     filter_key = models.ManyToManyField(FilterKey,related_name="post",blank=True)
     resolved =  models.BooleanField(default=False) 
 
-    def save( self, *args, **kwargs):
-        print(f"SAVE KWARGS = {kwargs}")
+    #def save( self, *args, **kwargs):
+    #    print(f"SAVE KWARGS = {kwargs}")
     #    if 'update_fields' in kwargs and kwargs['update_fields'] == ['resolved']:
     #        self._meta.get_field('last_modified').auto_now = False
     #        super().save(*args, **kwargs)
     #        self._meta.get_field('last_modified').auto_now = True
     #    else:
-        super().save(*args, **kwargs)
+    #    super().save(*args, **kwargs)
 
     def answered_by(self):
         f = ['','s','i','a']
