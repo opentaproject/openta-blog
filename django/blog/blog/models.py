@@ -195,12 +195,18 @@ class Post(models.Model):
         return v
 
     def bgclass(self ):
-        k = self.post_author.visitor_type
+        try :
+            k = self.post_author.visitor_type
+        except :
+            k = 0
         colors = ['px-2 bg-white','px-2 bg-green-400','px-2 bg-yellow-400','px-2 red-400']
         return colors[ k ]
 
     def tx(self):
-        k = self.post_author.visitor_type
+        try :
+            k = self.post_author.visitor_type
+        except :
+            k = 0
         c = ['','s','i','a']
         return c[k]
 
@@ -208,7 +214,11 @@ class Post(models.Model):
 
     def textclass(self ):
         colors = ['text-green-800','text-gray-600','text-blue-600','text-blue-600']
-        return colors[ self.author_type ]
+        try : 
+            k =  self.author_type 
+        except:
+            k = 0
+        return colors[ k ]
 
 
 class Comment(models.Model):

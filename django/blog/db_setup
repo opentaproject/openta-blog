@@ -11,3 +11,4 @@ mkdir -p /subdomain-data/${SUBDOMAIN}/media/_versions
 echo $PGDATABASE > /subdomain-data/${SUBDOMAIN}/dbname.txt
 python manage.py migrate
 python manage.py create_superuser
+python manage.py loaddata fixtures/initial_data.json

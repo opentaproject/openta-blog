@@ -35,7 +35,7 @@ class VisitorAdmin(admin.ModelAdmin):
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['id','name','subdomain','hidden','get_filterkeys','get_posts']
+    list_display = ['id','name','subdomain','hidden','restricted','get_filterkeys','get_posts']
     form = CategoryForm
     pass
 
