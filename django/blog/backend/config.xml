@@ -21,6 +21,7 @@
         <lticm:property name="lis_person_name_family">$Person.name.family</lticm:property>
         <lticm:property name="lis_person_contact_email_primary">$Person.email.primary</lticm:property>
         <lticm:property name="account_name">$Canvas.account.name</lticm:property>
+	 <lticm:property name="windowTarget">_blank</lticm:property>
     </blti:custom>
     <blti:extensions platform="canvas.instructure.com">
       <lticm:property name="tool_id">COURSE_KEY</lticm:property>
@@ -32,16 +33,19 @@
         <lticm:property name="visibility">public</lticm:property>
         <lticm:property name="default">enabled</lticm:property>
         <lticm:property name="enabled">true</lticm:property>
+	 <lticm:property name="windowTarget">_blank</lticm:property>
       </lticm:options>
       <lticm:options name="account_navigation">
         <lticm:property name="url">https://sidecar.openta.se</lticm:property>
         <lticm:property name="text">OpenTA-sidecar</lticm:property>
         <lticm:property name="enabled">true</lticm:property>
+	 <lticm:property name="windowTarget">_blank</lticm:property>
       </lticm:options>
       <lticm:options name="user_navigation">
         <lticm:property name="url">https://sidecar.openta.se</lticm:property>
         <lticm:property name="text">OpenTA-sidecar</lticm:property>
         <lticm:property name="enabled">true</lticm:property>
+	 <lticm:property name="windowTarget">_blank</lticm:property>
       </lticm:options>
     </blti:extensions>
     <cartridge_bundle identifierref="BLTI001_Bundle"/>
