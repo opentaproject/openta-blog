@@ -172,10 +172,15 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['course_pk'] = course_pk
         request.session['filter_key'] = fkey
         request.session['filter_key_selected'] = data.get('filter_key',[''])[0]
-        launch_presentation_return_url = request.POST.get('launch_presentation_return_url')
-        return_url = '/'.join( launch_presentation_return_url.split('/')[0:5] ) + '/'
-        request.session['return_url'] = data.get('return_url',[return_url])[0];
-        request.session['referer']   = data.get('referer',[return_url])[0]
+        request.session['referer']   = data.get('referer',[request.META.get('HTTP_REFERER')])
+        if 'launch_presentation_return_url' in request.POST :
+            launch_presentation_return_url = request.POST.get('launch_presentation_return_url')
+            return_url = '/'.join( launch_presentation_return_url.split('/')[0:5] ) + '/'
+            request.session['return_url'] = return_url
+            request.session['referer'] = return_url
+        else :
+            request.session['return_url'] = data.get('return_url',[''])[0];
+            request.session['referer']   = data.get('referer',[''])[0]
         request.session['filter_title'] = data.get('filter_title',[''])[0]
         uri = str(  request.build_absolute_uri()  )
         if 'home' in uri :
