@@ -11,7 +11,7 @@
     <blti:title>OpenTA-sidecar</blti:title>
     <blti:description>OpenTA-sidecar</blti:description>
     <blti:icon></blti:icon>
-    <blti:launch_url>https://www.openta.se</blti:launch_url>
+    <blti:launch_url>https://sidecar.openta.se</blti:launch_url>
     <blti:custom>
         <lticm:property name="canvas_login_id">$Canvas.user.loginId</lticm:property>
         <lticm:property name="user_id">$Canvas.user.id</lticm:property>
@@ -25,21 +25,21 @@
     <blti:extensions platform="canvas.instructure.com">
       <lticm:property name="tool_id">COURSE_KEY</lticm:property>
       <lticm:property name="privacy_level">anonymous</lticm:property>
-      <lticm:property name="domain">www.openta.se</lticm:property>
+      <lticm:property name="domain">sidecar.openta.se</lticm:property>
       <lticm:options name="course_navigation">
-        <lticm:property name="url">https://www.openta.se</lticm:property>
+        <lticm:property name="url">https://sidecar.openta.se</lticm:property>
         <lticm:property name="text">OpenTA-sidecar</lticm:property>
         <lticm:property name="visibility">public</lticm:property>
         <lticm:property name="default">enabled</lticm:property>
         <lticm:property name="enabled">true</lticm:property>
       </lticm:options>
       <lticm:options name="account_navigation">
-        <lticm:property name="url">https://www.openta.se</lticm:property>
+        <lticm:property name="url">https://sidecar.openta.se</lticm:property>
         <lticm:property name="text">OpenTA-sidecar</lticm:property>
         <lticm:property name="enabled">true</lticm:property>
       </lticm:options>
       <lticm:options name="user_navigation">
-        <lticm:property name="url">https://www.openta.se</lticm:property>
+        <lticm:property name="url">https://sidecar.openta.se</lticm:property>
         <lticm:property name="text">OpenTA-sidecar</lticm:property>
         <lticm:property name="enabled">true</lticm:property>
       </lticm:options>

@@ -75,6 +75,8 @@ def load_session_variables( request , *args, **kwargs ):
         params = {};
         for key in ['oauth_consumer_key','oauth_nonce','oauth_timestamp','oauth_signature_method','oauth_version','lti_message_type','lti_version','resource_link_id' ]:
             params[key] = request.data.get(key,None)
+        print(f"PARAMS = {params}")
+        print(f"POST = {request.POST}")
         validate_oauth_signature('POST', "https://www.openta.se", params ,settings.LTI_SECRET )
         t = str( int(  time.time() )).encode() ;
         bt = base64.b64encode(t)
@@ -170,8 +172,10 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['course_pk'] = course_pk
         request.session['filter_key'] = fkey
         request.session['filter_key_selected'] = data.get('filter_key',[''])[0]
+        launch_presentation_return_url = request.POST.get('launch_presentation_return_url')
         request.session['return_url'] = data.get('return_url',[''])[0];
-        request.session['referer']   = data.get('referer',["REFERER_IN_LOAD_SESSION_VARIABLES_NOT_DEFINED"])[0]
+        request.session['referer']   = data.get('referer',[launch_presentation_return_url])[0]
+        request.session['return_url'] = data.get('return_url',[request.session['referer'] ])[0];
         request.session['filter_title'] = data.get('filter_title',[''])[0]
         uri = str(  request.build_absolute_uri()  )
         if 'home' in uri :

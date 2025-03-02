@@ -122,6 +122,8 @@ def blog_index(request, *args, **kwargs ) :
         #del request.session['filter_title']  
         #del request.session['category_selected'] 
     referer =  request.session.get('referer','')
+    print(f"REFERER = {referer}")
+    print(f"PATH = {path}")
     try :
         fkey =  json.loads( request.session.get('filter_key','')  )
         names = list( fkey.keys() )
