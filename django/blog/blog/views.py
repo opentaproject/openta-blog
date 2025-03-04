@@ -80,7 +80,10 @@ def sidecar_count(request, *args, **kwargs ) :
     #if False and len( pks ) == 0 :
     #    unread = []
     #    sidecar_count = 0 
-    unread =  visitor[0].get_unread_filtertypes()
+    if len( visitor  ) > 0 :
+        unread =  visitor[0].get_unread_filtertypes()
+    else :
+        unread = []
     sidecar_count = len( unread )
     if exercise == 'None' :
         sidecar_count = len( unread)
