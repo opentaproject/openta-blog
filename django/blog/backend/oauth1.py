@@ -75,8 +75,6 @@ def load_session_variables( request , *args, **kwargs ):
         params = {};
         for key in ['oauth_consumer_key','oauth_nonce','oauth_timestamp','oauth_signature_method','oauth_version','lti_message_type','lti_version','resource_link_id' ]:
             params[key] = request.data.get(key,None)
-        print(f"PARAMS = {params}")
-        print(f"POST = {request.POST}")
         validate_oauth_signature('POST', "https://www.openta.se", params ,settings.LTI_SECRET )
         t = str( int(  time.time() )).encode() ;
         bt = base64.b64encode(t)

@@ -73,6 +73,9 @@ def sidecar_count(request, *args, **kwargs ) :
     username = request.POST.get('username','')
     subdomain = request.POST.get('subdomain','')
     subdomain_ ,_ = Subdomain.objects.get_or_create(name=subdomain)
+    if subdomain_.hidden :
+        data = {'sidecar_count' : -1 ,'unread' : [] , 'exercises_with_posts' : [] }
+        return JsonResponse( data )
     exercises_with_posts = subdomain_.get_filterkeys_with_posts() 
     exercise = str( request.POST.get('exercise') )
     visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
@@ -125,8 +128,6 @@ def blog_index(request, *args, **kwargs ) :
         #del request.session['filter_title']  
         #del request.session['category_selected'] 
     referer =  request.session.get('referer','')
-    print(f"REFERER = {referer}")
-    print(f"PATH = {path}")
     try :
         fkey =  json.loads( request.session.get('filter_key','')  )
         names = list( fkey.keys() )
@@ -139,7 +140,6 @@ def blog_index(request, *args, **kwargs ) :
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
     if  len( Category.objects.filter(name=subdomain_name,subdomain=subdomain)  ) == 0 :
-        print(f"SUBDOMAIN_NAME = {subdomain_name}")
         new_category = Category.objects.create(name=subdomain_name,subdomain=subdomain,restricted=True)
         new_category.save() 
     filter_key = None
