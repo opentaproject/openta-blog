@@ -18,6 +18,7 @@ STAFF = 3     #
 
 class Subdomain( models.Model) :
     name = models.CharField(max_length=60)
+    hidden =  models.BooleanField(default=True) 
 
     def __str__(self):
         return self.name
