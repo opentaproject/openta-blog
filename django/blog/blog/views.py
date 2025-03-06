@@ -1,4 +1,5 @@
 # blogs/views.py
+from django.http import Http404
 from django.db.models import Count, Subquery, Sum, OuterRef, F
 import hmac
 import json
@@ -73,11 +74,11 @@ def sidecar_count(request, *args, **kwargs ) :
     username = request.POST.get('username','')
     subdomain = request.POST.get('subdomain','')
     subdomain_ ,_ = Subdomain.objects.get_or_create(name=subdomain)
-    if subdomain_.hidden :
-        data = {'sidecar_count' : -1 ,'unread' : [] , 'exercises_with_posts' : [] }
-        return JsonResponse( data )
     exercises_with_posts = subdomain_.get_filterkeys_with_posts() 
     exercise = str( request.POST.get('exercise') )
+    if subdomain_.hidden   and exercise == 'None' :
+        data = {'sidecar_count' : -1 ,'unread' : [] , 'exercises_with_posts' : [] }
+        return JsonResponse( data )
     visitor = Visitor.objects.filter(name=username,subdomain__name=subdomain).order_by('-last_visit')
     pks = Visit.objects.all().filter(visitor__in=visitor).values('post_id')
     #if False and len( pks ) == 0 :
@@ -118,7 +119,6 @@ def sidecar_count(request, *args, **kwargs ) :
 @xframe_options_exempt  
 def blog_index(request, *args, **kwargs ) :
     pk = kwargs.get('pk',None)
-    #category_selected = kwargs.get('category_selected',request.session.get('category_selected',None ) )
     path =  request.build_absolute_uri() 
     uri = str(  request.build_absolute_uri()  )
     if not load_session_variables( request, args, kwargs ) :
@@ -137,6 +137,9 @@ def blog_index(request, *args, **kwargs ) :
     server = str( request.session.get('server','')  )
     subdomain_name = request.session.get('subdomain','')
     subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
+    #if subdomain.hidden :
+    #    subdomain, _ = Subdomain.objects.get_or_create(name='')
+    #    subdomain_name = ''
     category_selected = request.session.get('category_selected',None)
     username = request.session['username']
     if  len( Category.objects.filter(name=subdomain_name,subdomain=subdomain)  ) == 0 :
@@ -227,9 +230,9 @@ def blog_index(request, *args, **kwargs ) :
                     categories = ( closed | copen )
                 else :
                     categories = copen
-            #for c in categories :
-            #    f = c.get_filterkeys()
-            #    print(f" C={c} F = {f}")
+
+            hidden_subdomains = list( Subdomain.objects.filter(hidden=True).values_list('name',flat=True) )
+            categories = categories.exclude(name__in=hidden_subdomains)
             first_list = ['All','Unread']
             last_categories = categories.exclude(name__in=first_list).order_by('name')
             first_categories = categories.filter(name__in=first_list).order_by('name')
