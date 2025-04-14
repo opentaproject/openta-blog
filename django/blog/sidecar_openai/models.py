@@ -41,8 +41,8 @@ class OpenAIFile(models.Model) :
             print(f"FILE = {self.file}")
             self.checksum = hashlib.md5(data).hexdigest()
             self.path = self.file.path
-            #uploaded_file = openai.files.create( file=open( self.path, "rb"), purpose="assistants")
-            self.file_id = 'file_id'
+            uploaded_file = openai.files.create( file=open( self.path, "rb"), purpose="assistants")
+            self.file_id = uploaded_file.id
             super().save(*args, **kwargs) # Then update with true hashed path
 
 #class VectorStore( models.model ):

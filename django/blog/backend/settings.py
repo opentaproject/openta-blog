@@ -370,3 +370,6 @@ LOGGING = {
 }
 print(f"PGDATABAS {PGDATABASE}")
 HIDE_UUID = True
+AI_KEY =  os.environ.get("OPENAI_API_KEY",None)
+AI_MODEL = os.environ.get('AI_MODEL','gpt-4o-mini')
+
