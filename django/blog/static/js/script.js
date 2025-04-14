@@ -39,7 +39,7 @@
             var blockdivs =  document.getElementsByClassName('pblock');
             for ( var i =0 ; i < blockdivs.length ; i++ ){ blockdivs[i].remove() }
             var count = 0
-	    var bs = 3
+	    var bs = 12
             var isopen = false
             var isave = 0
             var bmax = Math.trunc( posts.length / bs )
