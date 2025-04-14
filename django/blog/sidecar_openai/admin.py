@@ -11,7 +11,7 @@ class VectorStoreAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'vector_store_id', 'list_file_ids')  # Add your custom method here
 
     def list_file_ids(self, obj):
-        return ", ".join(str(f.pk) for f in obj.files.all())
+        return ", ".join(str(f.original_file_name) for f in obj.files.all())
 
-    list_file_ids.short_description = "File IDs"
+    list_file_ids.short_description = "File Names"
     

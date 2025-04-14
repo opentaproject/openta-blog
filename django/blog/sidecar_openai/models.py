@@ -1,4 +1,5 @@
 from django.db import models
+import time
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
@@ -41,9 +42,18 @@ class OpenAIFile(models.Model) :
             data = self.file.read()
             print(f"FILE = {self.file}")
             self.checksum = hashlib.md5(data).hexdigest()
-            self.path = self.file.path
-            uploaded_file = openai.files.create( file=open( self.path, "rb"), purpose="assistants")
-            self.file_id = uploaded_file.id
+            others = OpenAIFile.objects.filter(checksum=self.checksum )
+            if others.count() > 0 :
+                print(f"GOT IDENTICAL FILE")
+                other = others.last() 
+                self.file_id = other.file_id
+                self.path = other.path
+                if os.path.exists( self.file.path ):
+                    os.remove( self.file.path )
+            else :
+                uploaded_file = openai.files.create( file=open( self.path, "rb"), purpose="assistants")
+                self.file_id = uploaded_file.id
+                self.path = self.file.path
             super().save(*args, **kwargs) # Then update with true hashed path
 
 class VectorStore( models.Model ):
@@ -59,13 +69,6 @@ class VectorStore( models.Model ):
             vector_store = client.vector_stores.create(name=self.name)
             self.vector_store_id = vector_store.id
             super().save(*args,**kwargs)
-        #    #for f in self.files.all() :
-        #    file_ids = [ f.file_id for f in self.files.all()  ]
-        #    print(f'FILE_IDS = {file_ids}')
-
-#
-#    vector_store = client.vector_stores.create(name="Simple file")
-#    vector_store_id = vector_store.id
 
 @receiver(m2m_changed, sender=VectorStore.files.through)
 def handle_files_changed(sender, instance, action, **kwargs):
@@ -85,8 +88,21 @@ def handle_files_changed(sender, instance, action, **kwargs):
             print(f"F = {f.pk} {f.file_id} ")
         print(f"PKS = {pks}")
         print(f"IDS = {ids }")
+        for fid in ids:
+            client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=fid)
         instance.files.add( *pks )
         instance.save()
         del instance._updating_from_m2m
+        print("CHECK!")
+        files = client.vector_stores.files.list(vector_store_id=vector_store_id)
+        is_done = False;
+        i = 0;
+        while not is_done  and i < 20 :
+            is_done = True
+            i = i + 1;
+            for f in files:
+                if f.status == 'in_progress' :
+                    is_done = False 
+                print("CHECK THE UPLOAD ", f.id, f.status)
+            time.sleep(1)
 
-        # Do something with instance.files.all()
