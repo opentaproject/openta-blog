@@ -15,5 +15,9 @@ class OpenAIFile (models.Model) :
 
 
 
-def save( self, *args, **kwargs ):
-    super().save(*args, **kwargs)
+    def save( self, *args, **kwargs ):
+        self.checksum = 'checksum'
+        self.file_name = 'file_name'
+        self.path = 'path'
+        self.file_key = 'file_key'
+        super().save(*args, **kwargs)
