@@ -19,7 +19,7 @@ def hashed_upload_to(instance, filename):
 class OpenAIFile (models.Model) :
     date = models.DateTimeField(auto_now=True)
     checksum = models.CharField(primary_key=True, max_length=255,blank=True)
-    file_name = models.CharField(max_length=255,blank=True)
+    original_file_name = models.CharField(max_length=255,blank=True)
     path = models.CharField(max_length=255,blank=True)
     file_key = models.CharField(max_length=255,blank=True)
     file = models.FileField( max_length=512, upload_to=hashed_upload_to, storage=upload_storage,)
@@ -28,7 +28,7 @@ class OpenAIFile (models.Model) :
 
     def save( self, *args, **kwargs ):
         is_new = self._state.adding and not self.pk
-        self.file_name = f"{self.file}"
+        self.original_file_name = f"{self.file}"
         super().save(*args, **kwargs)  # Save first, so file is processed
         if is_new and self.file:
             data = self.file.read()
