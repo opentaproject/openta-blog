@@ -8,7 +8,7 @@ class OpenAIFileAdmin(admin.ModelAdmin):
 
 @admin.register(VectorStore)
 class VectorStoreAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'vector_store_id', 'list_file_ids')  # Add your custom method here
+    list_display = ('id', 'name', 'vector_store_id', 'checksum', 'list_file_ids')  # Add your custom method here
 
     def list_file_ids(self, obj):
         return ", ".join(str(f.original_file_name) for f in obj.files.all())
