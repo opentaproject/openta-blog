@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import OpenAIFile  , VectorStore # Replace with your actual model
+from .models import OpenAIFile  , VectorStore , Assistant# Replace with your actual model
 
 @admin.register(OpenAIFile)
 class OpenAIFileAdmin(admin.ModelAdmin):
@@ -14,4 +14,14 @@ class VectorStoreAdmin(admin.ModelAdmin):
         return ", ".join(str(f.original_file_name) for f in obj.files.all())
 
     list_file_ids.short_description = "File Names"
+    
+
+@admin.register(Assistant)
+class AssistantAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'assistant_id', 'list_vector_store_ids')  # Add your custom method here
+
+    def list_vector_store_ids(self, obj):
+        return ", ".join(str(f.name ) for f in obj.vector_stores.all())
+
+    list_vector_store_ids.short_description = "VectorStore names"
     

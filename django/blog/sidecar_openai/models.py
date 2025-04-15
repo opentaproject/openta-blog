@@ -61,6 +61,9 @@ class VectorStore( models.Model ):
     name =  models.CharField(max_length=255,blank=True)
     files = models.ManyToManyField( OpenAIFile )
 
+    def __str__(self):
+        return f"{self.name}"
+
     def save( self, *args, **kwargs ):
         is_new = self._state.adding and not self.pk
         super().save(*args,**kwargs)
@@ -69,6 +72,30 @@ class VectorStore( models.Model ):
             vector_store = client.vector_stores.create(name=self.name)
             self.vector_store_id = vector_store.id
             super().save(*args,**kwargs)
+
+class Assistant( models.Model ):
+    name =   models.CharField(max_length=255,blank=True)
+    instructions = models.TextField(blank=True)
+    vector_stores = models.ManyToManyField( VectorStore )
+    assistant_id = models.CharField(max_length=255,blank=True)
+    json_field = models.JSONField( default=dict ,  blank=True, null=True)
+
+    def save( self, *args, **kwargs ):
+        is_new = self._state.adding and not self.pk
+        self.json_field = "{}"
+        super().save(*args,**kwargs)
+        if is_new :
+            print(f"{self.vector_stores.all() }")
+            assistant = client.beta.assistants.create( name=self.name,
+                instructions=self.instructions, 
+                model=settings.AI_MODEL, 
+                tools=[{"type": "file_search"}],)
+            self.assistant_id = assistant.id
+            super().save(*args,**kwargs)
+
+
+
+
 
 @receiver(m2m_changed, sender=VectorStore.files.through)
 def handle_files_changed(sender, instance, action, **kwargs):
