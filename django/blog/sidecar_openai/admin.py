@@ -18,7 +18,7 @@ class VectorStoreAdmin(admin.ModelAdmin):
 
 @admin.register(Assistant)
 class AssistantAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'assistant_id', 'list_vector_store_ids')  # Add your custom method here
+    list_display = ('id', 'name', 'assistant_id', 'file_names','file_pks', 'list_vector_store_ids')  # Add your custom method here
 
     def list_vector_store_ids(self, obj):
         return ", ".join(str(f.name ) for f in obj.vector_stores.all())
