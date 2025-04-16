@@ -9,6 +9,12 @@ class OpenAIFileAdmin(admin.ModelAdmin):
 @admin.register(VectorStore)
 class VectorStoreAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'vector_store_id', 'checksum', 'list_file_ids')  # Add your custom method here
+    readonly_fields = ('checksum',)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # editing an existing object
+            return self.readonly_fields + ('name',)
+        return self.readonly_fields  # creating a new object
 
     def list_file_ids(self, obj):
         return ", ".join(str(f.original_file_name) for f in obj.files.all())

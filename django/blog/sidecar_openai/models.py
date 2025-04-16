@@ -75,28 +75,40 @@ def custom_delete_openaifile(sender, instance, **kwargs):
     pk = instance.pk
     file_id = instance.file_id 
     vst = VectorStore.objects.filter(files=instance)
-    ast = Assistant.objects.filter(vector_stores__in=vst)
-    for a in ast.all():
-        pks = a.file_pks()
-        assistant_id = a.assistant_id
-        file_ids = []
-        for pk_ in pks :
-            if not pk_  == pk  :
-                old_file_id = OpenTAFile.objects.get(pk=pk_).file_id
-                print(f"OLD_FILE_ID = {old_file_id}")
-                file_ids.append( old_file_id )
-        print(f"FILE_IDS = {file_ids}")
-        vs = client.vector_stores.create( name="{a.name}-merged", file_ids=file_ids)
-        client.beta.assistants.update(
-            assistant_id=assistant_id,
-            tool_resources={"file_search": {"vector_store_ids": [ vs.id ] }},
-            )
+    # THE VECTOR_STORE MUST BE 
+    #ast = Assistant.objects.filter(vector_stores__in=vst)
+    #for a in ast.all():
+    #    pks = a.file_pks()
+    #    assistant_id = a.assistant_id
+    #    file_ids = []
+    #    for pk_ in pks :
+    #        if not pk_  == pk  :
+    #            old_file_id = OpenTAFile.objects.get(pk=pk_).file_id
+    #            print(f"OLD_FILE_ID = {old_file_id}")
+    #            file_ids.append( old_file_id )
+    #    print(f"FILE_IDS = {file_ids}")
+    #    vs = client.vector_stores.create( name="{a.name}-merged", file_ids=file_ids)
+    #    client.beta.assistants.update(
+    #        assistant_id=assistant_id,
+    #        tool_resources={"file_search": {"vector_store_ids": [ vs.id ] }},
+    #        )
     for vs in vst.all() :
         vector_store_id = vs.vector_store_id
-        client.vector_stores.files.delete(vector_store_id=vector_store_id,file_id=file_id)
+        try :
+            client.vector_stores.files.delete(vector_store_id=vector_store_id,file_id=file_id)
+        except  openai.NotFoundError as e: 
+            pass
+    #
+    #
+    # When the  file is deleted, the vector stores are updated
+    #
 
-    client.files.delete(file_id)
-    print(f"Preparing to delete {instance.original_file_name}")
+    try :
+        client.files.delete(file_id)
+        print(f"DELETED {instance.original_file_name}")
+    except openai.NotFoundError as e:
+        print(f"ERROR DELETING {instance.original_file_name}")
+        pass
 
 class VectorStore( models.Model ):
     checksum = models.CharField(blank=True, max_length=255)
@@ -142,9 +154,12 @@ class VectorStore( models.Model ):
 
 @receiver(pre_delete, sender=VectorStore)
 def custom_delete_vector_store(sender, instance, **kwargs):
-    vectors_store_id = instance.vector_store_id
-    print(f"DELETE VECTOR_STORE{vector_store_id}")
-    client.beta.vector_stores.delete(vector_store_id)
+    try :
+        vector_store_id = instance.vector_store_id
+        print(f"DELETE VECTOR_STORE{vector_store_id}")
+        client.vector_stores.delete(vector_store_id)
+    except openai.NotFoundError as e:
+        pass
 
 
 class Assistant( models.Model ):
@@ -190,13 +205,46 @@ class Assistant( models.Model ):
 def custom_delete_assistant(sender, instance, **kwargs):
     pk = instance.pk
     assistant_id = instance.assistant_id
-    print(f"DELETE ASSISTANT {assistant_id}")
+    assistant = openai.beta.assistants.retrieve(assistant_id)
+    print(f"DELETE ASSISTANT {assistant}")
+    tool_resources = assistant.tool_resources
+    print(f"TOOL_RESOURCES = {tool_resources}")
+    vector_store_id = tool_resources.file_search.vector_store_ids[0]
+    print(f"VECTOR_STORES = {vector_store_id}")
+    vector_store =  client.vector_stores.retrieve(vector_store_id)
+    print(f"VECTOR_STORE = {vector_store}")
+    print(f"VECTOR_STORE_NAME = {vector_store.name}")
+    if vector_store.name == assistant_id : # THIS IS HERE BECAUSE MULTIPL VECTOR STORES CAN'T BE USED BY AN ASSISTANT
+        client.vector_stores.delete(vector_store_id)
     client.beta.assistants.delete(assistant_id)
+
+@receiver(m2m_changed, sender=VectorStore.files.through)
+def handle_vector_stores_changed(sender, instance, action, **kwargs):
+    print(f"HANDLE_CHANGE_SENDER_VECTOR_STORE ACTION={action} ")
+    if action == "post_add" or action == 'post_remove':
+        print(f"ACTION = {action} ")
+        if getattr(instance, '_updating_from_m2m', False):
+            return
+        print(f"CONTINUE UPDATING")
+        instance._updating_from_m2m = True
+        vector_store_id = instance.vector_store_id
+        vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store_id)
+        for vector_store_file in vector_store_files :
+            file_id = vector_store_file.id
+            try :
+                client.vector_stores.files.delete( vector_store_id=vector_store_id, file_id=file_id)
+            except :
+                print(f"FILE ERROR {file_id}")
+        for f in instance.files.all() :
+            client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=f.file_id)
+        instance.save()
+        del instance._updating_from_m2m
+
 
 
 
 @receiver(m2m_changed, sender=Assistant.vector_stores.through)
-def handle_vector_stores_changed(sender, instance, action, **kwargs):
+def handle_assistants_changed(sender, instance, action, **kwargs):
     print(f"HANDLE_CHANGE_SENDER_ASSISTANT")
     if action == "post_add":
         if getattr(instance, '_updating_from_m2m', False):
@@ -221,7 +269,7 @@ def handle_vector_stores_changed(sender, instance, action, **kwargs):
                 tool_resources={"file_search": {"vector_store_ids": ids }},
                 )
         else :
-            vs = client.vector_stores.create( name=f"{instance.name}-merged", file_ids=file_ids)
+            vs = client.vector_stores.create( name=f"{assistant_id}", file_ids=file_ids)
             assistant = client.beta.assistants.update(
                 assistant_id=assistant_id,
                 tool_resources={"file_search": {"vector_store_ids": [ vs.id ] }},
@@ -258,18 +306,29 @@ def handle_files_changed(sender, instance, action, **kwargs):
         instance.checksum = checksum
         others = VectorStore.objects.filter(checksum=checksum)
         npks =  list( OpenAIFile.objects.filter(file_id__in=ids).values_list('pk',flat=True)  )
-        if others.count() > 0 :
-            other = others.last() 
-            instance.vector_store_id = other.vector_store_id
-            instance.files.add( *npks )
-            instance.save()
-            return
+        #
+        # DO NOT MAKE CHECKSUM EQUIVALINCE OF DIFFERENT VECTOR STORES
+        # SINCE THEY MAY CHANGE INDIVIDUALLY LATER
+        #
+        #if others.count() > 0 :
+        #    other = others.last() 
+        #    instance.vector_store_id = other.vector_store_id
+        #    instance.files.add( *npks )
+        #    instance.save()
+        #    return
         for fid in ids:
-            client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=fid)
+            try :
+                client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=fid)
+            except :
+                pass
         instance.files.add( *pks )
         instance.save()
         del instance._updating_from_m2m
-        files = client.vector_stores.files.list(vector_store_id=vector_store_id)
+        try :
+            files = client.vector_stores.files.list(vector_store_id=vector_store_id)
+        except :
+            files = []
+
         is_done = False;
         i = 0;
         while not is_done  and i < 20 :
