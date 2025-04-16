@@ -68,6 +68,8 @@ class OpenAIFile(models.Model) :
             o.delete();
 
 
+
+
 @receiver(pre_delete, sender=OpenAIFile)
 def custom_delete_openaifile(sender, instance, **kwargs):
     pk = instance.pk
@@ -93,7 +95,7 @@ def custom_delete_openaifile(sender, instance, **kwargs):
         vector_store_id = vs.vector_store_id
         client.vector_stores.files.delete(vector_store_id=vector_store_id,file_id=file_id)
 
-        
+    client.files.delete(file_id)
     print(f"Preparing to delete {instance.original_file_name}")
 
 class VectorStore( models.Model ):
@@ -138,6 +140,13 @@ class VectorStore( models.Model ):
             self.vector_store_id = vector_store.id
             super().save(*args,**kwargs)
 
+@receiver(pre_delete, sender=VectorStore)
+def custom_delete_vector_store(sender, instance, **kwargs):
+    vectors_store_id = instance.vector_store_id
+    print(f"DELETE VECTOR_STORE{vector_store_id}")
+    client.beta.vector_stores.delete(vector_store_id)
+
+
 class Assistant( models.Model ):
     name =   models.CharField(max_length=255,blank=True)
     instructions = models.TextField(blank=True)
@@ -177,6 +186,15 @@ class Assistant( models.Model ):
         f = list( set( f) )
         return f
 
+@receiver(pre_delete, sender=Assistant)
+def custom_delete_assistant(sender, instance, **kwargs):
+    pk = instance.pk
+    assistant_id = instance.assistant_id
+    print(f"DELETE ASSISTANT {assistant_id}")
+    client.beta.assistants.delete(assistant_id)
+
+
+
 @receiver(m2m_changed, sender=Assistant.vector_stores.through)
 def handle_vector_stores_changed(sender, instance, action, **kwargs):
     print(f"HANDLE_CHANGE_SENDER_ASSISTANT")
@@ -203,7 +221,7 @@ def handle_vector_stores_changed(sender, instance, action, **kwargs):
                 tool_resources={"file_search": {"vector_store_ids": ids }},
                 )
         else :
-            vs = client.vector_stores.create( name="{instance.name}-merged", file_ids=file_ids)
+            vs = client.vector_stores.create( name=f"{instance.name}-merged", file_ids=file_ids)
             assistant = client.beta.assistants.update(
                 assistant_id=assistant_id,
                 tool_resources={"file_search": {"vector_store_ids": [ vs.id ] }},
