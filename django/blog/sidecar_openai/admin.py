@@ -3,7 +3,7 @@ from .models import OpenAIFile  , VectorStore , Assistant# Replace with your act
 
 @admin.register(OpenAIFile)
 class OpenAIFileAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'original_file_name', 'file_id', 'date')
+    list_display = ('pk', 'original_file_name', 'file_id', 'checksum', 'date')
     readonly_fields = ('checksum','original_file_name','path','file_id')
 
 @admin.register(VectorStore)
