@@ -209,13 +209,16 @@ def custom_delete_assistant(sender, instance, **kwargs):
     print(f"DELETE ASSISTANT {assistant}")
     tool_resources = assistant.tool_resources
     print(f"TOOL_RESOURCES = {tool_resources}")
-    vector_store_id = tool_resources.file_search.vector_store_ids[0]
-    print(f"VECTOR_STORES = {vector_store_id}")
-    vector_store =  client.vector_stores.retrieve(vector_store_id)
-    print(f"VECTOR_STORE = {vector_store}")
-    print(f"VECTOR_STORE_NAME = {vector_store.name}")
-    if vector_store.name == assistant_id : # THIS IS HERE BECAUSE MULTIPL VECTOR STORES CAN'T BE USED BY AN ASSISTANT
-        client.vector_stores.delete(vector_store_id)
+    try :
+        vector_store_id = tool_resources.file_search.vector_store_ids[0]
+        print(f"VECTOR_STORES = {vector_store_id}")
+        vector_store =  client.vector_stores.retrieve(vector_store_id)
+        print(f"VECTOR_STORE = {vector_store}")
+        print(f"VECTOR_STORE_NAME = {vector_store.name}")
+        if vector_store.name == assistant_id : # THIS IS HERE BECAUSE MULTIPL VECTOR STORES CAN'T BE USED BY AN ASSISTANT
+            client.vector_stores.delete(vector_store_id)
+    except :
+        pass
     client.beta.assistants.delete(assistant_id)
 
 @receiver(m2m_changed, sender=VectorStore.files.through)
@@ -225,7 +228,6 @@ def handle_vector_stores_changed(sender, instance, action, **kwargs):
         print(f"ACTION = {action} ")
         if getattr(instance, '_updating_from_m2m', False):
             return
-        print(f"CONTINUE UPDATING")
         instance._updating_from_m2m = True
         vector_store_id = instance.vector_store_id
         vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store_id)
@@ -246,11 +248,30 @@ def handle_vector_stores_changed(sender, instance, action, **kwargs):
 @receiver(m2m_changed, sender=Assistant.vector_stores.through)
 def handle_assistants_changed(sender, instance, action, **kwargs):
     print(f"HANDLE_CHANGE_SENDER_ASSISTANT")
-    if action == "post_add":
-        if getattr(instance, '_updating_from_m2m', False):
-            return
-        instance._updating_from_m2m = True
+    if getattr(instance, '_updating_from_m2m', False):
+        return
+    instance._updating_from_m2m = True
+    assistant_id = instance.assistant_id
+    rebuild = False
+    if action == "post_remove":
+        vector_stores = instance.vector_stores.all();
         assistant_id = instance.assistant_id
+        assistant = openai.beta.assistants.retrieve(assistant_id)
+        tool_resources = assistant.tool_resources
+        try :
+            vector_store_id = tool_resources.file_search.vector_store_ids[0]
+            vector_store =  client.vector_stores.retrieve(vector_store_id)
+            client.vector_stores.delete(vector_store_id)
+            print(f"REMAINING VECTOR_STORES TO BE SET UP {vector_stores}")
+        except :
+            print(f"ERROR DELTING")
+            pass
+        rebuild = True
+        #
+        # TODO RESTORE THE VECTOR STORE HERE
+        #
+
+    if action == "post_add" or rebuild:
         pks = [];
         ids = [];
         file_ids = [];
@@ -263,6 +284,7 @@ def handle_assistants_changed(sender, instance, action, **kwargs):
         file_ids = list( set( file_ids ) )
         file_ids.sort() 
         file_pks = list( set( file_pks ) )
+        print(f"IDS = {ids}")
         if len( ids ) < 2 :
             assistant = client.beta.assistants.update(
                 assistant_id=assistant_id,
@@ -275,8 +297,8 @@ def handle_assistants_changed(sender, instance, action, **kwargs):
                 tool_resources={"file_search": {"vector_store_ids": [ vs.id ] }},
                 )
 
-        instance.save()
-        del instance._updating_from_m2m
+    instance.save()
+    del instance._updating_from_m2m
 
 
 
