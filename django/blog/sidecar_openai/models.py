@@ -64,7 +64,7 @@ def custom_delete_openaifile(sender, instance, **kwargs):
     try :
         os.remove(instance.path)
     except Exception as e:
-        logger.error(f" FILE {instance.path} DOES NOT EXIST")
+        logger.error(f" FILE/ {instance.path} DOES NOT EXIST")
     vst = VectorStore.objects.filter(files=instance)
     # THE VECTOR_STORE MUST BE 
     #ast = Assistant.objects.filter(vector_stores__in=vst)
