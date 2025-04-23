@@ -43,37 +43,28 @@ class OpenAIFile(models.Model) :
         is_new = self._state.adding  and not self.pk
         self.original_file_name = self.file.name
         self.path = self.file.path
-        print(f"SELF PATH = {self.file.path}")
-        duplicatepk = None
         super().save(*args, **kwargs)  # Save first, so file is processed
         if is_new and self.file:
             data = self.file.read()
             self.checksum = hashlib.md5(data).hexdigest()
-            others = OpenAIFile.objects.filter(checksum=self.checksum )
-            if others.count() > 0 :
-                other = others.last() 
-                duplicatepk = self.pk # IF THE FILE ALREADY EXISTS, DO NOT CREATE A NEW FILE ENTRY
-                self.pk = other.pk
-                self.file_id = other.file_id
-                self.path = other.path
-                if os.path.exists( self.file.path ):
-                    os.remove( self.file.path )
-            else :
-                uploaded_file = openai.files.create( file=open( self.file.path, "rb"), purpose="assistants")
-                self.file_id = uploaded_file.id
-                self.path = self.file.path
+            uploaded_file = openai.files.create( file=open( self.file.path, "rb"), purpose="assistants")
+            self.file_id = uploaded_file.id
+            self.path = self.file.path
+            print(f"PATH = { self.path}")
             super().save(*args, **kwargs) # Then update with true hashed path
-        if duplicatepk != None :
-            o = OpenAIFile.objects.get(pk=duplicatepk)
-            o.delete();
 
 
 
 
 @receiver(pre_delete, sender=OpenAIFile)
 def custom_delete_openaifile(sender, instance, **kwargs):
+    print(f"CUSTOM_DELETE_OPENAIFILE")
     pk = instance.pk
     file_id = instance.file_id 
+    try :
+        os.remove(instance.path)
+    except Exception as e:
+        logger.error(f" FILE {instance.path} DOES NOT EXIST")
     vst = VectorStore.objects.filter(files=instance)
     # THE VECTOR_STORE MUST BE 
     #ast = Assistant.objects.filter(vector_stores__in=vst)
