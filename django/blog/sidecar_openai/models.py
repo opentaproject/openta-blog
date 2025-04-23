@@ -85,7 +85,7 @@ def custom_delete_openaifile(sender, instance, **kwargs):
     #        )
     for vs in vst.all() :
         vector_store_id = vs.vector_store_id
-        try :
+        try  :
             client.vector_stores.files.delete(vector_store_id=vector_store_id,file_id=file_id)
         except  openai.NotFoundError as e: 
             pass
@@ -118,8 +118,8 @@ class VectorStore( models.Model ):
         return ids
 
     def file_pks(self, *args, **kwargs ):
-        files = self.files
         pks = []
+        files = self.files
         for f in files.all():
             pks.append(f.pk)
         return pks
@@ -131,13 +131,27 @@ class VectorStore( models.Model ):
             pks.append(f.checksum)
         return pks
 
-
+    def files_ok( self, *args, **kwargs) :
+        vs = self
+        file_ids = vs.file_ids()
+        print(f"FILE_IDS = {file_ids}")
+        vector_store_id = vs.vector_store_id
+        vector_store =  client.vector_stores.retrieve(vector_store_id)
+        vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store.id)
+        remote_ids = []
+        for f in vector_store_files:
+            remote_ids.append( f.id)
+        print(f"REMOTE_IDS = {remote_ids}")
+        #assert  set( file_ids) == set( remote_ids) , f"{file_ids} == {remote_ids} is false "
+        return set( file_ids) == set( remote_ids) 
 
 
 
     def save( self, *args, **kwargs ):
         is_new = self._state.adding and not self.pk
+        print(f"IS_NEW = {is_new}")
         super().save(*args,**kwargs)
+        print(f"DID SUPER SAVE")
         if is_new :
             vector_store = client.vector_stores.create(name=self.name)
             self.vector_store_id = vector_store.id
@@ -148,7 +162,7 @@ def custom_delete_vector_store(sender, instance, **kwargs):
     try :
         vector_store_id = instance.vector_store_id
         print(f"DELETE VECTOR_STORE{vector_store_id}")
-        client.vector_stores.delete(vector_store_id)
+        client.vector_stores.delete(vector_store_id=vector_store_id)
     except openai.NotFoundError as e:
         pass
 
@@ -212,26 +226,26 @@ def custom_delete_assistant(sender, instance, **kwargs):
         pass
     client.beta.assistants.delete(assistant_id)
 
-@receiver(m2m_changed, sender=VectorStore.files.through)
-def handle_vector_stores_changed(sender, instance, action, **kwargs):
-    print(f"HANDLE_CHANGE_SENDER_VECTOR_STORE ACTION={action} ")
-    if action == "post_add" or action == 'post_remove':
-        print(f"ACTION = {action} ")
-        if getattr(instance, '_updating_from_m2m', False):
-            return
-        instance._updating_from_m2m = True
-        vector_store_id = instance.vector_store_id
-        vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store_id)
-        for vector_store_file in vector_store_files :
-            file_id = vector_store_file.id
-            try :
-                client.vector_stores.files.delete( vector_store_id=vector_store_id, file_id=file_id)
-            except :
-                print(f"FILE ERROR {file_id}")
-        for f in instance.files.all() :
-            client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=f.file_id)
-        instance.save()
-        del instance._updating_from_m2m
+#@receiver(m2m_changed, sender=VectorStore.files.through)
+#def handle_vector_stores_changed(sender, instance, action, **kwargs):
+#    print(f"HANDLE_CHANGE_SENDER_VECTOR_STORE ACTION={action} ")
+#    if action == "post_add" or action == 'post_remove':
+#        print(f"ACTION = {action} ")
+#        if getattr(instance, '_updating_from_m2m', False):
+#            return
+#        instance._updating_from_m2m = True
+#        vector_store_id = instance.vector_store_id
+#        vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store_id)
+#        for vector_store_file in vector_store_files :
+#            file_id = vector_store_file.id
+#            try :
+#                client.vector_stores.files.delete( vector_store_id=vector_store_id, file_id=file_id)
+#            except :
+#                print(f"FILE ERROR {file_id}")
+#        for f in instance.files.all() :
+#            client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=f.file_id)
+#        instance.save()
+#        del instance._updating_from_m2m
 
 
 
@@ -297,12 +311,26 @@ def handle_assistants_changed(sender, instance, action, **kwargs):
 
 @receiver(m2m_changed, sender=VectorStore.files.through)
 def handle_files_changed(sender, instance, action, **kwargs):
-    print(f"HANDLE_SENDER_VECTOR_STORE")
-    if action == "post_add":
+    print(f"HANDLE_SENDER_VECTOR_STORE action={action} ")
+    if True or action == "post_add":
         if getattr(instance, '_updating_from_m2m', False):
             return
         instance._updating_from_m2m = True
         vector_store_id = instance.vector_store_id
+        vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store_id)
+        old_file_ids = []
+        for vector_store_file in vector_store_files :
+            file_id = vector_store_file.id
+            old_file_ids.append(file_id)
+            #try :
+            #    client.vector_stores.files.delete( vector_store_id=vector_store_id, file_id=file_id)
+            #except :
+            #    print(f"FILE ERROR {file_id}")
+        new_file_ids = []
+        for f in instance.files.all() :
+            new_file_ids.append( f.file_id )
+        print(f"OLD_FILE_IDS = {old_file_ids} ")
+        print(f"NEW_FILE_IDS = {new_file_ids} ")
         pks = [];
         ids = [];
         cksums = []
@@ -310,15 +338,27 @@ def handle_files_changed(sender, instance, action, **kwargs):
             pks.append( f.pk )
             ids.append( f.file_id );
             cksums.append( f.checksum)
-        ids = list( set(ids) )
+        added_files = list( set( new_file_ids) - set( old_file_ids ) )
+        subtracted_files = list( set( old_file_ids)  - set( new_file_ids) )
+        print(f"ADDED_FILES = {added_files}")
+        print(f"SUBTRACTED_FILES = {subtracted_files}")
+        for file_id in subtracted_files :
+            client.vector_stores.files.delete( vector_store_id=vector_store_id, file_id=file_id)
+        for file_id in added_files :
+            client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=file_id)
+
+
+
+        ids = list( set(ids ))
         pks = list( set(pks) )
         cksums = list( set( cksums) )
         cksums.sort()
         ckstring = ''.join(cksums).encode()
         checksum = hashlib.md5(ckstring).hexdigest()
         instance.checksum = checksum
-        others = VectorStore.objects.filter(checksum=checksum)
+        #others = VectorStore.objects.filter(checksum=checksum)
         npks =  list( OpenAIFile.objects.filter(file_id__in=ids).values_list('pk',flat=True)  )
+        print(f"IDS = {ids} PKS = {pks}")
         #
         # DO NOT MAKE CHECKSUM EQUIVALINCE OF DIFFERENT VECTOR STORES
         # SINCE THEY MAY CHANGE INDIVIDUALLY LATER
@@ -329,13 +369,14 @@ def handle_files_changed(sender, instance, action, **kwargs):
         #    instance.files.add( *npks )
         #    instance.save()
         #    return
-        for fid in ids:
-            try :
-                client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=fid)
-            except :
-                pass
-        instance.files.add( *pks )
-        instance.save()
+        #print(f"IDS TO BE ADDED TO VS = {ids}")
+        #for fid in ids:
+        #    try :
+        #        client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=fid)
+        #    except :
+        #        pass
+        #instance.files.add( *pks )
+        #instance.save()
         del instance._updating_from_m2m
         try :
             files = client.vector_stores.files.list(vector_store_id=vector_store_id)

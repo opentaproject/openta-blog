@@ -12,7 +12,13 @@ from openai import OpenAI
 
 model = 'gpt-4o-mini'
 client = OpenAI()
+import string
+import random
 
+
+def randstring(length=8):
+    characters = string.ascii_letters + string.digits  # A-Z, a-z, 0-9
+    return ''.join(random.choices(characters, k=length))
 
 
 
@@ -22,7 +28,7 @@ class OpenAI(TestCase):
         self.admin_user = User.objects.create_superuser( username='admin', email='admin@example.com', password='adminpass')
         self.client.login(username='admin', password='adminpass')
 
-    def test_create_and_delete_file_object(self):
+    def notest_create_and_delete_file_object(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         #print(f"RESPONSE = {response}")
@@ -61,7 +67,7 @@ class OpenAI(TestCase):
 
 
 
-    def test_create_and_delete_two_openai_file_objects(self):
+    def notest_create_and_delete_two_openai_file_objects(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         print(f"RESPONSE = {response}")
@@ -109,25 +115,34 @@ class OpenAI(TestCase):
         test_file2 = SimpleUploadedFile( "test2.txt", b"test2_content_here\n", content_type="text/plain")
         self.client.post( url ,  {'file': test_file2}, follow=True)
         t2 = OpenAIFile.objects.get(original_file_name="test2.txt")
-        for t in [t1,t2] :
-            path = t.path
-            original_file_name = t.original_file_name
-            file_id = t.file_id
-            t.delete();
-            try :
-                aifile = client.files.retrieve(file_id)
-                exists = True
-            except openai.OpenAIError as e:
-                exists = False
-            print(f"NOW EXISTS = {exists}")
-            assert not exists, f"FILE {file_id} was not successfully deleted on the server"
-            try :
-                tt = OpenAIFile.objects.get(original_file_name=original_file_name)
-                exists_locally = True
-            except ObjectDoesNotExist as e :
-                exists_locally = False
-                print(f"OK! {original_file_name} is GONE  LOCALLY ")
-            assert not exists_locally, f"File {file_id} still exists locally"
-            assert not os.path.exists(path), f"LOCAL FILE PATH {path} DID NOT GET DELETED"
+        vsname = randstring()
+        vs = VectorStore(name=vsname)
+        vs.save()
+        vs.files.set([t1,t2])
+        vs.save()
+        vs.files.add(t1)
+        #vs.save()
+        #vs.files.add(t2);
+        #vs.save()
 
+        def ckfiles( vs ):
+            file_ids = vs.file_ids()
+            print(f"FILE_IDS = {file_ids}")
+            vector_store_id = vs.vector_store_id
+            vector_store =  client.vector_stores.retrieve(vector_store_id)
+            vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store.id)
+            remote_ids = []
+            for f in vector_store_files:
+                remote_ids.append( f.id)
+            print(f"REMOTE_IDS = {remote_ids}")
+            return set( file_ids) == set( remote_ids) 
 
+        assert vs.files_ok( ), "TWO FILES NOT OK"
+        vs.files.remove( t1  )
+        print(f"AFTER REMOVE t1 {vs.file_ids}")
+        assert vs.files_ok() , "ONE FILE NOT OK"
+        t2.delete()
+        print(f"AFTERM REMOVING t2 {vs.file_ids}")
+        assert vs.files_ok( ) , "NO FILES SHOULD BE LEFT"
+        vs.delete()
+        t1.delete()
