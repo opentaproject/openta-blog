@@ -148,7 +148,7 @@ class OpenAI(TestCase):
         t1.delete()
 
 
-    def test_create_and_delete_assistant_object(self):
+    def notest_create_and_delete_assistant_object(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         print(f"RESPONSE = {response}")
@@ -206,6 +206,46 @@ class OpenAI(TestCase):
 
         vs1.delete();
         vs2.delete();
+        t1.delete();
+        t2.delete();
+        t3.delete();
+        assistant.delete();
+
+    def test_create_and_delete_thread(self):
+        url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
+        response = self.client.get(url)
+        print(f"RESPONSE = {response}")
+        url = reverse('admin:sidecar_openai_openaifile_add')  # use your app and model name
+        test_file1 = SimpleUploadedFile( "test1.txt", b"test1_content_here\n", content_type="text/plain")
+        self.client.post( url ,  {'file': test_file1}, follow=True)
+        t1 = OpenAIFile.objects.get(original_file_name="test1.txt")
+        test_file2 = SimpleUploadedFile( "test2.txt", b"test2_content_here\n", content_type="text/plain")
+        self.client.post( url ,  {'file': test_file2}, follow=True)
+        t2 = OpenAIFile.objects.get(original_file_name="test2.txt")
+
+        test_file3 = SimpleUploadedFile( "test3.txt", b"test3_content_here\n", content_type="text/plain")
+        self.client.post( url ,  {'file': test_file3}, follow=True)
+        t3 = OpenAIFile.objects.get(original_file_name="test3.txt")
+
+
+        vsname = randstring()
+        vs1 = VectorStore(name=vsname)
+        vs1.save()
+        vs1.files.set([t1,t2,t3])
+        vs1.save()
+
+        aname = randstring()
+        assistant = Assistant( name=aname)
+        assistant.instructions = 'Here are instructions; Just answer questions about the content of the files test1.txt, test2.txt and test3.tx.\
+                \nDo not answer other questions!'
+        assistant.save();
+        assistant.vector_stores.add(vs1)
+        assistant.save();
+        file_ids = assistant.file_ids()
+        print(f"ASSISTANT FILE_IDS = {file_ids}")
+        assert  assistant.files_ok()  , f"FILE_IDS_LOCAL = {file_ids} not equal to FILE_IDS_REMOTE "
+
+        vs1.delete();
         t1.delete();
         t2.delete();
         t3.delete();
