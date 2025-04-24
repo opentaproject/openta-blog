@@ -186,7 +186,6 @@ class Assistant( models.Model ):
             self.assistant_id = assistant.id
             super().save(*args,**kwargs)
 
-
     def file_pks( self, *args, **kwargs ):
         vs = self.vector_stores.all()
         f = []
@@ -195,6 +194,17 @@ class Assistant( models.Model ):
                 f.append( vf.pk )
         f = list( set( f) )
         return f
+
+    def file_ids(self, *args, **kwargs ):
+        vs = self.vector_stores.all()
+        f = []
+        for v in vs :
+            for vf in v.files.all():
+                f.append( vf.file_id )
+        f = list( set( f) )
+        return f
+
+
 
 
     def file_names( self, *args, **kwargs ):
@@ -205,6 +215,30 @@ class Assistant( models.Model ):
                 f.append( vf.original_file_name )
         f = list( set( f) )
         return f
+
+    def remote_files( self, *args, **kwargs ) :
+        assistant = self
+        assistant_id = assistant.assistant_id
+        remote_assistant = openai.beta.assistants.retrieve(assistant_id)
+        tool_resources = remote_assistant.tool_resources
+        remote_ids = [];
+        vector_store_ids = tool_resources.file_search.vector_store_ids
+        for vector_store_id in vector_store_ids :
+            vector_store =  client.vector_stores.retrieve(vector_store_id)
+            vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store.id)
+            for f in vector_store_files:
+                remote_ids.append( f.id)
+        return remote_ids
+
+
+        
+
+    def files_ok( self,*args, **kwargs):
+        assistant = self
+        file_ids = assistant.file_ids();
+        remote_ids = assistant.remote_files();
+        return set( remote_ids) == set( file_ids )
+
 
 @receiver(pre_delete, sender=Assistant)
 def custom_delete_assistant(sender, instance, **kwargs):
@@ -225,29 +259,6 @@ def custom_delete_assistant(sender, instance, **kwargs):
     except :
         pass
     client.beta.assistants.delete(assistant_id)
-
-#@receiver(m2m_changed, sender=VectorStore.files.through)
-#def handle_vector_stores_changed(sender, instance, action, **kwargs):
-#    print(f"HANDLE_CHANGE_SENDER_VECTOR_STORE ACTION={action} ")
-#    if action == "post_add" or action == 'post_remove':
-#        print(f"ACTION = {action} ")
-#        if getattr(instance, '_updating_from_m2m', False):
-#            return
-#        instance._updating_from_m2m = True
-#        vector_store_id = instance.vector_store_id
-#        vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store_id)
-#        for vector_store_file in vector_store_files :
-#            file_id = vector_store_file.id
-#            try :
-#                client.vector_stores.files.delete( vector_store_id=vector_store_id, file_id=file_id)
-#            except :
-#                print(f"FILE ERROR {file_id}")
-#        for f in instance.files.all() :
-#            client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=f.file_id)
-#        instance.save()
-#        del instance._updating_from_m2m
-
-
 
 
 @receiver(m2m_changed, sender=Assistant.vector_stores.through)

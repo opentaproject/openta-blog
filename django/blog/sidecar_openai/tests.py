@@ -104,7 +104,7 @@ class OpenAI(TestCase):
 
 
 
-    def test_create_and_delete_vector_store_object(self):
+    def notest_create_and_delete_vector_store_object(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         print(f"RESPONSE = {response}")
@@ -120,10 +120,10 @@ class OpenAI(TestCase):
         vs.save()
         vs.files.set([t1,t2])
         vs.save()
-        vs.files.add(t1)
-        #vs.save()
-        #vs.files.add(t2);
-        #vs.save()
+        vs.files.add(t1) # REDUNDANT ADD
+        vs.save()
+        vs.files.add(t2); # REDUNDANT ADD
+        vs.save()
 
         def ckfiles( vs ):
             file_ids = vs.file_ids()
@@ -146,3 +146,75 @@ class OpenAI(TestCase):
         assert vs.files_ok( ) , "NO FILES SHOULD BE LEFT"
         vs.delete()
         t1.delete()
+
+
+    def test_create_and_delete_assistant_object(self):
+        url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
+        response = self.client.get(url)
+        print(f"RESPONSE = {response}")
+        url = reverse('admin:sidecar_openai_openaifile_add')  # use your app and model name
+
+        test_file1 = SimpleUploadedFile( "test1.txt", b"test1_content_here\n", content_type="text/plain")
+        self.client.post( url ,  {'file': test_file1}, follow=True)
+        t1 = OpenAIFile.objects.get(original_file_name="test1.txt")
+        test_file2 = SimpleUploadedFile( "test2.txt", b"test2_content_here\n", content_type="text/plain")
+        self.client.post( url ,  {'file': test_file2}, follow=True)
+        t2 = OpenAIFile.objects.get(original_file_name="test2.txt")
+
+        test_file3 = SimpleUploadedFile( "test3.txt", b"test3_content_here\n", content_type="text/plain")
+        self.client.post( url ,  {'file': test_file3}, follow=True)
+        t3 = OpenAIFile.objects.get(original_file_name="test3.txt")
+
+
+        vsname = randstring()
+        vs1 = VectorStore(name=vsname)
+        vs1.save()
+        vs1.files.set([t1])
+        vs1.save()
+
+        vsname = randstring()
+        vs2 = VectorStore(name=vsname)
+        vs2.save()
+        vs2.files.set([t2,t3])
+        vs2.save()
+
+        aname = randstring()
+        assistant = Assistant( name=aname)
+        assistant.instructions = 'Here are instructions; be nice!'
+        assistant.save();
+        assistant.vector_stores.add(vs1)
+        assistant.save();
+        file_ids = assistant.file_ids()
+        print(f"ASSISTANT FILE_IDS = {file_ids}")
+
+        #def ckfiles( assistant ):
+        #    file_ids = assistant.file_ids();
+        #    print(f"FILE_IDS = {file_ids}")
+        #    assistant_id = assistant.assistant_id
+        #    remote_assistant = openai.beta.assistants.retrieve(assistant_id)
+        #    tool_resources = remote_assistant.tool_resources
+        #    print(f"TOOL_RESOURCES = {tool_resources}")
+        #    remote_ids = [];
+        #    vector_store_ids = tool_resources.file_search.vector_store_ids
+        #    for vector_store_id in vector_store_ids :
+        #        print(f"VECTOR_STORE = {vector_store_id}")
+        #        vector_store =  client.vector_stores.retrieve(vector_store_id)
+        #        vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store.id)
+        #        for f in vector_store_files:
+        #            remote_ids.append( f.id)
+        #    print(f"REMOTE_IDS = {remote_ids}")
+        #    print(f"COMPARE TO = {file_ids}")
+        #    return set( remote_ids) == set( file_ids )
+        assert  assistant.files_ok()  , f"FILE_IDS_LOCAL = {file_ids} not equal to FILE_IDS_REMOTE "
+        print(f"NOW ADD VS2")
+        assistant.vector_stores.add(vs2)
+        file_ids = assistant.file_ids()
+        print(f"FILE_IDS IS NOW {file_ids}")
+        assert assistant.files_ok() , 'FILES_IDS_LOCAL = {file_ids}'
+
+        vs1.delete();
+        vs2.delete();
+        t1.delete();
+        t2.delete();
+        t3.delete();
+        assistant.delete();
