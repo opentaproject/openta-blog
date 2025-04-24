@@ -1,4 +1,5 @@
 from django.test import TestCase
+import time
 import os
 from sidecar_openai.models import OpenAIFile, VectorStore, Assistant
 from django.contrib.auth import get_user_model
@@ -212,18 +213,21 @@ class OpenAI(TestCase):
         assistant.delete();
 
     def test_create_and_delete_thread(self):
+        import tiktoken
+
+
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         print(f"RESPONSE = {response}")
         url = reverse('admin:sidecar_openai_openaifile_add')  # use your app and model name
-        test_file1 = SimpleUploadedFile( "test1.txt", b"test1_content_here\n", content_type="text/plain")
+        test_file1 = SimpleUploadedFile( "test1.txt", b"The dog was black\n", content_type="text/plain")
         self.client.post( url ,  {'file': test_file1}, follow=True)
         t1 = OpenAIFile.objects.get(original_file_name="test1.txt")
-        test_file2 = SimpleUploadedFile( "test2.txt", b"test2_content_here\n", content_type="text/plain")
+        test_file2 = SimpleUploadedFile( "test2.txt", b"The cat was white.\n", content_type="text/plain")
         self.client.post( url ,  {'file': test_file2}, follow=True)
         t2 = OpenAIFile.objects.get(original_file_name="test2.txt")
 
-        test_file3 = SimpleUploadedFile( "test3.txt", b"test3_content_here\n", content_type="text/plain")
+        test_file3 = SimpleUploadedFile( "test3.txt", b"The dog chased the cat \n", content_type="text/plain")
         self.client.post( url ,  {'file': test_file3}, follow=True)
         t3 = OpenAIFile.objects.get(original_file_name="test3.txt")
 
@@ -233,17 +237,49 @@ class OpenAI(TestCase):
         vs1.save()
         vs1.files.set([t1,t2,t3])
         vs1.save()
-
         aname = randstring()
         assistant = Assistant( name=aname)
-        assistant.instructions = 'Here are instructions; Just answer questions about the content of the files test1.txt, test2.txt and test3.tx.\
-                \nDo not answer other questions!'
+        assistant.instructions = 'Here are instructions; be nice!'
         assistant.save();
         assistant.vector_stores.add(vs1)
         assistant.save();
         file_ids = assistant.file_ids()
+        assistant_id = assistant.assistant_id
         print(f"ASSISTANT FILE_IDS = {file_ids}")
         assert  assistant.files_ok()  , f"FILE_IDS_LOCAL = {file_ids} not equal to FILE_IDS_REMOTE "
+        print(f"ASSITANT REMOTE FILES OK")
+        #client.beta.assistants.update(
+        #    assistant_id=assistant_id,
+        #    tool_resources={"file_search": {"vector_store_ids": [vector_store_id]}},
+        #    )
+        thread = client.beta.threads.create(); 
+        thread_id = thread.id
+        queries =  [ 'What color was the dog.',
+                     'What color was the cat.',
+                     'What did the dog do?',
+                      'Please repeat the reply to the first request']
+        encoding = tiktoken.encoding_for_model(model)
+        for query in queries :
+            openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query)
+            run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id)
+            while True:
+                run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+                if run_status.status == "completed":
+                    break
+                elif run_status.status == "failed":
+                    raise Exception("Run failed.")
+                else:
+                    print("Waiting for completion...")
+                    time.sleep(1)
+            messages = openai.beta.threads.messages.list(thread_id=thread_id)
+            i = 0;
+            for msg in messages.data[::-1]:  # newest last
+                i = i + 1 
+                if msg.role == "assistant":
+                    res = msg
+            txt =   str( msg.content[0].text.value )
+            tokens = encoding.encode(txt)
+            print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
 
         vs1.delete();
         t1.delete();
