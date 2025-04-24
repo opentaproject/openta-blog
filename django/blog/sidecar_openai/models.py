@@ -1,6 +1,7 @@
 from django.db import models
 from django.db import transaction, IntegrityError
 import time
+import tiktoken
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
@@ -32,6 +33,8 @@ class OpenAIFile(models.Model) :
     path = models.CharField(max_length=255,blank=True)
     file_id = models.CharField(max_length=255,blank=True)
     file = models.FileField( max_length=512, upload_to=hashed_upload_to, storage=upload_storage,)
+    ntokens = models.IntegerField(default=0,null=True, blank=True)
+    
 
     def __str__(self):
         return f"{self.original_file_name}"
@@ -50,6 +53,9 @@ class OpenAIFile(models.Model) :
             uploaded_file = openai.files.create( file=open( self.file.path, "rb"), purpose="assistants")
             self.file_id = uploaded_file.id
             self.path = self.file.path
+            encoding = tiktoken.encoding_for_model(settings.AI_MODEL)
+            self.ntokens = len( encoding.encode(data.decode('utf-8' )) )
+
             print(f"PATH = { self.path}")
             super().save(*args, **kwargs) # Then update with true hashed path
 
@@ -116,6 +122,15 @@ class VectorStore( models.Model ):
         for f in files.all():
             ids.append(f.file_id)
         return ids
+
+    def ntokens( self, *args, **kwargs ):
+        files = self.files
+        n = 0;
+        for f in files.all():
+            n = n + f.ntokens
+        return n
+
+
 
     def file_pks(self, *args, **kwargs ):
         pks = []
@@ -185,6 +200,16 @@ class Assistant( models.Model ):
                 tools=[{"type": "file_search"}],)
             self.assistant_id = assistant.id
             super().save(*args,**kwargs)
+
+
+    def ntokens( self, *args, **kwargs ):
+        vs = self.vector_stores.all()
+        n = 0;
+        for v in vs :
+            for vf in v.files.all():
+                n = n + vf.ntokens 
+        return n
+
 
     def file_pks( self, *args, **kwargs ):
         vs = self.vector_stores.all()

@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ObjectDoesNotExist
+import tiktoken
 
 import openai
 from openai import OpenAI
@@ -64,6 +65,7 @@ class OpenAI(TestCase):
             #print(f"OK! text.txt IS GONE  LOCALLY ")
         assert not exists_locally, f"File {file_id1} still exists locally"
         assert not os.path.exists(path), f"LOCAL FILE PATH {path} DID NOT GET DELETED"
+        print(f"NTOKENS OF t1 = {t1.ntokens}")
 
 
 
@@ -125,6 +127,7 @@ class OpenAI(TestCase):
         vs.save()
         vs.files.add(t2); # REDUNDANT ADD
         vs.save()
+        print(f"NTOKENS OF VS = {vs.ntokens()}")
 
         def ckfiles( vs ):
             file_ids = vs.file_ids()
@@ -149,7 +152,7 @@ class OpenAI(TestCase):
         t1.delete()
 
 
-    def notest_create_and_delete_assistant_object(self):
+    def test_create_and_delete_assistant_object(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         print(f"RESPONSE = {response}")
@@ -186,6 +189,7 @@ class OpenAI(TestCase):
         assistant.vector_stores.add(vs1)
         assistant.save();
         file_ids = assistant.file_ids()
+        print(f"NTOKENS ASSISTANT = {assistant.ntokens() }")
         print(f"ASSISTANT FILE_IDS = {file_ids}")
 
         assert  assistant.files_ok()  , f"FILE_IDS_LOCAL = {file_ids} not equal to FILE_IDS_REMOTE "
@@ -193,6 +197,7 @@ class OpenAI(TestCase):
         assistant.vector_stores.add(vs2)
         file_ids = assistant.file_ids()
         print(f"FILE_IDS IS NOW {file_ids}")
+        print(f"NTOKENS ASSISTANT = {assistant.ntokens() }")
         assert assistant.files_ok() , 'FILES_IDS_LOCAL = {file_ids}'
         print(f"NOW SUBTRACT VS1")
         assistant.vector_stores.remove(vs1)
@@ -247,6 +252,7 @@ class OpenAI(TestCase):
         assistant_id = assistant.assistant_id
         print(f"ASSISTANT FILE_IDS = {file_ids}")
         assert  assistant.files_ok()  , f"FILE_IDS_LOCAL = {file_ids} not equal to FILE_IDS_REMOTE "
+        print(f"NTOKENS ASSISTANT = {assistant.ntokens() }")
         print(f"ASSITANT REMOTE FILES OK")
         #client.beta.assistants.update(
         #    assistant_id=assistant_id,
