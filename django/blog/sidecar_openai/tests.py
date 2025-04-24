@@ -187,29 +187,21 @@ class OpenAI(TestCase):
         file_ids = assistant.file_ids()
         print(f"ASSISTANT FILE_IDS = {file_ids}")
 
-        #def ckfiles( assistant ):
-        #    file_ids = assistant.file_ids();
-        #    print(f"FILE_IDS = {file_ids}")
-        #    assistant_id = assistant.assistant_id
-        #    remote_assistant = openai.beta.assistants.retrieve(assistant_id)
-        #    tool_resources = remote_assistant.tool_resources
-        #    print(f"TOOL_RESOURCES = {tool_resources}")
-        #    remote_ids = [];
-        #    vector_store_ids = tool_resources.file_search.vector_store_ids
-        #    for vector_store_id in vector_store_ids :
-        #        print(f"VECTOR_STORE = {vector_store_id}")
-        #        vector_store =  client.vector_stores.retrieve(vector_store_id)
-        #        vector_store_files = client.vector_stores.files.list( vector_store_id=vector_store.id)
-        #        for f in vector_store_files:
-        #            remote_ids.append( f.id)
-        #    print(f"REMOTE_IDS = {remote_ids}")
-        #    print(f"COMPARE TO = {file_ids}")
-        #    return set( remote_ids) == set( file_ids )
         assert  assistant.files_ok()  , f"FILE_IDS_LOCAL = {file_ids} not equal to FILE_IDS_REMOTE "
         print(f"NOW ADD VS2")
         assistant.vector_stores.add(vs2)
         file_ids = assistant.file_ids()
         print(f"FILE_IDS IS NOW {file_ids}")
+        assert assistant.files_ok() , 'FILES_IDS_LOCAL = {file_ids}'
+        print(f"NOW SUBTRACT VS1")
+        assistant.vector_stores.remove(vs1)
+        file_ids = assistant.file_ids()
+        print(f"FILE_IDS IS NOW {file_ids}")
+        assert assistant.files_ok() , 'FILES_IDS_LOCAL = {file_ids}'
+
+        assistant.vector_stores.remove(vs2)
+        file_ids = assistant.file_ids()
+        print(f"FILE_IDS SHOULD BE EMPTY : IS NOW {file_ids}")
         assert assistant.files_ok() , 'FILES_IDS_LOCAL = {file_ids}'
 
         vs1.delete();
