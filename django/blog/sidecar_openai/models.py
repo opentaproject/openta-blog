@@ -376,8 +376,8 @@ def handle_files_changed(sender, instance, action, **kwargs):
             cksums.append( f.checksum)
         added_files = list( set( new_file_ids) - set( old_file_ids ) )
         subtracted_files = list( set( old_file_ids)  - set( new_file_ids) )
-        print(f"ADDED_FILES = {added_files}")
-        print(f"SUBTRACTED_FILES = {subtracted_files}")
+        print(f"ADDED_FILES = {set(added_files)}")
+        print(f"SUBTRACTED_FILES = {set(subtracted_files)}")
         for file_id in subtracted_files :
             client.vector_stores.files.delete( vector_store_id=vector_store_id, file_id=file_id)
         for file_id in added_files :

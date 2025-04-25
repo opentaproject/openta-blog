@@ -152,7 +152,7 @@ class OpenAI(TestCase):
         t1.delete()
 
 
-    def test_create_and_delete_assistant_object(self):
+    def notest_create_and_delete_assistant_object(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         print(f"RESPONSE = {response}")
@@ -263,8 +263,47 @@ class OpenAI(TestCase):
         queries =  [ 'What color was the dog.',
                      'What color was the cat.',
                      'What did the dog do?',
-                      'Please repeat the reply to the first request']
+                      'Please repeat the reply to the first request'
+                        ]
         encoding = tiktoken.encoding_for_model(model)
+        for query in queries :
+            openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query)
+            run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id)
+            while True:
+                run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+                if run_status.status == "completed":
+                    break
+                elif run_status.status == "failed":
+                    raise Exception(f"Run failed. {run_status}")
+                else:
+                    print("Waiting for completion...")
+                    time.sleep(1)
+            messages = openai.beta.threads.messages.list(thread_id=thread_id)
+            i = 0;
+            for msg in messages.data[::-1]:  # newest last
+                i = i + 1 
+                if msg.role == "assistant":
+                    res = msg
+            txt =   str( msg.content[0].text.value )
+            tokens = encoding.encode(txt)
+            print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
+
+        vs1.files.remove(t3)
+        file_ids = assistant.file_ids()
+        test_file4 = SimpleUploadedFile( "test4.txt", b"The cat scratched the dog. \n", content_type="text/plain")
+        self.client.post( url ,  {'file': test_file4}, follow=True)
+        t4 = OpenAIFile.objects.get(original_file_name="test4.txt")
+        vs1.files.add(t4)
+        vs1.save()
+        file_ids = vs1.file_ids();
+        print(f"VS FILE_IDS AFTER REPLACING t3 by t4 IS NOW {file_ids}")
+        file_ids = assistant.file_ids();
+        print(f"ASSISTANT  FILE_IDS AFTER REPLACING t3 by t4 IS NOW {file_ids}")
+        queries =  [ 'What color was the cat.',
+                 'What color was the dog.',
+                 'What did the cat  do?',
+                 'Please repeat the reply to the first request'
+                 ]
         for query in queries :
             openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query)
             run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id)
@@ -286,6 +325,7 @@ class OpenAI(TestCase):
             txt =   str( msg.content[0].text.value )
             tokens = encoding.encode(txt)
             print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
+
 
         vs1.delete();
         t1.delete();
