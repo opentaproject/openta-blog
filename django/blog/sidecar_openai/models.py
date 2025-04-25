@@ -13,10 +13,39 @@ from django.dispatch import receiver
 
 import os
 client = openai.OpenAI(api_key=settings.AI_KEY)
-
-
-
 upload_storage = FileSystemStorage('/subdomain-data/sidecar/openaifiles', base_url="/")
+
+def run_query( assistant_id, query , thread_id=None):
+    cleanup = False
+    if thread_id == None :
+        thread = client.beta.threads.create(); 
+        thread_id = thread.id
+        cleanup = True
+    encoding = tiktoken.encoding_for_model(settings.AI_MODEL)
+    openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
+    run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id )
+    while True:
+        run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+        if run_status.status == "completed":
+            break
+        elif run_status.status == "failed":
+            raise Exception(f"Run failed. {run_status}")
+        else:
+            print("Waiting for completion...")
+            time.sleep(1)
+    messages = openai.beta.threads.messages.list(thread_id=thread_id)
+    i = 0;
+    for msg in messages.data[::-1]:  # newest last
+        i = i + 1 
+        if msg.role == "assistant":
+            res = msg
+    txt =   str( msg.content[0].text.value )
+    tokens = encoding.encode(txt)
+    print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
+    if cleanup :
+        client.beta.threads.delete(thread_id=thread_id)
+    return txt
+
 
 def hashed_upload_to(instance, filename):
     file = instance.file
@@ -200,6 +229,8 @@ class Assistant( models.Model ):
                 tools=[{"type": "file_search"}],)
             self.assistant_id = assistant.id
             super().save(*args,**kwargs)
+
+
 
 
     def ntokens( self, *args, **kwargs ):
