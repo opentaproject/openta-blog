@@ -382,6 +382,19 @@ def handle_files_changed(sender, instance, action, **kwargs):
             client.vector_stores.files.delete( vector_store_id=vector_store_id, file_id=file_id)
         for file_id in added_files :
             client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=file_id)
+        while True:
+            file_list = client.vector_stores.files.list(vector_store_id=vector_store_id)
+            statuses = [file.status for file in file_list.data]
+            if all(status == "completed" for status in statuses):
+                print("✅ All files processed and ready!")
+                break
+            elif any(status == "failed" for status in statuses):
+                raise Exception("❌ Some files failed to process!")
+            else:
+                print(f"⏳ Current statuses: {statuses} - Waiting...")
+                time.sleep(5)  # Wait before polling again
+        time.sleep(20)
+        
 
 
 

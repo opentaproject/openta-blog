@@ -22,6 +22,47 @@ def randstring(length=8):
     characters = string.ascii_letters + string.digits  # A-Z, a-z, 0-9
     return ''.join(random.choices(characters, k=length))
 
+def run_stateless_assistant(client, assistant_id, user_message):
+    # Step 1: Create a new thread
+    thread = client.beta.threads.create()
+
+    # Step 2: Add user's message into the thread
+    client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=user_message
+    )
+
+    # Step 3: Run the assistant on this fresh thread
+    run = client.beta.threads.runs.create(
+        thread_id=thread.id,
+        assistant_id=assistant_id
+    )
+
+    # Step 4: Poll for run completion
+    while True:
+        current_run = client.beta.threads.runs.retrieve(
+            thread_id=thread.id,
+            run_id=run.id
+        )
+        if current_run.status == "completed":
+            break
+        elif current_run.status in ("failed", "cancelled", "expired"):
+            raise Exception(f"Run failed with status: {current_run.status}")
+        else:
+            time.sleep(2)
+
+    # Step 5: Fetch the assistant's reply
+    messages = client.beta.threads.messages.list(thread_id=thread.id)
+    
+    # The assistant's reply is usually the last message
+    for message in reversed(messages.data):
+        if message.role == "assistant":
+            return message.content[0].text.value
+
+    return "No assistant response found."
+
+
 
 
 class OpenAI(TestCase):
@@ -263,12 +304,13 @@ class OpenAI(TestCase):
         queries =  [ 'What color was the dog.',
                      'What color was the cat.',
                      'What did the dog do?',
+                     'What did the cat do?',
                       'Please repeat the reply to the first request'
                         ]
         encoding = tiktoken.encoding_for_model(model)
         for query in queries :
-            openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query)
-            run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id)
+            openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
+            run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id,  instructions="Answer only based on the current context.")
             while True:
                 run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
                 if run_status.status == "completed":
@@ -289,24 +331,28 @@ class OpenAI(TestCase):
             print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
 
         vs1.files.remove(t3)
+        t3.delete();
         file_ids = assistant.file_ids()
-        test_file4 = SimpleUploadedFile( "test4.txt", b"The cat scratched the dog. \n", content_type="text/plain")
-        self.client.post( url ,  {'file': test_file4}, follow=True)
-        t4 = OpenAIFile.objects.get(original_file_name="test4.txt")
-        vs1.files.add(t4)
+        test_file3 = SimpleUploadedFile( "test3.txt", b"The cat scratched the dog. The dog yelped. \n", content_type="text/plain")
+        self.client.post( url ,  {'file': test_file3}, follow=True)
+        t3 = OpenAIFile.objects.get(original_file_name="test3.txt")
+        vs1.files.add(t3)
         vs1.save()
         file_ids = vs1.file_ids();
-        print(f"VS FILE_IDS AFTER REPLACING t3 by t4 IS NOW {file_ids}")
+        print(f"VS FILE_IDS AFTER UPDATING t3  NOW {file_ids}")
         file_ids = assistant.file_ids();
-        print(f"ASSISTANT  FILE_IDS AFTER REPLACING t3 by t4 IS NOW {file_ids}")
+        print(f"ASSISTANT  FILE_IDS AFTER UPDATING t3 IS NOW {file_ids}")
+        file_ids = assistant.remote_files();
+        print(f"ASSISTANT  REMOTE FILE_IDS AFTER UPDATING t3 IS NOW {file_ids}")
         queries =  [ 'What color was the cat.',
                  'What color was the dog.',
                  'What did the cat  do?',
+                 'What did the dog do?',
                  'Please repeat the reply to the first request'
                  ]
         for query in queries :
             openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query)
-            run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id)
+            run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id, instructions="Answer only based on the current context." )
             while True:
                 run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
                 if run_status.status == "completed":
