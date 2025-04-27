@@ -32,7 +32,6 @@ class OpenAI(TestCase):
     def notest_create_and_delete_file_object(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
-        #print(f"RESPONSE = {response}")
         url = reverse('admin:sidecar_openai_openaifile_add')  # use your app and model name
         test_file1 = SimpleUploadedFile( "test1.txt", b"test1_content_here\n", content_type="text/plain")
         self.client.post( url ,  {'file': test_file1}, follow=True)
@@ -45,23 +44,19 @@ class OpenAI(TestCase):
             exists = False
         assert exists , f"{file_id1} Does not exist on server "
         path = t1.path
-        #print(f"EXISTS = {exists} PATH={path} ")
         assert os.path.exists(path), f"LOCAL FILE PATH {path} DOES NOT EXIST"
-        #print(f"NOW DELETE THE FILE")
         t1.delete();
         try :
             aifile = client.files.retrieve(file_id1)
             exists = True
         except openai.OpenAIError as e:
             exists = False
-        #print(f"NOW EXISTS = {exists}")
         assert not exists, f"FILE {file_id1} was not successfully deleted on the server"
         try :
             t1 = OpenAIFile.objects.get(original_file_name="test1.txt")
             exists_locally = True
         except ObjectDoesNotExist as e :
             exists_locally = False
-            #print(f"OK! text.txt IS GONE  LOCALLY ")
         assert not exists_locally, f"File {file_id1} still exists locally"
         assert not os.path.exists(path), f"LOCAL FILE PATH {path} DID NOT GET DELETED"
         print(f"NTOKENS OF t1 = {t1.ntokens}")
@@ -253,37 +248,6 @@ class OpenAI(TestCase):
         assert  assistant.files_ok()  , f"FILE_IDS_LOCAL = {file_ids} not equal to FILE_IDS_REMOTE "
         print(f"NTOKENS ASSISTANT = {assistant.ntokens() }")
         print(f"ASSITANT REMOTE FILES OK")
-        #client.beta.assistants.update(
-        #    assistant_id=assistant_id,
-        #    tool_resources={"file_search": {"vector_store_ids": [vector_store_id]}},
-        #    )
-
-        #def run_stateful_assistant( client,  assistant_id, query , thread_id=None):
-        #    if thread_id == None :
-        #        thread = client.beta.threads.create(); 
-        #        thread_id = thread.id
-        #    encoding = tiktoken.encoding_for_model(model)
-        #    openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
-        #    run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id,  instructions="Answer only based on the current context.")
-        #    while True:
-        #        run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
-        #        if run_status.status == "completed":
-        #            break
-        #        elif run_status.status == "failed":
-        #            raise Exception(f"Run failed. {run_status}")
-        #        else:
-        #            print("Waiting for completion...")
-        #            time.sleep(1)
-        #    messages = openai.beta.threads.messages.list(thread_id=thread_id)
-        #    i = 0;
-        #    for msg in messages.data[::-1]:  # newest last
-        #        i = i + 1 
-        #        if msg.role == "assistant":
-        #            res = msg
-        #    txt =   str( msg.content[0].text.value )
-        #    tokens = encoding.encode(txt)
-        #    print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
-        #    return txt
 
         queries =  [ 'What color was the dog.',
                      'What color was the cat.',
@@ -294,28 +258,12 @@ class OpenAI(TestCase):
 
         thread = client.beta.threads.create(); 
         thread_id = thread.id
+        messages = [];
         for query in queries :
-            txt = run_query(  assistant_id, query , thread_id  )
-            #openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
-            #run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id,  instructions="Answer only based on the current context.")
-            #while True:
-            #    run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
-            #    if run_status.status == "completed":
-            #        break
-            #    elif run_status.status == "failed":
-            #        raise Exception(f"Run failed. {run_status}")
-            #    else:
-            #        print("Waiting for completion...")
-            #        time.sleep(1)
-            #messages = openai.beta.threads.messages.list(thread_id=thread_id)
-            #i = 0;
-            #for msg in messages.data[::-1]:  # newest last
-            #    i = i + 1 
-            #    if msg.role == "assistant":
-            #        res = msg
+            txt = run_query(  assistant_id, query , thread_id  , messages)
+            messages.append({'user' : query, 'assistant' : txt}) 
             print(f"QUERY {query} -> {txt}")
-
-
+        print(f"MESSAGES = {messages}")
         vs1.files.remove(t3)
         t3.delete();
         file_ids = assistant.file_ids()
@@ -330,6 +278,7 @@ class OpenAI(TestCase):
         print(f"ASSISTANT  FILE_IDS AFTER UPDATING t3 IS NOW {file_ids}")
         file_ids = assistant.remote_files();
         print(f"ASSISTANT  REMOTE FILE_IDS AFTER UPDATING t3 IS NOW {file_ids}")
+        messages = []
         queries =  [ 'What color was the cat.',
                  'What color was the dog.',
                  'What did the cat  do?',
@@ -337,30 +286,9 @@ class OpenAI(TestCase):
                  'Please repeat the reply to the first request'
                  ]
         for query in queries :
-            txt = run_query(  assistant_id, query, thread_id=None )
+            txt = run_query(  assistant_id, query, thread_id=thread_id, messages=messages)
+            messages.append({'user' : query, 'assistant' : txt}) 
             print(f"QUERY {query} -> {txt}")
-            #openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query)
-            #run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id, instructions="Answer only based on the current context." )
-            #while True:
-            #    run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
-            #    if run_status.status == "completed":
-            #        break
-            #    elif run_status.status == "failed":
-            #        raise Exception("Run failed.")
-            #    else:
-            #        print("Waiting for completion...")
-            #        time.sleep(1)
-            #messages = openai.beta.threads.messages.list(thread_id=thread_id)
-            #i = 0;
-            #for msg in messages.data[::-1]:  # newest last
-            #    i = i + 1 
-            #    if msg.role == "assistant":
-            #        res = msg
-            #txt =   str( msg.content[0].text.value )
-            #tokens = encoding.encode(txt)
-            #print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
-
-
         vs1.delete();
         t1.delete();
         t2.delete();

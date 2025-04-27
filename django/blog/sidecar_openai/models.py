@@ -1,5 +1,6 @@
 from django.db import models
 from django.db import transaction, IntegrityError
+import logging
 import time
 import tiktoken
 from django.core.exceptions import ObjectDoesNotExist
@@ -12,18 +13,33 @@ from django.db.models.signals import m2m_changed, pre_delete
 from django.dispatch import receiver
 
 import os
+logger = logging.getLogger(__name__)
 client = openai.OpenAI(api_key=settings.AI_KEY)
 upload_storage = FileSystemStorage('/subdomain-data/sidecar/openaifiles', base_url="/")
 
-def run_query( assistant_id, query , thread_id=None):
+def run_query( assistant_id, query , thread_id=None,messages=[]):
     cleanup = False
+    print(f"QUERY_ID = {assistant_id} RUN_QUERY MESSAGES = {messages}")
     if thread_id == None :
         thread = client.beta.threads.create(); 
         thread_id = thread.id
         cleanup = True
+    for message in [] : # messages :
+        userquery = message['user']
+        response  = message['assistant']
+        client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role='user',
+            content=userquery)
+        client.beta.threads.messages.create(
+            thread_id=thread_id,
+            role='assistant',
+            content=response)
+
     encoding = tiktoken.encoding_for_model(settings.AI_MODEL)
     openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
-    run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id )
+    run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id ,  
+                truncation_strategy={ "type": "last_messages", "last_messages": 2 })
     while True:
         run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
         if run_status.status == "completed":
