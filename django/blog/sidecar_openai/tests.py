@@ -1,7 +1,7 @@
 from django.test import TestCase
 import time
 import os
-from sidecar_openai.models import OpenAIFile, VectorStore, Assistant, run_query
+from sidecar_openai.models import OpenAIFile, VectorStore, Assistant, run_query, Thread
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -226,7 +226,7 @@ class OpenAI(TestCase):
         self.client.post( url ,  {'file': test_file2}, follow=True)
         t2 = OpenAIFile.objects.get(original_file_name="test2.txt")
 
-        test_file3 = SimpleUploadedFile( "test3.txt", b"The dog chased the cat \n", content_type="text/plain")
+        test_file3 = SimpleUploadedFile( "test3.txt", b"The dog barked.\n", content_type="text/plain")
         self.client.post( url ,  {'file': test_file3}, follow=True)
         t3 = OpenAIFile.objects.get(original_file_name="test3.txt")
 
@@ -243,7 +243,6 @@ class OpenAI(TestCase):
         assistant.vector_stores.add(vs1)
         assistant.save();
         file_ids = assistant.file_ids()
-        assistant_id = assistant.assistant_id
         print(f"ASSISTANT FILE_IDS = {file_ids}")
         assert  assistant.files_ok()  , f"FILE_IDS_LOCAL = {file_ids} not equal to FILE_IDS_REMOTE "
         print(f"NTOKENS ASSISTANT = {assistant.ntokens() }")
@@ -256,18 +255,20 @@ class OpenAI(TestCase):
                       'Please repeat the reply to the first request'
                         ]
 
-        thread = client.beta.threads.create(); 
-        thread_id = thread.id
-        messages = [];
+        #thread = client.beta.threads.create(); 
+        aname = randstring()
+        thread = Thread(name=aname)
+        thread.save()
+        #messages = [];
         for query in queries :
-            txt = run_query(  assistant_id, query , thread_id  , messages)
-            messages.append({'user' : query, 'assistant' : txt}) 
+            txt = run_query(  assistant, query , thread  )
+            #messages.append({'user' : query, 'assistant' : txt}) 
             print(f"QUERY {query} -> {txt}")
-        print(f"MESSAGES = {messages}")
+        print(f"MESSAGES = {thread.messages}")
         vs1.files.remove(t3)
         t3.delete();
         file_ids = assistant.file_ids()
-        test_file3 = SimpleUploadedFile( "test3.txt", b"The cat scratched the dog. The dog yelped. \n", content_type="text/plain")
+        test_file3 = SimpleUploadedFile( "test3.txt", b"The cat said miaow. \n", content_type="text/plain")
         self.client.post( url ,  {'file': test_file3}, follow=True)
         t3 = OpenAIFile.objects.get(original_file_name="test3.txt")
         vs1.files.add(t3)
@@ -278,7 +279,6 @@ class OpenAI(TestCase):
         print(f"ASSISTANT  FILE_IDS AFTER UPDATING t3 IS NOW {file_ids}")
         file_ids = assistant.remote_files();
         print(f"ASSISTANT  REMOTE FILE_IDS AFTER UPDATING t3 IS NOW {file_ids}")
-        messages = []
         queries =  [ 'What color was the cat.',
                  'What color was the dog.',
                  'What did the cat  do?',
@@ -286,9 +286,9 @@ class OpenAI(TestCase):
                  'Please repeat the reply to the first request'
                  ]
         for query in queries :
-            txt = run_query(  assistant_id, query, thread_id=thread_id, messages=messages)
-            messages.append({'user' : query, 'assistant' : txt}) 
+            txt = run_query(  assistant, query, thread )
             print(f"QUERY {query} -> {txt}")
+        print(f"FINALLY MESSAGES = {thread.messages}")
         vs1.delete();
         t1.delete();
         t2.delete();

@@ -17,24 +17,26 @@ logger = logging.getLogger(__name__)
 client = openai.OpenAI(api_key=settings.AI_KEY)
 upload_storage = FileSystemStorage('/subdomain-data/sidecar/openaifiles', base_url="/")
 
-def run_query( assistant_id, query , thread_id=None,messages=[]):
+def run_query( assistant, query , thread):
+    assistant_id = assistant.assistant_id
+    thread_id = thread.thread_id
     cleanup = False
-    print(f"QUERY_ID = {assistant_id} RUN_QUERY MESSAGES = {messages}")
-    if thread_id == None :
-        thread = client.beta.threads.create(); 
-        thread_id = thread.id
-        cleanup = True
-    for message in [] : # messages :
-        userquery = message['user']
-        response  = message['assistant']
-        client.beta.threads.messages.create(
-            thread_id=thread_id,
-            role='user',
-            content=userquery)
-        client.beta.threads.messages.create(
-            thread_id=thread_id,
-            role='assistant',
-            content=response)
+    print(f"QUERY_ID = {assistant_id} RUN_QUERY ")
+    #if thread_id == None :
+    #    thread = client.beta.threads.create(); 
+    #    thread_id = thread.id
+    #    cleanup = True
+    #for message in [] : # messages :
+    #    userquery = message['user']
+    #    response  = message['assistant']
+    #    client.beta.threads.messages.create(
+    #        thread_id=thread_id,
+    #        role='user',
+    #        content=userquery)
+    #    client.beta.threads.messages.create(
+    #        thread_id=thread_id,
+    #        role='assistant',
+    #        content=response)
 
     encoding = tiktoken.encoding_for_model(settings.AI_MODEL)
     openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
@@ -58,8 +60,10 @@ def run_query( assistant_id, query , thread_id=None,messages=[]):
     txt =   str( msg.content[0].text.value )
     tokens = encoding.encode(txt)
     print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
-    if cleanup :
-        client.beta.threads.delete(thread_id=thread_id)
+    #if cleanup :
+    #    client.beta.threads.delete(thread_id=thread_id)
+    thread.messages.append({'user' : query, 'assistant' : txt}) 
+    thread.save()
     return txt
 
 
@@ -105,6 +109,30 @@ class OpenAIFile(models.Model) :
 
             print(f"PATH = { self.path}")
             super().save(*args, **kwargs) # Then update with true hashed path
+
+class Thread(models.Model) :
+    name = models.CharField(max_length=255,unique=True)
+    date = models.DateTimeField(auto_now=True)
+    thread_id = models.CharField(max_length=255,blank=True)
+    messages = models.JSONField( default=dict ,  blank=True, null=True)
+    
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+
+
+    def save( self, *args, **kwargs ):
+        is_new = self._state.adding  and not self.pk
+        super().save(*args, **kwargs)  # Save first, so file is processed
+        if is_new  :
+            thread = client.beta.threads.create(); 
+            thread_id = thread.id
+            self.thread_id = thread_id
+            self.messages = []
+            super().save(*args, **kwargs) # Then update with true hashed path
+
 
 
 
