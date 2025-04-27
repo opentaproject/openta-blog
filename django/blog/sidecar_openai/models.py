@@ -117,23 +117,6 @@ def custom_delete_openaifile(sender, instance, **kwargs):
     except Exception as e:
         logger.error(f" FILE/ {instance.path} DOES NOT EXIST")
     vst = VectorStore.objects.filter(files=instance)
-    # THE VECTOR_STORE MUST BE 
-    #ast = Assistant.objects.filter(vector_stores__in=vst)
-    #for a in ast.all():
-    #    pks = a.file_pks()
-    #    assistant_id = a.assistant_id
-    #    file_ids = []
-    #    for pk_ in pks :
-    #        if not pk_  == pk  :
-    #            old_file_id = OpenTAFile.objects.get(pk=pk_).file_id
-    #            print(f"OLD_FILE_ID = {old_file_id}")
-    #            file_ids.append( old_file_id )
-    #    print(f"FILE_IDS = {file_ids}")
-    #    vs = client.vector_stores.create( name="{a.name}-merged", file_ids=file_ids)
-    #    client.beta.assistants.update(
-    #        assistant_id=assistant_id,
-    #        tool_resources={"file_search": {"vector_store_ids": [ vs.id ] }},
-    #        )
     for vs in vst.all() :
         vector_store_id = vs.vector_store_id
         try  :
@@ -213,7 +196,7 @@ class VectorStore( models.Model ):
         super().save(*args,**kwargs)
         print(f"DID SUPER SAVE")
         if is_new :
-            vector_store = client.vector_stores.create(name=self.name)
+            vector_store = client.vector_stores.create(name=self.name,metadata={"api_key": settings.AI_KEY} )
             self.vector_store_id = vector_store.id
             super().save(*args,**kwargs)
 
@@ -242,7 +225,7 @@ class Assistant( models.Model ):
             assistant = client.beta.assistants.create( name=self.name,
                 instructions=self.instructions, 
                 model=settings.AI_MODEL, 
-                tools=[{"type": "file_search"}],)
+                tools=[{"type": "file_search"}],metadata={"api_key": settings.AI_KEY} )
             self.assistant_id = assistant.id
             super().save(*args,**kwargs)
 
@@ -377,12 +360,14 @@ def handle_assistants_changed(sender, instance, action, **kwargs):
             assistant = client.beta.assistants.update(
                 assistant_id=assistant_id,
                 tool_resources={"file_search": {"vector_store_ids": ids }},
+                metadata={"api_key": settings.AI_KEY} 
                 )
         else :
-            vs = client.vector_stores.create( name=f"{assistant_id}", file_ids=file_ids)
+            vs = client.vector_stores.create( name=f"{assistant_id}", file_ids=file_ids, metadata={"api_key": settings.AI_KEY} )
             assistant = client.beta.assistants.update(
                 assistant_id=assistant_id,
                 tool_resources={"file_search": {"vector_store_ids": [ vs.id ] }},
+                metadata={"api_key": settings.AI_KEY} 
                 )
 
     instance.save()
@@ -428,7 +413,7 @@ def handle_files_changed(sender, instance, action, **kwargs):
         for file_id in subtracted_files :
             client.vector_stores.files.delete( vector_store_id=vector_store_id, file_id=file_id)
         for file_id in added_files :
-            client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=file_id)
+            client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=file_id,  )
         while True:
             file_list = client.vector_stores.files.list(vector_store_id=vector_store_id)
             statuses = [file.status for file in file_list.data]
@@ -455,24 +440,6 @@ def handle_files_changed(sender, instance, action, **kwargs):
         #others = VectorStore.objects.filter(checksum=checksum)
         npks =  list( OpenAIFile.objects.filter(file_id__in=ids).values_list('pk',flat=True)  )
         print(f"IDS = {ids} PKS = {pks}")
-        #
-        # DO NOT MAKE CHECKSUM EQUIVALINCE OF DIFFERENT VECTOR STORES
-        # SINCE THEY MAY CHANGE INDIVIDUALLY LATER
-        #
-        #if others.count() > 0 :
-        #    other = others.last() 
-        #    instance.vector_store_id = other.vector_store_id
-        #    instance.files.add( *npks )
-        #    instance.save()
-        #    return
-        #print(f"IDS TO BE ADDED TO VS = {ids}")
-        #for fid in ids:
-        #    try :
-        #        client.vector_stores.files.create( vector_store_id=vector_store_id, file_id=fid)
-        #    except :
-        #        pass
-        #instance.files.add( *pks )
-        #instance.save()
         del instance._updating_from_m2m
         try :
             files = client.vector_stores.files.list(vector_store_id=vector_store_id)
