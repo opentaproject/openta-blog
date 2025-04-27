@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import OpenAIFile  , VectorStore , Assistant# Replace with your actual model
+from .models import OpenAIFile  , VectorStore , Assistant, Thread
 
 @admin.register(OpenAIFile)
 class OpenAIFileAdmin(admin.ModelAdmin):
@@ -31,3 +31,8 @@ class AssistantAdmin(admin.ModelAdmin):
 
     list_vector_store_ids.short_description = "VectorStore names"
     
+
+@admin.register(Thread)
+class ThreadAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'thread_id', 'messages' )  # Add your custom method here
+

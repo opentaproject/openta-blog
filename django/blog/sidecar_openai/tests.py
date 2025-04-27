@@ -262,7 +262,6 @@ class OpenAI(TestCase):
         #messages = [];
         for query in queries :
             txt = run_query(  assistant, query , thread  )
-            #messages.append({'user' : query, 'assistant' : txt}) 
             print(f"QUERY {query} -> {txt}")
         print(f"MESSAGES = {thread.messages}")
         vs1.files.remove(t3)
