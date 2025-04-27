@@ -66,7 +66,8 @@ def run_query( assistant_id, query , thread_id=None,messages=[]):
 def hashed_upload_to(instance, filename):
     file = instance.file
     file.open('rb')
-    file_hash = hashlib.md5(file.read()).hexdigest()[0:8]
+    file_hash = hashlib.md5(file.read()).hexdigest()[0:7]
+    file_hash = file_hash + "_" + settings.AI_KEY[-8:]
     file.seek(0)  # reset for saving later
     ext = os.path.splitext(filename)[1]
     return f'{file_hash}{ext}'
@@ -95,6 +96,7 @@ class OpenAIFile(models.Model) :
         if is_new and self.file:
             data = self.file.read()
             self.checksum = hashlib.md5(data).hexdigest()
+            print(f"FILE_PATH = {self.file.path}")
             uploaded_file = openai.files.create( file=open( self.file.path, "rb"), purpose="assistants")
             self.file_id = uploaded_file.id
             self.path = self.file.path
@@ -196,7 +198,7 @@ class VectorStore( models.Model ):
         super().save(*args,**kwargs)
         print(f"DID SUPER SAVE")
         if is_new :
-            vector_store = client.vector_stores.create(name=self.name,metadata={"api_key": settings.AI_KEY} )
+            vector_store = client.vector_stores.create(name=self.name,metadata={"api_key": settings.AI_KEY[-8:] } )
             self.vector_store_id = vector_store.id
             super().save(*args,**kwargs)
 
@@ -225,7 +227,7 @@ class Assistant( models.Model ):
             assistant = client.beta.assistants.create( name=self.name,
                 instructions=self.instructions, 
                 model=settings.AI_MODEL, 
-                tools=[{"type": "file_search"}],metadata={"api_key": settings.AI_KEY} )
+                tools=[{"type": "file_search"}],metadata={"api_key": settings.AI_KEY[-8:] } )
             self.assistant_id = assistant.id
             super().save(*args,**kwargs)
 
@@ -360,14 +362,14 @@ def handle_assistants_changed(sender, instance, action, **kwargs):
             assistant = client.beta.assistants.update(
                 assistant_id=assistant_id,
                 tool_resources={"file_search": {"vector_store_ids": ids }},
-                metadata={"api_key": settings.AI_KEY} 
+                metadata={"api_key": settings.AI_KEY[-8:] } 
                 )
         else :
-            vs = client.vector_stores.create( name=f"{assistant_id}", file_ids=file_ids, metadata={"api_key": settings.AI_KEY} )
+            vs = client.vector_stores.create( name=f"{assistant_id}", file_ids=file_ids, metadata={"api_key": settings.AI_KEY[-8:] } )
             assistant = client.beta.assistants.update(
                 assistant_id=assistant_id,
                 tool_resources={"file_search": {"vector_store_ids": [ vs.id ] }},
-                metadata={"api_key": settings.AI_KEY} 
+                metadata={"api_key": settings.AI_KEY[-8:] } 
                 )
 
     instance.save()
