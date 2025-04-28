@@ -17,7 +17,11 @@ logger = logging.getLogger(__name__)
 client = openai.OpenAI(api_key=settings.AI_KEY)
 upload_storage = FileSystemStorage('/subdomain-data/sidecar/openaifiles', base_url="/")
 
-def run_query( assistant, query , thread):
+def run_query( assistant, query , thread, last_messages=None):
+
+    """ last_messages is either None for auto or an integer for length of thread history to keep at OpenAI. 
+    The entire history is kept in the local database"""
+
     assistant_id = assistant.assistant_id
     thread_id = thread.thread_id
     cleanup = False
@@ -40,8 +44,11 @@ def run_query( assistant, query , thread):
 
     encoding = tiktoken.encoding_for_model(settings.AI_MODEL)
     openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
-    run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id ,  
-                truncation_strategy={ "type": "last_messages", "last_messages": 2 })
+    if last_messages == None :
+        run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id )
+    else :
+        run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id ,  
+                truncation_strategy={ "type": "last_messages", "last_messages": last_messages })
     while True:
         run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
         if run_status.status == "completed":
