@@ -117,31 +117,6 @@ class OpenAIFile(models.Model) :
             print(f"PATH = { self.path}")
             super().save(*args, **kwargs) # Then update with true hashed path
 
-class Thread(models.Model) :
-    name = models.CharField(max_length=255,unique=True)
-    date = models.DateTimeField(auto_now=True)
-    thread_id = models.CharField(max_length=255,blank=True)
-    messages = models.JSONField( default=dict ,  blank=True, null=True)
-    
-
-    def __str__(self):
-        return f"{self.name}"
-
-
-
-
-    def save( self, *args, **kwargs ):
-        is_new = self._state.adding  and not self.pk
-        super().save(*args, **kwargs)  # Save first, so file is processed
-        if is_new  :
-            thread = client.beta.threads.create(); 
-            thread_id = thread.id
-            self.thread_id = thread_id
-            self.messages = []
-            super().save(*args, **kwargs) # Then update with true hashed path
-
-
-
 
 
 @receiver(pre_delete, sender=OpenAIFile)
@@ -330,6 +305,94 @@ class Assistant( models.Model ):
         file_ids = assistant.file_ids();
         remote_ids = assistant.remote_files();
         return set( remote_ids) == set( file_ids )
+
+
+class Thread(models.Model) :
+    name = models.CharField(max_length=255,unique=True)
+    date = models.DateTimeField(auto_now=True)
+    thread_id = models.CharField(max_length=255,blank=True)
+    messages = models.JSONField( default=dict ,  blank=True, null=True)
+    assistant = models.ForeignKey(Assistant, on_delete=models.SET_NULL, null=True, related_name="threads")
+    
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+
+
+    def save( self, *args, **kwargs ):
+        is_new = self._state.adding  and not self.pk
+        super().save(*args, **kwargs)  # Save first, so file is processed
+        if is_new  :
+            thread = client.beta.threads.create(); 
+            thread_id = thread.id
+            self.thread_id = thread_id
+            self.messages = []
+            super().save(*args, **kwargs) # Then update with true hashed path
+
+    def run_query( self, *args, **kwargs  ):
+        last_messages = kwargs.get('last_messages',None)
+        query= kwargs['query']
+    
+        """ last_messages is either None for auto or an integer for length of thread history to keep at OpenAI. 
+        The entire history is kept in the local database"""
+    
+        assistant = self.assistant
+        assistant_id = assistant.assistant_id
+        thread = self
+        thread_id = thread.thread_id
+        print(f"QUERY_ID = {assistant_id} RUN_QUERY ")
+        #if thread_id == None :
+        #    thread = client.beta.threads.create(); 
+        #    thread_id = thread.id
+        #    cleanup = True
+        #for message in [] : # messages :
+        #    userquery = message['user']
+        #    response  = message['assistant']
+        #    client.beta.threads.messages.create(
+        #        thread_id=thread_id,
+        #        role='user',
+        #        content=userquery)
+        #    client.beta.threads.messages.create(
+        #        thread_id=thread_id,
+        #        role='assistant',
+        #        content=response)
+    
+        encoding = tiktoken.encoding_for_model(settings.AI_MODEL)
+        openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
+        if last_messages == None :
+            run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id )
+        else :
+            run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id ,  
+                    truncation_strategy={ "type": "last_messages", "last_messages": last_messages })
+        while True:
+            run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+            if run_status.status == "completed":
+                break
+            elif run_status.status == "failed":
+                raise Exception(f"Run failed. {run_status}")
+            else:
+                print("Waiting for completion...")
+                time.sleep(1)
+        messages = openai.beta.threads.messages.list(thread_id=thread_id)
+        i = 0;
+        for msg in messages.data[::-1]:  # newest last
+            i = i + 1 
+            if msg.role == "assistant":
+                res = msg
+        txt =   str( msg.content[0].text.value )
+        tokens = encoding.encode(txt)
+        print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
+        #if cleanup :
+        #    client.beta.threads.delete(thread_id=thread_id)
+        thread.messages.append({'user' : query, 'assistant' : txt}) 
+        thread.save()
+        return txt
+
+
+
+
 
 
 @receiver(pre_delete, sender=Assistant)

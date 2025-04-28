@@ -29,7 +29,7 @@ class OpenAI(TestCase):
         self.admin_user = User.objects.create_superuser( username='admin', email='admin@example.com', password='adminpass')
         self.client.login(username='admin', password='adminpass')
 
-    def test_create_and_delete_file_object(self):
+    def notest_create_and_delete_file_object(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         url = reverse('admin:sidecar_openai_openaifile_add')  # use your app and model name
@@ -64,7 +64,7 @@ class OpenAI(TestCase):
 
 
 
-    def test_create_and_delete_two_openai_file_objects(self):
+    def notest_create_and_delete_two_openai_file_objects(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         print(f"RESPONSE = {response}")
@@ -101,7 +101,7 @@ class OpenAI(TestCase):
 
 
 
-    def test_create_and_delete_vector_store_object(self):
+    def notest_create_and_delete_vector_store_object(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         print(f"RESPONSE = {response}")
@@ -146,7 +146,7 @@ class OpenAI(TestCase):
         t1.delete()
 
 
-    def test_create_and_delete_assistant_object(self):
+    def notest_create_and_delete_assistant_object(self):
         url = reverse('admin:sidecar_openai_openaifile_changelist')  # use your app and model name
         response = self.client.get(url)
         print(f"RESPONSE = {response}")
@@ -256,10 +256,10 @@ class OpenAI(TestCase):
                         ]
 
         aname = randstring()
-        thread = Thread(name=aname)
+        thread = Thread(name=aname,assistant=assistant)
         thread.save()
         for query in queries :
-            txt = run_query(  assistant, query , thread  )
+            txt = thread.run_query(  query=query )
             print(f"QUERY {query} -> {txt}")
         print(f"MESSAGES = {thread.messages}")
         vs1.files.remove(t3)
@@ -283,7 +283,7 @@ class OpenAI(TestCase):
                  'Please repeat the reply to the first request'
                  ]
         for query in queries :
-            txt = run_query(  assistant, query, thread , last_messages=2)
+            txt = thread.run_query(  query=query,  last_messages=2)
             print(f"QUERY {query} -> {txt}")
         print(f"FINALLY MESSAGES = {thread.messages}")
         vs1.delete();

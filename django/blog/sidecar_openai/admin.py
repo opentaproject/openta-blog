@@ -34,5 +34,5 @@ class AssistantAdmin(admin.ModelAdmin):
 
 @admin.register(Thread)
 class ThreadAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'thread_id', 'messages' )  # Add your custom method here
+    list_display = ('id', 'name', 'thread_id', 'messages' , 'assistant')  # Add your custom method here
 
