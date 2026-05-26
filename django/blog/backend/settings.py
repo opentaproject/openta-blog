@@ -189,8 +189,11 @@ MEDIA_ROOT = f'/subdomain-data/{SUBDOMAIN}/media'
 MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 RUNNING_DEVSERVER = 'runserver' in sys.argv
-if RUNNING_DEVSERVER :
+if not RUNNING_DEVSERVER :
     STATIC_URL = '/deploystatic/'
+STATIC_URL = os.environ.get('STATIC_URL', STATIC_URL )
+ 
+
 
 FILEBROWSER_ROOT = MEDIA_ROOT  # os.path.join(MEDIA_ROOT, 'uploads')
 FILEBROWSER_DIRECTORY = ''

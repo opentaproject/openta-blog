@@ -4,7 +4,8 @@
     "lodash": "^4.17.21",
     "oath": "^1.0.0",
     "package.json": "^2.0.1",
-    "require": "^0.4.4"
+    "require": "^0.4.4",
+    "tailwind": "^4.0.0"
   },
   "devDependencies": {
     "browserify": "^17.0.1",
