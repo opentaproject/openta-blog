@@ -18,7 +18,7 @@ WORKDIR /srv/openta-blog
 RUN pip install --upgrade pip
 COPY . /srv
 WORKDIR /srv
-RUN git clone https://github.com/opentaproject/openta-blog.git -b latest
+RUN git clone https://github.com/opentaproject/openta-blog.git -b openai
 WORKDIR /srv/openta-blog
 RUN pip install -r django/requirements.txt
 WORKDIR /srv/openta-blog/django/blog

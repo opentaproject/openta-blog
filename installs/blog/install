@@ -2,6 +2,5 @@ export BASE_VERSION='latest'
 #microk8s kubectl delete pods sidecar-0
 echo creating dockerfile openta-sidecar:${BASE_VERSION}
 echo "The next command may take a few minutes"
-docker build  -t localhost:32000/openta-sidecar:${BASE_VERSION} .
-docker push  localhost:32000/openta-sidecar:${BASE_VERSION}
-
+docker buildx build   --platform linux/amd64 -t opentaproject/openta-sidecar:${BASE_VERSION} --push .
+#docker push  opentaproject/openta-sidecar:${BASE_VERSION}
