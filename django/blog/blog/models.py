@@ -114,7 +114,7 @@ class Visitor(models.Model) :
     def get_unread_filtertypes(self):
         pks = Visit.objects.all().filter(visitor=self).values('post_id')
         subdomain = self.subdomain
-        categories = Category.objects.filter(name=subdomain) | Category.objects.filter(restricted=False)
+        categories = Category.objects.filter(subdomain=subdomain) | Category.objects.filter(restricted=False)
         posts = Post.objects.filter(category__in=categories)
         if pks :
             first_visit =  Visit.objects.all().filter(visitor=self).order_by('date').first()
@@ -244,5 +244,4 @@ class Comment(models.Model):
     def tx(self):
         c = ['','s','i','a']
         return c[ self.comment_author.visitor_type ]
-
 

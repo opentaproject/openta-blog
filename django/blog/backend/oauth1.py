@@ -40,12 +40,23 @@ def validate_oauth_signature(method, base_url, params, consumer_secret, token_se
         ])
         return base_string
 
-    #logger.error(f"PARAMS = {params}")
-    base_string = generate_base_string(method, base_url, params)
+    # Exclude oauth_signature from base string parameters
+    filtered = {k: v for k, v in params.items() if k != 'oauth_signature'}
+    base_string = generate_base_string(method, base_url, filtered)
     signing_key = f"{urllib.parse.quote(consumer_secret, safe='')}&{urllib.parse.quote(token_secret, safe='') if token_secret else ''}"
     hashed = hmac.new(signing_key.encode('utf-8'), base_string.encode('utf-8'), hashlib.sha1)
-    generated_signature = base64.b64encode( hashed.digest() )
-    return True
+    generated_signature = base64.b64encode(hashed.digest()).decode()
+    if received_signature is None:
+        received_signature = params.get('oauth_signature')
+    if received_signature is None:
+        return False
+    try:
+        # Some sources may percent-encode the signature
+        received_signature = urllib.parse.unquote(received_signature)
+    except Exception:
+        pass
+    # Constant-time comparison
+    return hmac.compare_digest(generated_signature, received_signature)
 
 
 
@@ -73,9 +84,11 @@ def create_oauth_signature(http_method, base_url, params, consumer_secret, token
 def load_session_variables( request , *args, **kwargs ):
     if request.data :
         params = {};
-        for key in ['oauth_consumer_key','oauth_nonce','oauth_timestamp','oauth_signature_method','oauth_version','lti_message_type','lti_version','resource_link_id' ]:
+        for key in ['oauth_consumer_key','oauth_nonce','oauth_timestamp','oauth_signature_method','oauth_version','lti_message_type','lti_version','resource_link_id','oauth_signature' ]:
             params[key] = request.data.get(key,None)
-        validate_oauth_signature('POST', "https://www.openta.se", params ,settings.LTI_SECRET )
+        if not validate_oauth_signature('POST', "https://www.openta.se", params ,settings.LTI_SECRET ):
+            logger.error("Invalid OAuth signature")
+            return False
         t = str( int(  time.time() )).encode() ;
         bt = base64.b64encode(t)
         #logger.error(f"T = {t}")
@@ -230,4 +243,3 @@ def get_author_type( request ):
 
 def get_username( request ):
     return request.session.get('username',request.user.username)
-

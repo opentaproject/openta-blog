@@ -39,7 +39,7 @@ PUBLIC = 2
 
 def get_visitor( request ):
     subdomain_name = request.session.get('subdomain','')
-    username = request.session['username']
+    username = request.session.get('username', getattr(request.user, 'username', ''))
     subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
     visitor_type = get_author_type(request)
     visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subdomain,visitor_type=visitor_type)
@@ -141,7 +141,7 @@ def blog_index(request, *args, **kwargs ) :
     #    subdomain, _ = Subdomain.objects.get_or_create(name='')
     #    subdomain_name = ''
     category_selected = request.session.get('category_selected',None)
-    username = request.session['username']
+    username = request.session.get('username', getattr(request.user, 'username', ''))
     if  len( Category.objects.filter(name=subdomain_name,subdomain=subdomain)  ) == 0 :
         new_category = Category.objects.create(name=subdomain_name,subdomain=subdomain,restricted=True)
         new_category.save() 
@@ -219,7 +219,7 @@ def blog_index(request, *args, **kwargs ) :
                 posts_visible = posts.filter(visibility=PUBLIC)
                 posts_own     = posts.filter(post_author=visitor)
                 posts = posts_visible | posts_own 
-            if request.session['is_staff']  :
+            if request.session.get('is_staff', False)  :
                 closed = used_categories
                 copen = Category.objects.all().filter(restricted=False,hidden=False)
                 categories = ( closed | copen )
@@ -383,7 +383,6 @@ def blog_add_post(request ):
             pass
         form = PostForm( qm , is_staff=is_staff, alias=alias, instance=instance )
         if form.is_valid() :
-            form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/edit_post/{post.pk}')
         else :
@@ -402,7 +401,13 @@ def blog_delete_post(request, pk ):
     post = get_object_or_404(Post, pk=pk)
     username = request.session.get('username',None)
     category_selected = post.category.pk
-    post.delete();
+    # Permission: author or teacher/staff can delete
+    current_visitor = get_visitor(request)
+    is_privileged = get_author_type(request) in [ TEACHER , STAFF ] or request.session.get('is_staff', False)
+    if current_visitor == post.post_author or is_privileged:
+        post.delete()
+    else:
+        raise PermissionDenied("Not allowed to delete this post")
     return HttpResponseRedirect(f'/blog/{category_selected}')
 
 
@@ -430,13 +435,9 @@ def blog_edit_post(request, pk ):
             return HttpResponseRedirect(f'/')
 
         form = PostForm( request.POST,  is_staff=is_staff, alias=alias ,instance=post,initial=initial)
-        #if form.is_valid() and not post.body == '' :
-        if  not post.body == '' :
-            form.save()  # S
+        if form.is_valid():
             form.save()
             return HttpResponseRedirect(f'/post/{post.pk}')
-        else :
-            pass
     else :
         form = PostForm( is_staff=is_staff, alias=alias, instance=post,initial=initial)
         r = render(request, "blog/blog_edit_post.html", {'form' : form, 'is_staff' : is_staff , 'alias' : alias , 'dummy_field' : 'FROM_EDIT_POST','initial' : initial } )
@@ -462,7 +463,6 @@ def blog_leave_comment (request, pk):
     if request.method == "POST":
         form = CommentForm( request.POST, instance=comment)
         if form.is_valid() and form.instance.body != '' and form.instance.comment_author != '':
-            form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/post/{comment.post.pk}')
         else :
@@ -494,7 +494,6 @@ def blog_edit_comment(request, pk ):
 
         form = CommentForm( request.POST, instance=comment)
         if form.is_valid():
-            form.save()  # S
             form.save()
             return HttpResponseRedirect(f'/post/{comment.post.pk}')
         else :
@@ -511,7 +510,13 @@ def blog_delete_comment(request, pk ):
     username = request.user.username
     action = request.POST.get('action','edit');
     post = comment.post
-    comment.delete();
+    # Permission: author or teacher/staff can delete
+    current_visitor = get_visitor(request)
+    is_privileged = get_author_type(request) in [ TEACHER , STAFF ] or request.session.get('is_staff', False)
+    if current_visitor == comment.comment_author or is_privileged:
+        comment.delete()
+    else:
+        raise PermissionDenied("Not allowed to delete this comment")
     return HttpResponseRedirect(f'/post/{post.pk}')
 
 
@@ -612,6 +617,5 @@ class CategoryDeleteView(DeleteView):
     filed = '__all__'
     template_name = 'category_confirm_delete.html'
     success_url = reverse_lazy('category_list')
-
 
 

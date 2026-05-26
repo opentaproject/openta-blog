@@ -7,14 +7,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 import hashlib
-import openai 
-from openai import OpenAI
+from openai import OpenAI, NotFoundError
 from django.db.models.signals import m2m_changed, pre_delete
 from django.dispatch import receiver
 
 import os
 logger = logging.getLogger(__name__)
-client = openai.OpenAI(api_key=settings.AI_KEY)
+client = OpenAI(api_key=settings.AI_KEY)
 upload_storage = FileSystemStorage('/subdomain-data/sidecar/openaifiles', base_url="/")
 
 def run_query( assistant, query , thread, last_messages=None):
@@ -43,14 +42,14 @@ def run_query( assistant, query , thread, last_messages=None):
     #        content=response)
 
     encoding = tiktoken.encoding_for_model(settings.AI_MODEL)
-    openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
+    client.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
     if last_messages == None :
-        run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id )
+        run = client.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id )
     else :
-        run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id ,  
+        run = client.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id ,  
                 truncation_strategy={ "type": "last_messages", "last_messages": last_messages })
     while True:
-        run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+        run_status = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
         if run_status.status == "completed":
             break
         elif run_status.status == "failed":
@@ -58,13 +57,14 @@ def run_query( assistant, query , thread, last_messages=None):
         else:
             print("Waiting for completion...")
             time.sleep(1)
-    messages = openai.beta.threads.messages.list(thread_id=thread_id)
+    messages = client.beta.threads.messages.list(thread_id=thread_id)
     i = 0;
     for msg in messages.data[::-1]:  # newest last
         i = i + 1 
         if msg.role == "assistant":
             res = msg
-    txt =   str( msg.content[0].text.value )
+    # Use the last assistant message captured in `res`
+    txt =   str( res.content[0].text.value )
     tokens = encoding.encode(txt)
     print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
     #if cleanup :
@@ -78,7 +78,6 @@ def hashed_upload_to(instance, filename):
     file = instance.file
     file.open('rb')
     file_hash = hashlib.md5(file.read()).hexdigest()[0:7]
-    file_hash = file_hash + "_" + settings.AI_KEY[-8:]
     file.seek(0)  # reset for saving later
     ext = os.path.splitext(filename)[1]
     return f'{file_hash}{ext}'
@@ -108,11 +107,16 @@ class OpenAIFile(models.Model) :
             data = self.file.read()
             self.checksum = hashlib.md5(data).hexdigest()
             print(f"FILE_PATH = {self.file.path}")
-            uploaded_file = openai.files.create( file=open( self.file.path, "rb"), purpose="assistants")
+            uploaded_file = client.files.create( file=open( self.file.path, "rb"), purpose="assistants")
             self.file_id = uploaded_file.id
             self.path = self.file.path
-            encoding = tiktoken.encoding_for_model(settings.AI_MODEL)
-            self.ntokens = len( encoding.encode(data.decode('utf-8' )) )
+            # Safely compute token count only for decodable text
+            try:
+                text = data.decode('utf-8')
+                encoding = tiktoken.encoding_for_model(settings.AI_MODEL)
+                self.ntokens = len( encoding.encode(text) )
+            except UnicodeDecodeError:
+                self.ntokens = 0
 
             print(f"PATH = { self.path}")
             super().save(*args, **kwargs) # Then update with true hashed path
@@ -133,7 +137,7 @@ def custom_delete_openaifile(sender, instance, **kwargs):
         vector_store_id = vs.vector_store_id
         try  :
             client.vector_stores.files.delete(vector_store_id=vector_store_id,file_id=file_id)
-        except  openai.NotFoundError as e: 
+        except  NotFoundError as e: 
             pass
     #
     #
@@ -143,7 +147,7 @@ def custom_delete_openaifile(sender, instance, **kwargs):
     try :
         client.files.delete(file_id)
         print(f"DELETED {instance.original_file_name}")
-    except openai.NotFoundError as e:
+    except NotFoundError as e:
         print(f"ERROR DELETING {instance.original_file_name}")
         pass
 
@@ -218,7 +222,7 @@ def custom_delete_vector_store(sender, instance, **kwargs):
         vector_store_id = instance.vector_store_id
         print(f"DELETE VECTOR_STORE{vector_store_id}")
         client.vector_stores.delete(vector_store_id=vector_store_id)
-    except openai.NotFoundError as e:
+    except NotFoundError as e:
         pass
 
 
@@ -231,7 +235,7 @@ class Assistant( models.Model ):
 
     def save( self, *args, **kwargs ):
         is_new = self._state.adding and not self.pk
-        self.json_field = "{}"
+        self.json_field = {}
         super().save(*args,**kwargs)
         if is_new :
             assistant = client.beta.assistants.create( name=self.name,
@@ -286,7 +290,7 @@ class Assistant( models.Model ):
     def remote_files( self, *args, **kwargs ) :
         assistant = self
         assistant_id = assistant.assistant_id
-        remote_assistant = openai.beta.assistants.retrieve(assistant_id)
+        remote_assistant = client.beta.assistants.retrieve(assistant_id)
         tool_resources = remote_assistant.tool_resources
         remote_ids = [];
         vector_store_ids = tool_resources.file_search.vector_store_ids
@@ -360,14 +364,14 @@ class Thread(models.Model) :
         #        content=response)
     
         encoding = tiktoken.encoding_for_model(settings.AI_MODEL)
-        openai.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
+        client.beta.threads.messages.create( thread_id=thread_id,  role="user", content=query )
         if last_messages == None :
-            run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id )
+            run = client.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id )
         else :
-            run = openai.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id ,  
+            run = client.beta.threads.runs.create( thread_id=thread_id, assistant_id=assistant_id ,  
                     truncation_strategy={ "type": "last_messages", "last_messages": last_messages })
         while True:
-            run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+            run_status = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if run_status.status == "completed":
                 break
             elif run_status.status == "failed":
@@ -375,13 +379,13 @@ class Thread(models.Model) :
             else:
                 print("Waiting for completion...")
                 time.sleep(1)
-        messages = openai.beta.threads.messages.list(thread_id=thread_id)
+        messages = client.beta.threads.messages.list(thread_id=thread_id)
         i = 0;
         for msg in messages.data[::-1]:  # newest last
             i = i + 1 
             if msg.role == "assistant":
                 res = msg
-        txt =   str( msg.content[0].text.value )
+        txt =   str( res.content[0].text.value )
         tokens = encoding.encode(txt)
         print(f"RETGURN TOKENS = {len(tokens)} REPLY = {txt}")
         #if cleanup :
@@ -399,7 +403,7 @@ class Thread(models.Model) :
 def custom_delete_assistant(sender, instance, **kwargs):
     pk = instance.pk
     assistant_id = instance.assistant_id
-    assistant = openai.beta.assistants.retrieve(assistant_id)
+    assistant = client.beta.assistants.retrieve(assistant_id)
     print(f"DELETE ASSISTANT {assistant}")
     tool_resources = assistant.tool_resources
     print(f"TOOL_RESOURCES = {tool_resources}")
@@ -427,7 +431,7 @@ def handle_assistants_changed(sender, instance, action, **kwargs):
     if action == "post_remove":
         vector_stores = instance.vector_stores.all();
         assistant_id = instance.assistant_id
-        assistant = openai.beta.assistants.retrieve(assistant_id)
+        assistant = client.beta.assistants.retrieve(assistant_id)
         tool_resources = assistant.tool_resources
         try :
             vector_store_id = tool_resources.file_search.vector_store_ids[0]
@@ -555,4 +559,3 @@ def handle_files_changed(sender, instance, action, **kwargs):
                 if f.status == 'in_progress' :
                     is_done = False 
             time.sleep(1)
-
