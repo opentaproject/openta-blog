@@ -25,7 +25,7 @@ spec:
 
       containers:
         - name: blog
-          image: 'opentaproject/openta-sidecar:latest'
+          image: 'opentaproject/openta-sidecar:v20260526'
           volumeMounts:
               - mountPath: "/subdomain-data"
                 name: blog-subdomain-vol
@@ -48,23 +48,23 @@ spec:
             - name: OPENAI_API_KEY
               value: ${OPENAI_API_KEY}
             - name: SUPERUSER_PASSWORD
-              value: learning
+              value: ${SUPERUSER_PASSWORD}
             - name: PGPASSWORD
-              value: postgres
+              value: ${PGPASSWORD}
             - name: PGUSER
-              value: postgres
+              value: ${PGUSER}
             - name: SECRET_KEY
-              value: 'abcdefghijklmnopqrst'
+              value: ${SECRET_KEY}
             - name: SUPERUSER
-              value: super
+              value: ${SUPERUSER}
             - name: PGDATABASE_NAME
-              value: 'default'
+              value: ${PGDATABASE_NAME}
             - name: LTI_KEY
-              value: '889d570f472'
+              value: ${LTI_KEY}
             - name: LTI_SECRET
-              value: 'b317476faed2e879'
+              value: ${LTI_SECRET}
             - name: PGDATABASE
-              value: 'wwwdb'
+              value: ${PGDATABASE}
             - name: HTTP_PROTOCOL
               value: "https"
             - name: HTTP_SERVER_PORT
@@ -74,13 +74,12 @@ spec:
           args: 
             - cd django/blog;
               git fetch --all
-              git checkout latest;
+              git checkout opentai;
               ./db_setup ;
-              python manage.py makemigrations;
               python manage.py migrate;
-              npx @tailwindcss/cli -i static/css/input.css -o static/css/output.css;
-              python manage.py collectstatic --no-input;
               /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
+              #npx @tailwindcss/cli -i static/css/input.css -o static/css/output.css;
+              #python manage.py collectstatic --no-input;
               #python manage.py runserver
 
         - name: nginx
