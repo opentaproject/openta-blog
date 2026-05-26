@@ -1,6 +1,8 @@
-export BASE_VERSION='latest'
+export BASE_VERSION='v20260526'
 #microk8s kubectl delete pods sidecar-0
 echo creating dockerfile openta-sidecar:${BASE_VERSION}
 echo "The next command may take a few minutes"
+rm -rf openta-blog
+git clone https://github.com/opentaproject/openta-blog.git -b openai
 docker buildx build   --platform linux/amd64 -t opentaproject/openta-sidecar:${BASE_VERSION} --push .
 #docker push  opentaproject/openta-sidecar:${BASE_VERSION}
