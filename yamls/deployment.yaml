@@ -16,82 +16,55 @@ spec:
     spec:  
 
       volumes:
-      - name: subdomain-vol
+      - name: blog-subdomain-vol
         persistentVolumeClaim:
-          claimName: subdomain-pvc
-      - name: deploystatic-vol
+          claimName: blog-subdomain-pvc
+      - name: blog-deploystatic-vol
         persistentVolumeClaim:
-          claimName: deploystatic-pvc
+          claimName: blog-deploystatic-pvc
 
       containers:
         - name: blog
-          image: 'localhost:32000/openta-sidecar:latest'
+          image: 'opentaproject/openta-sidecar:latest'
           volumeMounts:
               - mountPath: "/subdomain-data"
-                name: subdomain-vol
+                name: blog-subdomain-vol
               - mountPath: "/srv/openta-blog/django/blog/static"
-                name: deploystatic-vol
+                name: blog-deploystatic-vol
     
           env: 
             - name: TZ
               value: "Europe/Stockholm" # Set your desired timezone
-            - name: NOT_PGHOST
-              value: 'db-server'
             - name: PGHOST
-              value: 'pgbouncer-service'
+              value: 'blog-db-server'
+            - name: NOT_PGHOST
+              value: 'blog-pgbouncer-service'
             - name: DBHOST
-              value: 'db-server' # EDIT 
+              value: 'blog-db-server' # EDIT 
             - name: DEBUG
               value: 'True'
             - name:  SUBDOMAIN
               value: 'sidecar'
-
+            - name: OPENAI_API_KEY
+              value: ${OPENAI_API_KEY}
             - name: SUPERUSER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: openta-secret  # Name of the secret
-                  key: SUPERUSER_PASSWORD
-
+              value: learning
             - name: PGPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: openta-secret  # Name of the secret
-                  key: PGPASSWORD
-
+              value: postgres
             - name: PGUSER
-              valueFrom:
-                secretKeyRef:
-                  name: openta-secret  # Name of the secret
-                  key: PGUSER
-
+              value: postgres
             - name: SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: openta-secret  # Name of the secret
-                  key: SECRET_KEY
-
-
+              value: 'abcdefghijklmnopqrst'
             - name: SUPERUSER
-              valueFrom:
-                secretKeyRef:
-                  name: openta-secret  # Name of the secret
-                  key: SUPERUSER
-
+              value: super
             - name: PGDATABASE_NAME
               value: 'default'
-
-
             - name: LTI_KEY
               value: '889d570f472'
-
             - name: LTI_SECRET
               value: 'b317476faed2e879'
-
-
             - name: PGDATABASE
               value: 'wwwdb'
-
-
             - name: HTTP_PROTOCOL
               value: "https"
             - name: HTTP_SERVER_PORT
@@ -111,14 +84,14 @@ spec:
               #python manage.py runserver
 
         - name: nginx
-          image: 'localhost:32000/openta-blog-nginx:latest'
+          image: 'opentaproject/openta-blog-nginx:latest'
           ports: 
             - containerPort: 8080
           volumeMounts:
             - mountPath: "/subdomain-data"
-              name: subdomain-vol
+              name: blog-subdomain-vol
             - mountPath: "/deploystatic"
-              name: deploystatic-vol
+              name: blog-deploystatic-vol
 
 
 

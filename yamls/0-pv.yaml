@@ -1,7 +1,7 @@
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: minikube-vol
+  name: blog-minikube-vol
   labels:
     type: local
 spec:
@@ -11,17 +11,17 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/mnt/pv/minikube-vol"
+    path: "/mnt/pv/blog-minikube-vol"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: minikube-pvc
+  name: blog-minikube-pvc
 spec:
   storageClassName: local-hostpath
   accessModes:
     - ReadWriteOnce
-  volumeName: minikube-vol
+  volumeName: blog-minikube-vol
   resources:
     requests:
       storage: 10Gi
@@ -30,7 +30,7 @@ spec:
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: deploystatic-vol
+  name: blog-deploystatic-vol
   labels:
     type: local
 spec:
@@ -40,17 +40,17 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/mnt/pv/deploystatic-vol"
+    path: "/mnt/pv/blog-deploystatic-vol"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: deploystatic-pvc
+  name: blog-deploystatic-pvc
 spec:
   storageClassName: local-hostpath
   accessModes:
     - ReadWriteOnce
-  volumeName: deploystatic-vol
+  volumeName: blog-deploystatic-vol
   resources:
     requests:
       storage: 1Gi
@@ -59,7 +59,7 @@ spec:
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: subdomain-vol
+  name: blog-subdomain-vol
   labels:
     type: local
 spec:
@@ -69,17 +69,17 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/mnt/pv/subdomain-vol"
+    path: "/mnt/pv/blog-subdomain-vol"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: subdomain-pvc
+  name: blog-subdomain-pvc
 spec:
   storageClassName: local-hostpath
   accessModes:
     - ReadWriteOnce
-  volumeName: subdomain-vol
+  volumeName: blog-subdomain-vol
   resources:
     requests:
       storage: 10Gi
