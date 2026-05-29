@@ -76,7 +76,6 @@ spec:
               git fetch origin;
               git checkout -B simple origin/simple;
               ./db_setup ;
-              python manage.py makemigrations;
               python manage.py migrate;
               npx @tailwindcss/cli -i static/css/input.css -o static/css/output.css;
               python manage.py collectstatic --no-input;
