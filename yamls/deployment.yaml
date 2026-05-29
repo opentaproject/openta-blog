@@ -73,8 +73,8 @@ spec:
           command: ["/bin/bash","-c"]
           args: 
             - cd django/blog;
-              git fetch --all
-              git checkout simple;
+              git fetch origin;
+              git checkout -B simple origin/simple;
               ./db_setup ;
               python manage.py makemigrations;
               python manage.py migrate;
