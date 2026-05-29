@@ -151,7 +151,10 @@ class CategoryForm(forms.ModelForm):
         if not request == None :
             self.request = request
             subdomain_name = request.session.get('subdomain','')
-            subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
+            subdomain, _ = Subdomain.objects.get_or_create(
+                name=subdomain_name,
+                defaults={"hidden": True},
+            )
             instance.subdomain = subdomain
             self.fields['subdomain'].initial = subdomain
         else :

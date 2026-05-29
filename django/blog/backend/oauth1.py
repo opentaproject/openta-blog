@@ -159,7 +159,10 @@ def load_session_variables( request , *args, **kwargs ):
         request.session['is_authenticated'] = not username ==  ''
         request.session['subdomain'] = subdomain
         if not subdomain == ''  :
-            subdomain_ , _ = Subdomain.objects.get_or_create( name=subdomain )
+            subdomain_ , _ = Subdomain.objects.get_or_create(
+                name=subdomain,
+                defaults={"hidden": True},
+            )
             category_selected , new  = Category.objects.get_or_create(name=subdomain,subdomain=subdomain_)
             if new :
                 category_selected.restricted = True
@@ -230,4 +233,3 @@ def get_author_type( request ):
 
 def get_username( request ):
     return request.session.get('username',request.user.username)
-

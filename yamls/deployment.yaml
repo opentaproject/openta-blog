@@ -64,7 +64,7 @@ spec:
             - name: LTI_SECRET
               value: 'b317476faed2e879'
             - name: PGDATABASE
-              value: 'wwwdb'
+              value: 'simple'
             - name: HTTP_PROTOCOL
               value: "https"
             - name: HTTP_SERVER_PORT
@@ -74,7 +74,7 @@ spec:
           args: 
             - cd django/blog;
               git fetch --all
-              git checkout latest;
+              git checkout simple;
               ./db_setup ;
               python manage.py makemigrations;
               python manage.py migrate;

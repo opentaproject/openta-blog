@@ -40,7 +40,10 @@ PUBLIC = 2
 def get_visitor( request ):
     subdomain_name = request.session.get('subdomain','')
     username = request.session['username']
-    subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
+    subdomain, _ = Subdomain.objects.get_or_create(
+        name=subdomain_name,
+        defaults={"hidden": True},
+    )
     visitor_type = get_author_type(request)
     visitor, _ = Visitor.objects.update_or_create(name=username,subdomain=subdomain,visitor_type=visitor_type)
     return visitor
@@ -73,7 +76,10 @@ def sidecar_count(request, *args, **kwargs ) :
 
     username = request.POST.get('username','')
     subdomain = request.POST.get('subdomain','')
-    subdomain_ ,_ = Subdomain.objects.get_or_create(name=subdomain)
+    subdomain_ ,_ = Subdomain.objects.get_or_create(
+        name=subdomain,
+        defaults={"hidden": True},
+    )
     exercises_with_posts = subdomain_.get_filterkeys_with_posts() 
     exercise = str( request.POST.get('exercise') )
     if subdomain_.hidden   and exercise == 'None' :
@@ -136,7 +142,10 @@ def blog_index(request, *args, **kwargs ) :
         names = []
     server = str( request.session.get('server','')  )
     subdomain_name = request.session.get('subdomain','')
-    subdomain, _ = Subdomain.objects.get_or_create(name=subdomain_name)
+    subdomain, _ = Subdomain.objects.get_or_create(
+        name=subdomain_name,
+        defaults={"hidden": True},
+    )
     #if subdomain.hidden :
     #    subdomain, _ = Subdomain.objects.get_or_create(name='')
     #    subdomain_name = ''
@@ -348,7 +357,10 @@ def blog_add_post(request ):
         raise PermissionDenied("You must be authenticated in to add a post")
         
     subdomain_name = request.session.get('subdomain','')
-    subdomain,_ = Subdomain.objects.get_or_create(name=subdomain_name)
+    subdomain,_ = Subdomain.objects.get_or_create(
+        name=subdomain_name,
+        defaults={"hidden": True},
+    )
     visitor_type = get_author_type(request)
     #post_author = Visitor.objects.get(name=username,subdomain=subdomain,visitor_type=visitor_type)
     post_author = get_visitor( request )
@@ -594,7 +606,10 @@ class CategoryListView(ListView):
         path = self.request.path
         subdomain_name = self.request.session.get('subdomain','')
         if not subdomain_name == '' :
-            subdomain ,_ = Subdomain.objects.get_or_create(name=subdomain_name)
+            subdomain ,_ = Subdomain.objects.get_or_create(
+                name=subdomain_name,
+                defaults={"hidden": True},
+            )
             queryset = queryset.filter(subdomain=subdomain)
         return queryset
 
@@ -612,6 +627,5 @@ class CategoryDeleteView(DeleteView):
     filed = '__all__'
     template_name = 'category_confirm_delete.html'
     success_url = reverse_lazy('category_list')
-
 
 
