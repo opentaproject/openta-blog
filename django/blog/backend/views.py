@@ -35,8 +35,10 @@ def lti_landing(request) :
     return redirect(f"/")
 
 def config_lti(request):
-    with open("backend/config.xml", "rb") as f:
+    hostname = request.get_host().split(":")[0]
+    with open("backend/config.xml", encoding="utf-8") as f:
         data = f.read()
+    data = data.replace("HOSTNAME", hostname)
     response = HttpResponse(data, content_type="text/xml")
     response["Content-Disposition"] = 'attachment; filename="config.xml"'
     return response

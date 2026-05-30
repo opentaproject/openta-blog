@@ -7,11 +7,11 @@ metadata:
 spec:
   tls:
     - hosts:
-      - 'sidecar.openta.dev'   #EDIR
+      - '${HOSTNAME}'   #EDIR
       secretName: openta-tls-secret
   ingressClassName: public
   rules:
-    - host: "sidecar.openta.dev" #EDIT THIS
+    - host: "${HOSTNAME}" #EDIT THIS
       http:
         paths:
           - pathType: "ImplementationSpecific"
@@ -21,4 +21,3 @@ spec:
                 name: sidecar-service
                 port:
                   number: 8000
-
