@@ -48,23 +48,25 @@ spec:
             - name: OPENAI_API_KEY
               value: ${OPENAI_API_KEY}
             - name: SUPERUSER_PASSWORD
-              value: learning
+              value: ${SUPERUSER_PASSWORD}
             - name: PGPASSWORD
-              value: postgres
+              value: ${PGPASSWORD}
             - name: PGUSER
-              value: postgres
+              value: ${PGUSER}
             - name: SECRET_KEY
-              value: 'abcdefghijklmnopqrst'
+              value: ${SECRET_KEY}
             - name: SUPERUSER
               value: super
             - name: PGDATABASE_NAME
               value: 'default'
+            - name: HOSTNAME
+              value: ${HOSTNAME}
             - name: LTI_KEY
-              value: '889d570f472'
+              value:  ${LTI_KEY}
             - name: LTI_SECRET
-              value: 'b317476faed2e879'
+              value:  ${LTI_SECRET}
             - name: PGDATABASE
-              value: 'simple'
+              value: ${PGADATABASE}
             - name: HTTP_PROTOCOL
               value: "https"
             - name: HTTP_SERVER_PORT
