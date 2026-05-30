@@ -18,6 +18,7 @@ from blog.forms import CommentForm, PostForm
 from rest_framework.decorators import api_view
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseForbidden
+from django.utils.html import escape
 from django.views.decorators.clickjacking import xframe_options_exempt
 import time, base64
 import logging
@@ -128,6 +129,24 @@ def blog_index(request, *args, **kwargs ) :
     path =  request.build_absolute_uri() 
     uri = str(  request.build_absolute_uri()  )
     if not load_session_variables( request, args, kwargs ) :
+        error = getattr(request, "lti_validation_error", None)
+        if error:
+            context_rows = "".join(
+                f"<li><code>{escape(key)}</code>: <code>{escape(value)}</code></li>"
+                for key, value in error.get("context", {}).items()
+            )
+            return HttpResponseForbidden(
+                "<!doctype html>"
+                "<html><head><title>LTI validation failed</title></head>"
+                "<body style=\"font-family: system-ui, sans-serif; margin: 2rem; line-height: 1.45;\">"
+                "<h1>LTI validation failed</h1>"
+                f"<p><strong>Failure point:</strong> {escape(error.get('reason', 'Unknown'))}</p>"
+                f"<p>{escape(error.get('detail', 'Session variable loading failed.'))}</p>"
+                "<h2>Debug details</h2>"
+                f"<ul>{context_rows}</ul>"
+                "<p>Check the Canvas app Consumer Key, Shared Secret, and Config URL.</p>"
+                "</body></html>"
+            )
         return HttpResponseForbidden("Session Variable Load failed")
     if 'home' in uri :
         pass
@@ -627,5 +646,4 @@ class CategoryDeleteView(DeleteView):
     filed = '__all__'
     template_name = 'category_confirm_delete.html'
     success_url = reverse_lazy('category_list')
-
 

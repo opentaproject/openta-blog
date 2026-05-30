@@ -73,17 +73,33 @@ def create_oauth_signature(http_method, base_url, params, consumer_secret, token
 
 
 def load_session_variables( request , *args, **kwargs ):
+    def reject_lti(reason, detail, **context):
+        request.lti_validation_error = {
+            "reason": reason,
+            "detail": detail,
+            "context": context,
+        }
+        logger.warning("Rejected LTI launch: %s", reason)
+        return False
+
     if request.data :
         params = request.data.dict() if hasattr(request.data, "dict") else dict(request.data)
         client_key = params.get('oauth_consumer_key',None)
         if not settings.DISABLE_LTI_VALIDATION:
             if client_key != settings.LTI_KEY:
-                logger.warning("Rejected LTI launch with invalid consumer key")
-                return False
+                return reject_lti(
+                    "Invalid consumer key",
+                    "Canvas sent an oauth_consumer_key that does not match LTI_KEY.",
+                    received_consumer_key=client_key or "",
+                )
             base_url = request.build_absolute_uri(request.path)
             if not validate_oauth_signature('POST', base_url, params, settings.LTI_SECRET):
-                logger.warning("Rejected LTI launch with invalid OAuth signature")
-                return False
+                return reject_lti(
+                    "Invalid OAuth signature",
+                    "The OAuth signature did not validate with LTI_SECRET.",
+                    signature_base_url=base_url,
+                    has_oauth_signature=bool(params.get("oauth_signature")),
+                )
         t = str( int(  time.time() )).encode() ;
         bt = base64.b64encode(t)
         #logger.error(f"T = {t}")
