@@ -1,6 +1,9 @@
 import os
 import sys
+import logging
 from django.core.management import call_command
+
+logger = logging.getLogger(__name__)
 
 """
 Django settings for blog project.
@@ -338,6 +341,11 @@ LTI_TOOL_CONFIGURATION = {
 #SESSION_COOKIE_SECURE = True
 LTI_KEY =  os.environ.get('LTI_KEY', 'lti-key')
 LTI_SECRET = os.environ.get('LTI_SECRET', 'lti-secret')
+DISABLE_LTI_VALIDATION = os.environ.get("DISABLE_LTI_VALIDATION", "False").lower() in (
+    "1",
+    "true",
+    "yes",
+)
 
 PYLTI_CONFIG = {
     'consumers': {

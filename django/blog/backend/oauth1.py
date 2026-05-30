@@ -20,32 +20,34 @@ logger = logging.getLogger(__name__)
 #def create_signing_key(consumer_secret, token_secret=''):
 #    return f'{percent_encode(consumer_secret)}&{percent_encode(token_secret)}'
 
+def percent_encode(value):
+    return urllib.parse.quote(str(value), safe='~-._')
+
+
 def generate_base_string(method, base_url, params):
-    encoded_params = urllib.parse.urlencode(sorted(params.items()), quote_via=urllib.parse.quote)
-    base_string = '&'.join([
+    encoded_pairs = [
+        (percent_encode(key), percent_encode(value))
+        for key, value in params.items()
+        if key != "oauth_signature" and value is not None
+    ]
+    normalized_params = "&".join(
+        f"{key}={value}" for key, value in sorted(encoded_pairs)
+    )
+    return "&".join([
         method.upper(),
-        urllib.parse.quote(base_url, safe=''),
-        urllib.parse.quote(encoded_params, safe='')
+        percent_encode(base_url),
+        percent_encode(normalized_params),
     ])
-    return base_string
 
 def validate_oauth_signature(method, base_url, params, consumer_secret, token_secret=None, received_signature=None):
-
-    def generate_base_string(method, base_url, params):
-        encoded_params = urllib.parse.urlencode(sorted(params.items()), quote_via=urllib.parse.quote)
-        base_string = '&'.join([
-            method.upper(),
-            urllib.parse.quote(base_url, safe=''),
-            urllib.parse.quote(encoded_params, safe='')
-        ])
-        return base_string
-
-    #logger.error(f"PARAMS = {params}")
+    received_signature = received_signature or params.get("oauth_signature")
+    if not received_signature:
+        return False
     base_string = generate_base_string(method, base_url, params)
-    signing_key = f"{urllib.parse.quote(consumer_secret, safe='')}&{urllib.parse.quote(token_secret, safe='') if token_secret else ''}"
+    signing_key = f"{percent_encode(consumer_secret)}&{percent_encode(token_secret or '')}"
     hashed = hmac.new(signing_key.encode('utf-8'), base_string.encode('utf-8'), hashlib.sha1)
-    generated_signature = base64.b64encode( hashed.digest() )
-    return True
+    generated_signature = base64.b64encode(hashed.digest()).decode("utf-8")
+    return hmac.compare_digest(generated_signature, received_signature)
 
 
 
@@ -72,10 +74,16 @@ def create_oauth_signature(http_method, base_url, params, consumer_secret, token
 
 def load_session_variables( request , *args, **kwargs ):
     if request.data :
-        params = {};
-        for key in ['oauth_consumer_key','oauth_nonce','oauth_timestamp','oauth_signature_method','oauth_version','lti_message_type','lti_version','resource_link_id' ]:
-            params[key] = request.data.get(key,None)
-        validate_oauth_signature('POST', "https://www.openta.se", params ,settings.LTI_SECRET )
+        params = request.data.dict() if hasattr(request.data, "dict") else dict(request.data)
+        client_key = params.get('oauth_consumer_key',None)
+        if not settings.DISABLE_LTI_VALIDATION:
+            if client_key != settings.LTI_KEY:
+                logger.warning("Rejected LTI launch with invalid consumer key")
+                return False
+            base_url = request.build_absolute_uri(request.path)
+            if not validate_oauth_signature('POST', base_url, params, settings.LTI_SECRET):
+                logger.warning("Rejected LTI launch with invalid OAuth signature")
+                return False
         t = str( int(  time.time() )).encode() ;
         bt = base64.b64encode(t)
         #logger.error(f"T = {t}")
@@ -117,11 +125,10 @@ def load_session_variables( request , *args, **kwargs ):
         #logger.error(f"DATA EXISTS {request.data}")
         #logger.error(f"DATA_ = {data_}")
         #timestamp = data_['oauth_timestamp']
-        client_key = request.data.get('oauth_consumer_key',None)
         filter_key = request.data.get('filter_key',None)
         client_signature = request.data.get('oauth_signature',None)
         client_timestamp = request.data.get('oauth_timestamp',None)
-        client_key_ok =  client_key  == settings.LTI_KEY 
+        client_key_ok = True
         #logger.error(f"OK CLIENT KEY?  { client_key_ok }")
         #logger.error(f"OK TIMESTAMP ? {timestamp}=={ client_timestamp} ")
         method = 'POST'

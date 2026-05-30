@@ -11,10 +11,10 @@ export OPENAI_API_KEY=  # Set if using OPENAI
 export SUPERUSER_PASSWORD=XXXXX # CHANGEME
 export SUPERUSER=super
 export SECRET_KEY=XXXX # CHANGEME
-export PGDATABASE_NAME='default'
 export LTI_KEY=lti-key # CHANGEME
 export LTI_SECRET= # CHANGEME
-export PGDATABASE=${PGDATABASE_NAME}
+export DISABLE_LTI_VALIDATION=False
+export PGDATABASE=default
 export HOSTNAME=CHANGEME
 ```
 
@@ -52,10 +52,6 @@ Username for the Django superuser. The name of the superuser is hardcoded to `su
 
 Django `SECRET_KEY`. This must be a unique, private value for each deployment.
 
-`PGDATABASE_NAME`
-
-Logical database name used to build `PGDATABASE`.
-
 `LTI_KEY`
 
 Canvas LTI consumer key. The default is `lti-key`; change it if you configure Canvas with a different key.
@@ -64,9 +60,13 @@ Canvas LTI consumer key. The default is `lti-key`; change it if you configure Ca
 
 Canvas LTI shared secret. Set this to the same secret configured in Canvas.
 
+`DISABLE_LTI_VALIDATION`
+
+Set to `True` to bypass LTI consumer key and signature validation. The default is `False`, which requires valid Canvas LTI credentials.
+
 `PGDATABASE`
 
-Database name used by Django/PostgreSQL clients. It is derived from `PGDATABASE_NAME`.
+Database name used by Django/PostgreSQL clients. This should always be `default`; the application settings now hardcode this expectation.
 
 `HOSTNAME`
 
