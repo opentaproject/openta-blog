@@ -1,50 +1,48 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: sidecar # prefix for  pod names
+  name: sidecar
   labels:
     app: sidecar
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app:  sidecar
+      app: sidecar
   template:
     metadata:
       labels:
         app: sidecar
-    spec:  
-
+    spec:
       volumes:
-      - name: blog-subdomain-vol
-        persistentVolumeClaim:
-          claimName: blog-subdomain-pvc
-      - name: blog-deploystatic-vol
-        persistentVolumeClaim:
-          claimName: blog-deploystatic-pvc
-
+        - name: blog-subdomain-vol
+          persistentVolumeClaim:
+            claimName: blog-subdomain-pvc
+        - name: blog-deploystatic-vol
+          persistentVolumeClaim:
+            claimName: blog-deploystatic-pvc
       containers:
         - name: blog
-          image: 'opentaproject/openta-sidecar:latest'
+          image: opentaproject/openta-sidecar:latest
+          imagePullPolicy: Always
           volumeMounts:
-              - mountPath: "/subdomain-data"
-                name: blog-subdomain-vol
-              - mountPath: "/srv/openta-blog/django/blog/deploystatic"
-                name: blog-deploystatic-vol
-    
-          env: 
+            - mountPath: /subdomain-data
+              name: blog-subdomain-vol
+            - mountPath: /srv/openta-blog/django/blog/deploystatic
+              name: blog-deploystatic-vol
+          env:
             - name: TZ
-              value: "Europe/Stockholm" # Set your desired timezone
-            - name: PGHOST
-              value: 'blog-db-server'
+              value: "Europe/Stockholm"
             - name: NOT_PGHOST
-              value: 'blog-pgbouncer-service'
+              value: blog-db18-server
+            - name: PGHOST
+              value: blog-pgbouncer-service
             - name: DBHOST
-              value: 'blog-db-server' # EDIT 
+              value: blog-db18-server
             - name: DEBUG
-              value: 'True'
-            - name:  SUBDOMAIN
-              value: 'sidecar'
+              value: "True"
+            - name: SUBDOMAIN
+              value: sidecar
             - name: OPENAI_API_KEY
               value: ${OPENAI_API_KEY}
             - name: SUPERUSER_PASSWORD
@@ -58,51 +56,42 @@ spec:
             - name: SUPERUSER
               value: super
             - name: PGDATABASE_NAME
-              value: 'default'
+              value: default
             - name: HOSTNAME
               value: ${HOSTNAME}
             - name: LTI_KEY
-              value:  ${LTI_KEY}
+              value: ${LTI_KEY}
             - name: LTI_SECRET
-              value:  ${LTI_SECRET}
+              value: ${LTI_SECRET}
             - name: PGDATABASE
               value: ${PGDATABASE}
             - name: HTTP_PROTOCOL
               value: "https"
             - name: HTTP_SERVER_PORT
               value: "443"
-          imagePullPolicy: Always
-          command: ["/bin/bash","-c"]
-          args: 
-            - cd django/blog;
-              git fetch origin;
-              git checkout -B simple origin/simple;
-              ./db_setup ;
-              python manage.py migrate;
-              npx @tailwindcss/cli -i static/css/input.css -o static/css/output.css;
-              python manage.py collectstatic --no-input;
-              /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf 
-              #python manage.py runserver
-
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              cd django/blog
+              git fetch origin
+              git checkout -B simple origin/simple
+              ./db_setup
+              python manage.py migrate
+              npx @tailwindcss/cli -i static/css/input.css -o static/css/output.css
+              python manage.py collectstatic --no-input
+              /usr/bin/supervisord -c /srv/openta-blog/django/blog/supervisord.conf
         - name: nginx
-          image: 'opentaproject/openta-blog-nginx:latest'
-          ports: 
+          image: opentaproject/openta-blog-nginx:latest
+          ports:
             - containerPort: 8080
           volumeMounts:
-            - mountPath: "/subdomain-data"
+            - mountPath: /subdomain-data
               name: blog-subdomain-vol
-            - mountPath: "/deploystatic"
+            - mountPath: /deploystatic
               name: blog-deploystatic-vol
-
-
-
-
-
-    
 ---
-
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: sidecar-service
 spec:
