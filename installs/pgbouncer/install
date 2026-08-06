@@ -1,4 +1,0 @@
-export VERSION=latest
-echo creating docker openta-blog-pgbouncer:${VERSION}
-docker buildx build  --platform linux/amd64   -t opentaproject/openta-blog-pgbouncer:${VERSION} --push .
-#docker push opentaproject/openta-blog-pgbouncer:${VERSION}

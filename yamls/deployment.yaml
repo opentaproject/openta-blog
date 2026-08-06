@@ -34,11 +34,11 @@ spec:
             - name: TZ
               value: "Europe/Stockholm"
             - name: NOT_PGHOST
-              value: blog-db18-server
+              value: blog-server
             - name: PGHOST
               value: blog-pgbouncer-service
             - name: DBHOST
-              value: blog-db18-server
+              value: blog-server
             - name: DEBUG
               value: "True"
             - name: SUBDOMAIN

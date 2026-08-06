@@ -26,7 +26,7 @@ spec:
         - name: TZ
           value: "Europe/Stockholm" # Set your desired timezone
         - name: DB_HOST
-          value: blog-db18-server
+          value: blog-server
         - name: DB_PASSWORD
           value: 'postgres'
         - name: PGPASSWORD
